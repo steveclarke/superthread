@@ -10,7 +10,7 @@ module Superthread
       # @return [Hash] List of spaces
       def list(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
-        get("/#{ws}/projects")
+        http_get("/#{ws}/projects")
       end
 
       # Gets a specific space.
@@ -19,10 +19,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID (maps to project_id in API)
       # @return [Hash] Space details
-      def get(workspace_id, space_id)
+      def find(workspace_id, space_id)
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        get("/#{ws}/projects/#{space}")
+        http_get("/#{ws}/projects/#{space}")
       end
 
       # Creates a new space.
@@ -35,7 +35,7 @@ module Superthread
       def create(workspace_id, title:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(title: title, **params)
-        post("/#{ws}/projects", body: body)
+        http_post("/#{ws}/projects", body: body)
       end
 
       # Updates a space.
@@ -48,7 +48,7 @@ module Superthread
       def update(workspace_id, space_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        patch("/#{ws}/projects/#{space}", body: build_params(**params))
+        http_patch("/#{ws}/projects/#{space}", body: build_params(**params))
       end
 
       # Deletes a space.
@@ -57,10 +57,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID
       # @return [Hash] Success response
-      def delete(workspace_id, space_id)
+      def destroy(workspace_id, space_id)
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        delete("/#{ws}/projects/#{space}")
+        http_delete("/#{ws}/projects/#{space}")
       end
 
       # Adds a member to a space.
@@ -75,7 +75,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
         body = build_params(user_id: user_id, role: role)
-        post("/#{ws}/projects/#{space}/members", body: body)
+        http_post("/#{ws}/projects/#{space}/members", body: body)
       end
 
       # Removes a member from a space.
@@ -89,7 +89,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
         member = safe_id("member_id", member_id)
-        delete("/#{ws}/projects/#{space}/members/#{member}")
+        http_delete("/#{ws}/projects/#{space}/members/#{member}")
       end
     end
   end

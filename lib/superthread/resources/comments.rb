@@ -15,7 +15,7 @@ module Superthread
       def create(workspace_id, content:, card_id: nil, page_id: nil, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(content: content, card_id: card_id, page_id: page_id, **params)
-        post("/#{ws}/comments", body: body)
+        http_post("/#{ws}/comments", body: body)
       end
 
       # Gets a specific comment.
@@ -24,10 +24,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Comment ID
       # @return [Hash] Comment details
-      def get(workspace_id, comment_id)
+      def find(workspace_id, comment_id)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
-        get("/#{ws}/comments/#{comment}")
+        http_get("/#{ws}/comments/#{comment}")
       end
 
       # Updates a comment.
@@ -40,7 +40,7 @@ module Superthread
       def update(workspace_id, comment_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
-        patch("/#{ws}/comments/#{comment}", body: build_params(**params))
+        http_patch("/#{ws}/comments/#{comment}", body: build_params(**params))
       end
 
       # Deletes a comment.
@@ -49,10 +49,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Comment ID
       # @return [Hash] Success response
-      def delete(workspace_id, comment_id)
+      def destroy(workspace_id, comment_id)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
-        delete("/#{ws}/comments/#{comment}")
+        http_delete("/#{ws}/comments/#{comment}")
       end
 
       # Replies to a comment.
@@ -67,7 +67,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         body = build_params(content: content, **params)
-        post("/#{ws}/comments/#{comment}/comments", body: body)
+        http_post("/#{ws}/comments/#{comment}/comments", body: body)
       end
 
       # Gets replies to a comment.
@@ -79,7 +79,7 @@ module Superthread
       def replies(workspace_id, comment_id)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
-        get("/#{ws}/comments/#{comment}/comments")
+        http_get("/#{ws}/comments/#{comment}/comments")
       end
 
       # Updates a reply.
@@ -94,7 +94,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         reply = safe_id("reply_id", reply_id)
-        patch("/#{ws}/comments/#{comment}/comments/#{reply}", body: build_params(**params))
+        http_patch("/#{ws}/comments/#{comment}/comments/#{reply}", body: build_params(**params))
       end
 
       # Deletes a reply.
@@ -108,7 +108,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         reply = safe_id("reply_id", reply_id)
-        delete("/#{ws}/comments/#{comment}/comments/#{reply}")
+        http_delete("/#{ws}/comments/#{comment}/comments/#{reply}")
       end
     end
   end

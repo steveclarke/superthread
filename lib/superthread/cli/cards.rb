@@ -5,7 +5,7 @@ module Superthread
     class Cards < Base
       desc "get CARD_ID", "Get card details"
       def get(card_id)
-        output client.cards.get(workspace_id, card_id)
+        output client.cards.find(workspace_id, card_id)
       end
 
       desc "create", "Create a new card"
@@ -48,7 +48,7 @@ module Superthread
 
       desc "delete CARD_ID", "Delete a card"
       def delete(card_id)
-        output client.cards.delete(workspace_id, card_id)
+        output client.cards.destroy(workspace_id, card_id)
       end
 
       desc "duplicate CARD_ID", "Duplicate a card"

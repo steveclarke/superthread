@@ -9,20 +9,20 @@ module Superthread
 
       private
 
-      # HTTP verb helpers
-      def get(path, params: nil)
+      # HTTP verb helpers (prefixed to avoid collision with public API methods)
+      def http_get(path, params: nil)
         @client.request(method: :get, path: path, params: params)
       end
 
-      def post(path, body: nil)
+      def http_post(path, body: nil)
         @client.request(method: :post, path: path, body: body)
       end
 
-      def patch(path, body: nil)
+      def http_patch(path, body: nil)
         @client.request(method: :patch, path: path, body: body)
       end
 
-      def delete(path)
+      def http_delete(path)
         @client.request(method: :delete, path: path)
       end
 

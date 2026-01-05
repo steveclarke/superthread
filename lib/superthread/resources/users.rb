@@ -8,7 +8,7 @@ module Superthread
       #
       # @return [Hash] User account information
       def me
-        get("/users/me")
+        http_get("/users/me")
       end
 
       # Gets workspace members.
@@ -19,7 +19,7 @@ module Superthread
       def members(workspace_id)
         workspace_path(workspace_id, "/members")
         # Note: API uses /teams/:id/members but we use workspace terminology
-        get("/teams/#{safe_id("workspace_id", workspace_id)}/members")
+        http_get("/teams/#{safe_id("workspace_id", workspace_id)}/members")
       end
     end
   end

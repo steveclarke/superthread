@@ -12,7 +12,7 @@ module Superthread
       def list(workspace_id, space_id:)
         ws = safe_id("workspace_id", workspace_id)
         params = build_params(project_id: space_id)
-        get("/#{ws}/sprints", params: params)
+        http_get("/#{ws}/sprints", params: params)
       end
 
       # Gets a specific sprint.
@@ -22,11 +22,11 @@ module Superthread
       # @param sprint_id [String] Sprint ID
       # @param space_id [String] Space ID (required for this endpoint)
       # @return [Hash] Sprint details with available lists
-      def get(workspace_id, sprint_id, space_id:)
+      def find(workspace_id, sprint_id, space_id:)
         ws = safe_id("workspace_id", workspace_id)
         sprint = safe_id("sprint_id", sprint_id)
         params = build_params(project_id: space_id)
-        get("/#{ws}/sprints/#{sprint}", params: params)
+        http_get("/#{ws}/sprints/#{sprint}", params: params)
       end
     end
   end

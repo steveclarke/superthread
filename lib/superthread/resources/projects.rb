@@ -10,7 +10,7 @@ module Superthread
       # @return [Hash] List of projects
       def list(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
-        get("/#{ws}/epics")
+        http_get("/#{ws}/epics")
       end
 
       # Gets a specific project.
@@ -19,10 +19,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param project_id [String] Project ID (maps to epic_id)
       # @return [Hash] Project details
-      def get(workspace_id, project_id)
+      def find(workspace_id, project_id)
         ws = safe_id("workspace_id", workspace_id)
         proj = safe_id("project_id", project_id)
-        get("/#{ws}/epics/#{proj}")
+        http_get("/#{ws}/epics/#{proj}")
       end
 
       # Creates a new project.
@@ -36,7 +36,7 @@ module Superthread
       def create(workspace_id, title:, list_id:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(title: title, list_id: list_id, **params)
-        post("/#{ws}/epics", body: body)
+        http_post("/#{ws}/epics", body: body)
       end
 
       # Updates a project.
@@ -49,7 +49,7 @@ module Superthread
       def update(workspace_id, project_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         proj = safe_id("project_id", project_id)
-        patch("/#{ws}/epics/#{proj}", body: build_params(**params))
+        http_patch("/#{ws}/epics/#{proj}", body: build_params(**params))
       end
 
       # Deletes a project.
@@ -58,10 +58,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param project_id [String] Project ID
       # @return [Hash] Success response
-      def delete(workspace_id, project_id)
+      def destroy(workspace_id, project_id)
         ws = safe_id("workspace_id", workspace_id)
         proj = safe_id("project_id", project_id)
-        delete("/#{ws}/epics/#{proj}")
+        http_delete("/#{ws}/epics/#{proj}")
       end
 
       # Links a card to a project.
@@ -75,7 +75,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         proj = safe_id("project_id", project_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/epics/#{proj}/cards/#{card}")
+        http_post("/#{ws}/epics/#{proj}/cards/#{card}")
       end
 
       # Removes a card from a project.
@@ -89,7 +89,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         proj = safe_id("project_id", project_id)
         card = safe_id("card_id", card_id)
-        delete("/#{ws}/epics/#{proj}/cards/#{card}")
+        http_delete("/#{ws}/epics/#{proj}/cards/#{card}")
       end
     end
   end

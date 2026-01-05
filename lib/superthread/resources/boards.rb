@@ -14,7 +14,7 @@ module Superthread
       def create(workspace_id, space_id:, title:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(title: title, project_id: space_id, **params)
-        post("/#{ws}/boards", body: body)
+        http_post("/#{ws}/boards", body: body)
       end
 
       # Lists all boards in a space.
@@ -28,7 +28,7 @@ module Superthread
       def list(workspace_id, space_id:, bookmarked: nil, archived: nil)
         ws = safe_id("workspace_id", workspace_id)
         params = build_params(project_id: space_id, bookmarked: bookmarked, archived: archived)
-        get("/#{ws}/boards", params: params)
+        http_get("/#{ws}/boards", params: params)
       end
 
       # Gets a specific board with lists and cards.
@@ -37,10 +37,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param board_id [String] Board ID
       # @return [Hash] Board details
-      def get(workspace_id, board_id)
+      def find(workspace_id, board_id)
         ws = safe_id("workspace_id", workspace_id)
         board = safe_id("board_id", board_id)
-        get("/#{ws}/boards/#{board}")
+        http_get("/#{ws}/boards/#{board}")
       end
 
       # Updates a board.
@@ -53,7 +53,7 @@ module Superthread
       def update(workspace_id, board_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         board = safe_id("board_id", board_id)
-        patch("/#{ws}/boards/#{board}", body: build_params(**params))
+        http_patch("/#{ws}/boards/#{board}", body: build_params(**params))
       end
 
       # Duplicates a board.
@@ -68,7 +68,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         board = safe_id("board_id", board_id)
         body = build_params(title: title, project_id: space_id)
-        post("/#{ws}/boards/#{board}/copy", body: body)
+        http_post("/#{ws}/boards/#{board}/copy", body: body)
       end
 
       # Deletes a board.
@@ -77,10 +77,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param board_id [String] Board ID
       # @return [Hash] Success response
-      def delete(workspace_id, board_id)
+      def destroy(workspace_id, board_id)
         ws = safe_id("workspace_id", workspace_id)
         board = safe_id("board_id", board_id)
-        delete("/#{ws}/boards/#{board}")
+        http_delete("/#{ws}/boards/#{board}")
       end
 
       # Creates a list (column) on a board.
@@ -94,7 +94,7 @@ module Superthread
       def create_list(workspace_id, board_id:, title:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(board_id: board_id, title: title, **params)
-        post("/#{ws}/lists", body: body)
+        http_post("/#{ws}/lists", body: body)
       end
 
       # Updates a list.
@@ -107,7 +107,7 @@ module Superthread
       def update_list(workspace_id, list_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         list = safe_id("list_id", list_id)
-        patch("/#{ws}/lists/#{list}", body: build_params(**params))
+        http_patch("/#{ws}/lists/#{list}", body: build_params(**params))
       end
 
       # Deletes a list.
@@ -119,7 +119,7 @@ module Superthread
       def delete_list(workspace_id, list_id)
         ws = safe_id("workspace_id", workspace_id)
         list = safe_id("list_id", list_id)
-        delete("/#{ws}/lists/#{list}")
+        http_delete("/#{ws}/lists/#{list}")
       end
     end
   end

@@ -14,7 +14,7 @@ module Superthread
       def create(workspace_id, name:, color:, space_id: nil)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(name: name, color: color, project_id: space_id)
-        post("/#{ws}/tags", body: body)
+        http_post("/#{ws}/tags", body: body)
       end
 
       # Updates a tag.
@@ -27,7 +27,7 @@ module Superthread
       def update(workspace_id, tag_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         tag = safe_id("tag_id", tag_id)
-        patch("/#{ws}/tags/#{tag}", body: build_params(**params))
+        http_patch("/#{ws}/tags/#{tag}", body: build_params(**params))
       end
 
       # Deletes a tag.
@@ -36,10 +36,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param tag_id [String] Tag ID
       # @return [Hash] Success response
-      def delete(workspace_id, tag_id)
+      def destroy(workspace_id, tag_id)
         ws = safe_id("workspace_id", workspace_id)
         tag = safe_id("tag_id", tag_id)
-        delete("/#{ws}/tags/#{tag}")
+        http_delete("/#{ws}/tags/#{tag}")
       end
     end
   end

@@ -10,7 +10,7 @@ module Superthread
       # @return [Hash] List of notes
       def list(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
-        get("/#{ws}/notes")
+        http_get("/#{ws}/notes")
       end
 
       # Gets a specific note.
@@ -19,10 +19,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param note_id [String] Note ID
       # @return [Hash] Note details
-      def get(workspace_id, note_id)
+      def find(workspace_id, note_id)
         ws = safe_id("workspace_id", workspace_id)
         note = safe_id("note_id", note_id)
-        get("/#{ws}/notes/#{note}")
+        http_get("/#{ws}/notes/#{note}")
       end
 
       # Creates a new note.
@@ -35,7 +35,7 @@ module Superthread
       def create(workspace_id, title:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(title: title, **params)
-        post("/#{ws}/notes", body: body)
+        http_post("/#{ws}/notes", body: body)
       end
 
       # Deletes a note.
@@ -44,10 +44,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param note_id [String] Note ID
       # @return [Hash] Success response
-      def delete(workspace_id, note_id)
+      def destroy(workspace_id, note_id)
         ws = safe_id("workspace_id", workspace_id)
         note = safe_id("note_id", note_id)
-        delete("/#{ws}/notes/#{note}")
+        http_delete("/#{ws}/notes/#{note}")
       end
     end
   end

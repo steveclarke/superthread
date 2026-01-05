@@ -29,7 +29,7 @@ module Superthread
 
       desc "delete TAG_ID", "Delete a tag"
       def delete(tag_id)
-        output client.tags.delete(workspace_id, tag_id)
+        output client.tags.destroy(workspace_id, tag_id)
       end
     end
   end

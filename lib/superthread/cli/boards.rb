@@ -18,7 +18,7 @@ module Superthread
 
       desc "get BOARD_ID", "Get board details"
       def get(board_id)
-        output client.boards.get(workspace_id, board_id)
+        output client.boards.find(workspace_id, board_id)
       end
 
       desc "create", "Create a new board"
@@ -65,7 +65,7 @@ module Superthread
 
       desc "delete BOARD_ID", "Delete a board"
       def delete(board_id)
-        output client.boards.delete(workspace_id, board_id)
+        output client.boards.destroy(workspace_id, board_id)
       end
 
       desc "list_create", "Create a list on a board"

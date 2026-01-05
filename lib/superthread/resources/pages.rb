@@ -14,7 +14,7 @@ module Superthread
       def list(workspace_id, space_id: nil, archived: nil, updated_recently: nil)
         ws = safe_id("workspace_id", workspace_id)
         params = build_params(project_id: space_id, archived: archived, updated_recently: updated_recently)
-        get("/#{ws}/pages", params: params)
+        http_get("/#{ws}/pages", params: params)
       end
 
       # Gets a specific page.
@@ -23,10 +23,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param page_id [String] Page ID
       # @return [Hash] Page details
-      def get(workspace_id, page_id)
+      def find(workspace_id, page_id)
         ws = safe_id("workspace_id", workspace_id)
         page = safe_id("page_id", page_id)
-        get("/#{ws}/pages/#{page}")
+        http_get("/#{ws}/pages/#{page}")
       end
 
       # Creates a new page.
@@ -39,7 +39,7 @@ module Superthread
       def create(workspace_id, space_id:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = build_params(project_id: space_id, **params)
-        post("/#{ws}/pages", body: body)
+        http_post("/#{ws}/pages", body: body)
       end
 
       # Updates a page.
@@ -52,7 +52,7 @@ module Superthread
       def update(workspace_id, page_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         page = safe_id("page_id", page_id)
-        patch("/#{ws}/pages/#{page}", body: build_params(**params))
+        http_patch("/#{ws}/pages/#{page}", body: build_params(**params))
       end
 
       # Duplicates a page.
@@ -67,7 +67,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         page = safe_id("page_id", page_id)
         body = build_params(project_id: space_id, **params)
-        post("/#{ws}/pages/#{page}/copy", body: body)
+        http_post("/#{ws}/pages/#{page}/copy", body: body)
       end
 
       # Archives a page.
@@ -86,10 +86,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param page_id [String] Page ID
       # @return [Hash] Success response
-      def delete(workspace_id, page_id)
+      def destroy(workspace_id, page_id)
         ws = safe_id("workspace_id", workspace_id)
         page = safe_id("page_id", page_id)
-        delete("/#{ws}/pages/#{page}")
+        http_delete("/#{ws}/pages/#{page}")
       end
     end
   end

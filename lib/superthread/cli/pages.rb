@@ -18,7 +18,7 @@ module Superthread
 
       desc "get PAGE_ID", "Get page details"
       def get(page_id)
-        output client.pages.get(workspace_id, page_id)
+        output client.pages.find(workspace_id, page_id)
       end
 
       desc "create", "Create a new page"
@@ -71,7 +71,7 @@ module Superthread
 
       desc "delete PAGE_ID", "Delete a page permanently"
       def delete(page_id)
-        output client.pages.delete(workspace_id, page_id)
+        output client.pages.destroy(workspace_id, page_id)
       end
     end
   end

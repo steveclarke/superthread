@@ -5,7 +5,7 @@ module Superthread
     class Comments < Base
       desc "get COMMENT_ID", "Get comment details"
       def get(comment_id)
-        output client.comments.get(workspace_id, comment_id)
+        output client.comments.find(workspace_id, comment_id)
       end
 
       desc "create", "Create a comment"
@@ -34,7 +34,7 @@ module Superthread
 
       desc "delete COMMENT_ID", "Delete a comment"
       def delete(comment_id)
-        output client.comments.delete(workspace_id, comment_id)
+        output client.comments.destroy(workspace_id, comment_id)
       end
 
       desc "reply COMMENT_ID", "Reply to a comment"

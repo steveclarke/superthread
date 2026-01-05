@@ -10,7 +10,7 @@ module Superthread
 
       desc "get PROJECT_ID", "Get project details"
       def get(project_id)
-        output client.projects.get(workspace_id, project_id)
+        output client.projects.find(workspace_id, project_id)
       end
 
       desc "create", "Create a new project"
@@ -48,7 +48,7 @@ module Superthread
 
       desc "delete PROJECT_ID", "Delete a project"
       def delete(project_id)
-        output client.projects.delete(workspace_id, project_id)
+        output client.projects.destroy(workspace_id, project_id)
       end
 
       desc "add_card PROJECT_ID CARD_ID", "Link a card to a project"

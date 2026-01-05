@@ -28,7 +28,7 @@ module Superthread
         end
 
         ws = safe_id("workspace_id", workspace_id)
-        post("/#{ws}/cards", body: params)
+        http_post("/#{ws}/cards", body: params)
       end
 
       # Updates an existing card.
@@ -42,7 +42,7 @@ module Superthread
       def update(workspace_id, card_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        patch("/#{ws}/cards/#{card}", body: build_params(**params))
+        http_patch("/#{ws}/cards/#{card}", body: build_params(**params))
       end
 
       # Gets a specific card with full details.
@@ -51,10 +51,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param card_id [String] Card ID
       # @return [Hash] Card details
-      def get(workspace_id, card_id)
+      def find(workspace_id, card_id)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        get("/#{ws}/cards/#{card}")
+        http_get("/#{ws}/cards/#{card}")
       end
 
       # Deletes a card.
@@ -63,10 +63,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param card_id [String] Card ID
       # @return [Hash] Success response
-      def delete(workspace_id, card_id)
+      def destroy(workspace_id, card_id)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        delete("/#{ws}/cards/#{card}")
+        http_delete("/#{ws}/cards/#{card}")
       end
 
       # Duplicates a card.
@@ -79,7 +79,7 @@ module Superthread
       def duplicate(workspace_id, card_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/cards/#{card}/copy", body: build_params(**params))
+        http_post("/#{ws}/cards/#{card}/copy", body: build_params(**params))
       end
 
       # Gets cards assigned to a user.
@@ -104,7 +104,7 @@ module Superthread
         body[:card_filters][:include][:lists] = [filters[:list_id]] if filters[:list_id]
         body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
 
-        post("/#{ws}/views/preview", body: body)
+        http_post("/#{ws}/views/preview", body: body)
       end
 
       # Links two cards with a relationship.
@@ -119,7 +119,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
 
-        post("/#{ws}/cards/#{card}/linked_cards", body: {
+        http_post("/#{ws}/cards/#{card}/linked_cards", body: {
           card_id: related_card_id,
           linked_card_type: relation_type
         })
@@ -136,7 +136,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         linked = safe_id("linked_card_id", linked_card_id)
-        delete("/#{ws}/cards/#{card}/linked_cards/#{linked}")
+        http_delete("/#{ws}/cards/#{card}/linked_cards/#{linked}")
       end
 
       # Adds a member to a card.
@@ -150,7 +150,7 @@ module Superthread
       def add_member(workspace_id, card_id, user_id:, role: "member")
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/cards/#{card}/members", body: {user_id: user_id, role: role})
+        http_post("/#{ws}/cards/#{card}/members", body: {user_id: user_id, role: role})
       end
 
       # Removes a member from a card.
@@ -164,7 +164,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         user = safe_id("user_id", user_id)
-        delete("/#{ws}/cards/#{card}/members/#{user}")
+        http_delete("/#{ws}/cards/#{card}/members/#{user}")
       end
 
       # Creates a checklist on a card.
@@ -177,7 +177,7 @@ module Superthread
       def create_checklist(workspace_id, card_id, title:)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/cards/#{card}/checklists", body: {title: title})
+        http_post("/#{ws}/cards/#{card}/checklists", body: {title: title})
       end
 
       # Adds an item to a checklist.
@@ -194,7 +194,7 @@ module Superthread
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
 
-        post("/#{ws}/cards/#{card}/checklists/#{checklist}/items", body: {
+        http_post("/#{ws}/cards/#{card}/checklists/#{checklist}/items", body: {
           title: title,
           checklist_id: checklist_id,
           checked: checked
@@ -216,7 +216,7 @@ module Superthread
         checklist = safe_id("checklist_id", checklist_id)
         item = safe_id("item_id", item_id)
 
-        patch("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
+        http_patch("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
           body: build_params(**params))
       end
 
@@ -234,7 +234,7 @@ module Superthread
         checklist = safe_id("checklist_id", checklist_id)
         item = safe_id("item_id", item_id)
 
-        delete("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}")
+        http_delete("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}")
       end
 
       # Updates a checklist title.
@@ -250,7 +250,7 @@ module Superthread
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
 
-        patch("/#{ws}/cards/#{card}/checklists/#{checklist}", body: {title: title})
+        http_patch("/#{ws}/cards/#{card}/checklists/#{checklist}", body: {title: title})
       end
 
       # Deletes a checklist.
@@ -265,7 +265,7 @@ module Superthread
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
 
-        delete("/#{ws}/cards/#{card}/checklists/#{checklist}")
+        http_delete("/#{ws}/cards/#{card}/checklists/#{checklist}")
       end
 
       # Gets available tags for a workspace.
@@ -278,7 +278,7 @@ module Superthread
       def tags(workspace_id, project_id: nil, all: nil)
         ws = safe_id("workspace_id", workspace_id)
         params = build_params(project_id: project_id, all: all)
-        get("/#{ws}/tags", params: params)
+        http_get("/#{ws}/tags", params: params)
       end
 
       # Adds tags to a card.
@@ -293,7 +293,7 @@ module Superthread
         card = safe_id("card_id", card_id)
 
         body = tag_ids.is_a?(Array) ? {ids: tag_ids} : {id: tag_ids}
-        post("/#{ws}/cards/#{card}/tags", body: body)
+        http_post("/#{ws}/cards/#{card}/tags", body: body)
       end
 
       # Removes a tag from a card.
@@ -307,7 +307,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         tag = safe_id("tag_id", tag_id)
-        delete("/#{ws}/cards/#{card}/tags/#{tag}")
+        http_delete("/#{ws}/cards/#{card}/tags/#{tag}")
       end
     end
   end

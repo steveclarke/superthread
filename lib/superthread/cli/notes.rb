@@ -10,7 +10,7 @@ module Superthread
 
       desc "get NOTE_ID", "Get note details"
       def get(note_id)
-        output client.notes.get(workspace_id, note_id)
+        output client.notes.find(workspace_id, note_id)
       end
 
       desc "create", "Create a new note"
@@ -30,7 +30,7 @@ module Superthread
 
       desc "delete NOTE_ID", "Delete a note"
       def delete(note_id)
-        output client.notes.delete(workspace_id, note_id)
+        output client.notes.destroy(workspace_id, note_id)
       end
     end
   end

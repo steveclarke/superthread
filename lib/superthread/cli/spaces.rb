@@ -10,7 +10,7 @@ module Superthread
 
       desc "get SPACE_ID", "Get space details"
       def get(space_id)
-        output client.spaces.get(workspace_id, space_id)
+        output client.spaces.find(workspace_id, space_id)
       end
 
       desc "create", "Create a new space"
@@ -41,7 +41,7 @@ module Superthread
 
       desc "delete SPACE_ID", "Delete a space"
       def delete(space_id)
-        output client.spaces.delete(workspace_id, space_id)
+        output client.spaces.destroy(workspace_id, space_id)
       end
 
       desc "add_member SPACE_ID USER_ID", "Add a member to a space"
