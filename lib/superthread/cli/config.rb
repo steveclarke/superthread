@@ -52,11 +52,11 @@ module Superthread
         puts "  exists: #{File.exist?(config.config_path)}"
         puts ""
         puts "Current settings:"
-        puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : '(not set)'}"
+        puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : "(not set)"}"
         puts "  base_url: #{config.base_url}"
-        puts "  workspace: #{config.workspace || '(not set)'}"
+        puts "  workspace: #{config.workspace || "(not set)"}"
         puts "  format: #{config.format}"
-        puts "  workspaces: #{config.workspaces.keys.join(', ')}" unless config.workspaces.empty?
+        puts "  workspaces: #{config.workspaces.keys.join(", ")}" unless config.workspaces.empty?
       end
     end
   end

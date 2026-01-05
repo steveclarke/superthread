@@ -5,7 +5,7 @@ require "json"
 class Superthread::Client
   # Resource accessors - composition pattern matching TypeScript structure
   attr_reader :users, :projects, :spaces, :boards, :cards,
-              :comments, :pages, :notes, :sprints, :search, :tags
+    :comments, :pages, :notes, :sprints, :search, :tags
 
   def initialize(api_key: nil, base_url: nil, workspace: nil)
     @config = build_config(api_key, base_url, workspace)
@@ -77,13 +77,13 @@ class Superthread::Client
   end
 
   def parse_response(response)
-    return { success: true } if response.status == 204
+    return {success: true} if response.status == 204
 
     body = response.body.to_s
-    return { success: true } if body.empty?
+    return {success: true} if body.empty?
 
     JSON.parse(body, symbolize_names: true)
   rescue JSON::ParserError
-    { success: true }
+    {success: true}
   end
 end

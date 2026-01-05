@@ -6,7 +6,7 @@ class Superthread::Configuration
   DEFAULT_BASE_URL = "https://api.superthread.com/v1"
 
   attr_accessor :api_key, :base_url, :workspace, :format, :workspaces,
-                :timeout, :open_timeout
+    :timeout, :open_timeout
 
   def initialize
     @base_url = DEFAULT_BASE_URL
@@ -31,8 +31,8 @@ class Superthread::Configuration
     return if api_key && !api_key.empty?
 
     raise Superthread::ConfigurationError,
-          "API key is required. Set SUPERTHREAD_API_KEY environment variable " \
-          "or add api_key to #{config_path}"
+      "API key is required. Set SUPERTHREAD_API_KEY environment variable " \
+      "or add api_key to #{config_path}"
   end
 
   # Resolve workspace ID from alias or direct ID

@@ -95,7 +95,7 @@ module Superthread
         body = {
           type: "card",
           card_filters: {
-            include: { members: [user_id] }
+            include: {members: [user_id]}
           }
         }
 
@@ -150,7 +150,7 @@ module Superthread
       def add_member(workspace_id, card_id, user_id:, role: "member")
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/cards/#{card}/members", body: { user_id: user_id, role: role })
+        post("/#{ws}/cards/#{card}/members", body: {user_id: user_id, role: role})
       end
 
       # Removes a member from a card.
@@ -177,7 +177,7 @@ module Superthread
       def create_checklist(workspace_id, card_id, title:)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
-        post("/#{ws}/cards/#{card}/checklists", body: { title: title })
+        post("/#{ws}/cards/#{card}/checklists", body: {title: title})
       end
 
       # Adds an item to a checklist.
@@ -217,7 +217,7 @@ module Superthread
         item = safe_id("item_id", item_id)
 
         patch("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
-              body: build_params(**params))
+          body: build_params(**params))
       end
 
       # Deletes a checklist item.
@@ -250,7 +250,7 @@ module Superthread
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
 
-        patch("/#{ws}/cards/#{card}/checklists/#{checklist}", body: { title: title })
+        patch("/#{ws}/cards/#{card}/checklists/#{checklist}", body: {title: title})
       end
 
       # Deletes a checklist.
@@ -292,7 +292,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
 
-        body = tag_ids.is_a?(Array) ? { ids: tag_ids } : { id: tag_ids }
+        body = tag_ids.is_a?(Array) ? {ids: tag_ids} : {id: tag_ids}
         post("/#{ws}/cards/#{card}/tags", body: body)
       end
 

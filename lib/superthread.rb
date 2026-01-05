@@ -9,5 +9,8 @@ end
 require "zeitwerk"
 
 loader = Zeitwerk::Loader.for_gem
+loader.ignore(File.join(__dir__, "superthread", "error.rb"))
 loader.setup
 loader.eager_load_namespace(Superthread::Cli)
+
+require_relative "superthread/error"

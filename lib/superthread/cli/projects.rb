@@ -25,7 +25,7 @@ module Superthread
         output client.projects.create(
           workspace_id,
           **options.slice(:title, :list_id, :content, :start_date, :due_date,
-                          :owner_id, :priority).transform_keys(&:to_sym)
+            :owner_id, :priority).transform_keys(&:to_sym)
         )
       end
 
@@ -42,7 +42,7 @@ module Superthread
           workspace_id,
           project_id,
           **options.slice(:title, :list_id, :owner_id, :start_date, :due_date,
-                          :priority, :archived).transform_keys(&:to_sym)
+            :priority, :archived).transform_keys(&:to_sym)
         )
       end
 

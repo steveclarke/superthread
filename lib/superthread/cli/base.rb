@@ -14,7 +14,7 @@ module Superthread
       class_option :quiet, type: :boolean, aliases: "-q", desc: "Minimal logging"
       class_option :workspace, type: :string, aliases: "-w", desc: "Workspace ID"
       class_option :format, type: :string, default: "json", enum: %w[json table],
-                   desc: "Output format"
+        desc: "Output format"
 
       private
 
@@ -27,8 +27,8 @@ module Superthread
         return client.resolve_workspace(ws) if ws
 
         raise Thor::Error,
-              "Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID " \
-              "or add workspace to ~/.config/superthread/config.yaml"
+          "Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID " \
+          "or add workspace to ~/.config/superthread/config.yaml"
       end
 
       def output(data)
@@ -56,7 +56,7 @@ module Superthread
       def format_hash_table(hash)
         max_key_length = hash.keys.map { |k| k.to_s.length }.max || 0
         hash.map do |key, value|
-          formatted_value = value.is_a?(Hash) || value.is_a?(Array) ? JSON.generate(value) : value.to_s
+          formatted_value = (value.is_a?(Hash) || value.is_a?(Array)) ? JSON.generate(value) : value.to_s
           "#{key.to_s.ljust(max_key_length)} : #{formatted_value}"
         end.join("\n")
       end

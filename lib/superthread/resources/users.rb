@@ -17,9 +17,9 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @return [Hash] List of workspace members
       def members(workspace_id)
-        path = workspace_path(workspace_id, "/members")
+        workspace_path(workspace_id, "/members")
         # Note: API uses /teams/:id/members but we use workspace terminology
-        get("/teams/#{safe_id('workspace_id', workspace_id)}/members")
+        get("/teams/#{safe_id("workspace_id", workspace_id)}/members")
       end
     end
   end

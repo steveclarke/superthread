@@ -25,8 +25,8 @@ module Superthread
         result = client.cards.create(
           workspace_id,
           **options.slice(:title, :list_id, :board_id, :sprint_id, :content,
-                          :project_id, :start_date, :due_date, :priority,
-                          :parent_card_id, :epic_id, :owner_id).transform_keys(&:to_sym)
+            :project_id, :start_date, :due_date, :priority,
+            :parent_card_id, :epic_id, :owner_id).transform_keys(&:to_sym)
         )
         output result
       end
@@ -84,7 +84,7 @@ module Superthread
 
       desc "add_related CARD_ID RELATED_CARD_ID", "Link two cards"
       option :type, type: :string, required: true, enum: %w[blocks blocked_by related duplicates],
-             desc: "Relationship type"
+        desc: "Relationship type"
       def add_related(card_id, related_card_id)
         output client.cards.add_related(
           workspace_id, card_id,

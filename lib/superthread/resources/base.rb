@@ -46,7 +46,7 @@ module Superthread
 
         if cleaned.empty?
           raise Superthread::PathValidationError,
-                "#{name} must contain only letters, numbers, hyphen, or underscore"
+            "#{name} must contain only letters, numbers, hyphen, or underscore"
         end
 
         cleaned
