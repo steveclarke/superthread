@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "tmpdir"
+
 RSpec.describe Superthread::Configuration do
   subject(:config) { described_class.new }
 
@@ -74,6 +76,47 @@ RSpec.describe Superthread::Configuration do
       it "uses XDG_CONFIG_HOME" do
         expect(config.config_path).to eq("/custom/config/superthread/config.yaml")
       end
+    end
+  end
+
+  describe "#save_workspace" do
+    let(:temp_dir) { Dir.mktmpdir }
+    let(:config_path) { File.join(temp_dir, "superthread", "config.yaml") }
+
+    around do |example|
+      original = ENV["XDG_CONFIG_HOME"]
+      ENV["XDG_CONFIG_HOME"] = temp_dir
+      example.run
+      ENV["XDG_CONFIG_HOME"] = original
+      FileUtils.rm_rf(temp_dir)
+    end
+
+    it "creates config directory and file" do
+      config.save_workspace("ws_test123")
+      expect(File.exist?(config_path)).to be true
+    end
+
+    it "saves workspace to config file" do
+      config.save_workspace("ws_test123")
+      saved_config = YAML.safe_load_file(config_path)
+      expect(saved_config["workspace"]).to eq("ws_test123")
+    end
+
+    it "updates instance workspace" do
+      config.save_workspace("ws_test123")
+      expect(config.workspace).to eq("ws_test123")
+    end
+
+    it "preserves existing config values" do
+      FileUtils.mkdir_p(File.dirname(config_path))
+      File.write(config_path, YAML.dump({"api_key" => "existing_key", "format" => "table"}))
+
+      config.save_workspace("ws_new")
+
+      saved_config = YAML.safe_load_file(config_path)
+      expect(saved_config["api_key"]).to eq("existing_key")
+      expect(saved_config["format"]).to eq("table")
+      expect(saved_config["workspace"]).to eq("ws_new")
     end
   end
 end

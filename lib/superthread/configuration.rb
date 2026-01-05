@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "fileutils"
 require "yaml"
 
 class Superthread::Configuration
@@ -42,7 +43,26 @@ class Superthread::Configuration
     workspaces[workspace_ref.to_sym] || workspace_ref
   end
 
+  # Save workspace ID to config file
+  def save_workspace(workspace_id)
+    config = load_existing_config
+    config["workspace"] = workspace_id
+
+    FileUtils.mkdir_p(File.dirname(config_path))
+    File.write(config_path, YAML.dump(config))
+
+    @workspace = workspace_id
+  end
+
   private
+
+  def load_existing_config
+    return {} unless File.exist?(config_path)
+
+    YAML.safe_load_file(config_path) || {}
+  rescue Psych::SyntaxError
+    {}
+  end
 
   def load_config_file
     return unless File.exist?(config_path)

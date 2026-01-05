@@ -11,6 +11,9 @@ module Superthread
       desc "config SUBCOMMAND", "Manage configuration"
       subcommand "config", Superthread::Cli::Config
 
+      desc "workspaces SUBCOMMAND", "List and select workspaces"
+      subcommand "workspaces", Superthread::Cli::Workspaces
+
       desc "users SUBCOMMAND", "User and workspace member commands"
       subcommand "users", Superthread::Cli::Users
 
