@@ -1,0 +1,41 @@
+# Bundler
+/.bundle/
+/vendor/bundle
+
+# Gem build artifacts
+*.gem
+/pkg/
+
+# RSpec
+/coverage/
+/spec/reports/
+
+# VCR cassettes with sensitive data (keep structure)
+# /spec/fixtures/vcr_cassettes/
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Ruby version managers
+.ruby-version
+.ruby-gemset
+.rvmrc
+
+# Temp files
+/tmp/
+*.log
+
+# Documentation artifacts
+/doc/
+/.yardoc/
+
+# Debugging
+.byebug_history
+.debug_history

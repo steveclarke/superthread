@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "superthread"
+
+begin
+  Superthread::Cli::Main.start(ARGV)
+rescue Superthread::Error => e
+  warn "  \e[31mERROR: #{e.message}\e[0m"
+  exit 1
+end

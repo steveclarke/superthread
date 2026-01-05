@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Alias for st - both commands do the same thing
+load File.expand_path("st", __dir__)
