@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "fileutils"
+require 'fileutils'
 
 module Superthread
   module Cli
     class Config < Base
-      desc "init", "Create config file at ~/.config/superthread/config.yaml"
+      desc 'init', 'Create config file at ~/.config/superthread/config.yaml'
       def init
         config_path = Superthread::Configuration.new.config_path
         config_dir = File.dirname(config_path)
@@ -37,26 +37,26 @@ module Superthread
         YAML
 
         say_success "Created config file at #{config_path}"
-        say_info "Edit the file to add your API key and workspace settings"
+        say_info 'Edit the file to add your API key and workspace settings'
       end
 
-      desc "path", "Show config file path"
+      desc 'path', 'Show config file path'
       def path
         puts Superthread::Configuration.new.config_path
       end
 
-      desc "show", "Show current configuration (API key redacted)"
+      desc 'show', 'Show current configuration (API key redacted)'
       def show
         config = Superthread::Configuration.new
         puts "Config file: #{config.config_path}"
         puts "  exists: #{File.exist?(config.config_path)}"
-        puts ""
-        puts "Current settings:"
-        puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : "(not set)"}"
+        puts ''
+        puts 'Current settings:'
+        puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : '(not set)'}"
         puts "  base_url: #{config.base_url}"
-        puts "  workspace: #{config.workspace || "(not set)"}"
+        puts "  workspace: #{config.workspace || '(not set)'}"
         puts "  format: #{config.format}"
-        puts "  workspaces: #{config.workspaces.keys.join(", ")}" unless config.workspaces.empty?
+        puts "  workspaces: #{config.workspaces.keys.join(', ')}" unless config.workspaces.empty?
       end
     end
   end

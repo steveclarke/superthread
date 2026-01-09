@@ -2,24 +2,26 @@
 
 module Superthread
   module Resources
+    # API resource for user operations.
     class Users < Base
       # Gets the current user's account information.
       # API: GET /users/me
       #
-      # @return [Hash] User account information
+      # @return [Superthread::Objects::User] User account information
       def me
-        http_get("/users/me")
+        get_object('/users/me', object_class: Objects::User, unwrap_key: :user)
       end
 
       # Gets workspace members.
       # API: GET /teams/:workspace/members
       #
       # @param workspace_id [String] Workspace ID
-      # @return [Hash] List of workspace members
+      # @return [Superthread::Objects::Collection<User>] List of workspace members
       def members(workspace_id)
-        workspace_path(workspace_id, "/members")
-        # Note: API uses /teams/:id/members but we use workspace terminology
-        http_get("/teams/#{safe_id("workspace_id", workspace_id)}/members")
+        ws = safe_id('workspace_id', workspace_id)
+        # NOTE: API uses /teams/:id/members but we use workspace terminology
+        get_collection("/teams/#{ws}/members",
+                       item_class: Objects::User, items_key: :members)
       end
     end
   end

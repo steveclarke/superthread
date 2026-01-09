@@ -1,20 +1,21 @@
 # frozen_string_literal: true
 
-require "thor"
-require "json"
+require 'thor'
+require 'json'
 
 module Superthread
   module Cli
+    # Base class for all CLI commands.
+    # Provides common options, client access, and output formatting.
     class Base < Thor
       def self.exit_on_failure?
         true
       end
 
-      class_option :verbose, type: :boolean, aliases: "-v", desc: "Detailed logging"
-      class_option :quiet, type: :boolean, aliases: "-q", desc: "Minimal logging"
-      class_option :workspace, type: :string, aliases: "-w", desc: "Workspace ID"
-      class_option :format, type: :string, default: "json", enum: %w[json table],
-        desc: "Output format"
+      class_option :verbose, type: :boolean, aliases: '-v', desc: 'Detailed logging'
+      class_option :quiet, type: :boolean, aliases: '-q', desc: 'Minimal logging'
+      class_option :workspace, type: :string, aliases: '-w', desc: 'Workspace ID'
+      class_option :json, type: :boolean, desc: 'Output as JSON'
 
       private
 
@@ -27,56 +28,144 @@ module Superthread
         return client.resolve_workspace(ws) if ws
 
         raise Thor::Error,
-          "Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID " \
-          "or add workspace to ~/.config/superthread/config.yaml"
+              'Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID ' \
+              'or add workspace to ~/.config/superthread/config.yaml'
       end
 
-      def output(data)
-        case options[:format]
-        when "table"
-          puts format_table(data)
+      # Check if color output is enabled.
+      def color_enabled?
+        $stdout.tty? && !options[:quiet]
+      end
+
+      # Output a single item.
+      # In JSON mode, outputs as JSON. Otherwise, outputs as key-value pairs.
+      #
+      # @param item [Object] Item to output
+      # @param fields [Array<Symbol>] Fields to display in table mode
+      # @param labels [Hash<Symbol, String>] Custom field labels
+      def output_item(item, fields: nil, labels: {})
+        if options[:json]
+          puts Formatter.json(item)
         else
-          puts JSON.pretty_generate(data)
+          fields ||= default_detail_fields(item)
+          puts Formatter.detail(item, fields: fields, labels: labels, color_enabled: color_enabled?)
         end
       end
 
-      def format_table(data)
-        return "" if data.nil?
-
-        case data
-        when Hash
-          format_hash_table(data)
-        when Array
-          format_array_table(data)
+      # Output a collection/list.
+      # In JSON mode, outputs as JSON array. Otherwise, outputs as table.
+      #
+      # @param items [Array, Collection] Items to output
+      # @param columns [Array<Symbol>] Columns to display in table mode
+      # @param headers [Hash<Symbol, String>] Custom column headers
+      def output_list(items, columns: nil, headers: {})
+        if options[:json]
+          puts Formatter.json(items)
         else
-          data.to_s
-        end
-      end
-
-      def format_hash_table(hash)
-        max_key_length = hash.keys.map { |k| k.to_s.length }.max || 0
-        hash.map do |key, value|
-          formatted_value = (value.is_a?(Hash) || value.is_a?(Array)) ? JSON.generate(value) : value.to_s
-          "#{key.to_s.ljust(max_key_length)} : #{formatted_value}"
-        end.join("\n")
-      end
-
-      def format_array_table(array)
-        return "" if array.empty?
-
-        if array.first.is_a?(Hash)
-          keys = array.first.keys.take(5) # Limit columns for readability
-          widths = keys.map { |k| [k.to_s.length, array.map { |r| r[k].to_s.length }.max || 0].max }
-
-          header = keys.zip(widths).map { |k, w| k.to_s.ljust(w) }.join(" | ")
-          separator = widths.map { |w| "-" * w }.join("-+-")
-          rows = array.map do |row|
-            keys.zip(widths).map { |k, w| row[k].to_s.truncate(w).ljust(w) }.join(" | ")
+          columns ||= default_list_columns(items)
+          result = Formatter.table(items, columns: columns, headers: headers, color_enabled: color_enabled?)
+          if result.empty?
+            say 'No items found.', :yellow unless options[:quiet]
+          else
+            puts result
           end
+        end
+      end
 
-          [header, separator, *rows].join("\n")
+      # Output raw data (legacy support for commands not yet updated).
+      # In JSON mode or when data is not an object, outputs as JSON.
+      #
+      # @param data [Object] Data to output
+      def output(data)
+        if options[:json]
+          puts Formatter.json(data)
+        elsif data.respond_to?(:items)
+          output_list(data)
+        elsif data.is_a?(Superthread::Object)
+          output_item(data)
         else
-          array.join("\n")
+          puts Formatter.json(data)
+        end
+      end
+
+      # Output a success message.
+      #
+      # @param message [String] Message to display
+      def output_success(message)
+        if options[:json]
+          puts Formatter.json({ success: true, message: message })
+        else
+          say message, :green unless options[:quiet]
+        end
+      end
+
+      # Default detail fields based on item type.
+      def default_detail_fields(item)
+        case item
+        when Superthread::Objects::Card
+          %i[id title status priority list_title board_title time_created time_updated]
+        when Superthread::Objects::Board
+          %i[id title description space_id time_created]
+        when Superthread::Objects::User
+          %i[user_id display_name email role]
+        when Superthread::Objects::Project
+          %i[id title status start_date due_date]
+        when Superthread::Objects::Space
+          %i[id title description time_created]
+        when Superthread::Objects::Sprint
+          %i[id title status start_date due_date]
+        when Superthread::Objects::Comment
+          %i[id content user_id time_created]
+        when Superthread::Objects::Page
+          %i[id title space_id time_created time_updated]
+        when Superthread::Objects::Note
+          %i[id title time_created]
+        when Superthread::Objects::Tag
+          %i[id name color total_cards]
+        else
+          item.respond_to?(:keys) ? item.keys.take(10) : []
+        end
+      end
+
+      # Default list columns based on item type.
+      def default_list_columns(items)
+        first = items.respond_to?(:first) ? items.first : nil
+        return [] if first.nil?
+
+        case first
+        when Superthread::Objects::Card
+          %i[id title status priority list_title]
+        when Superthread::Objects::Board
+          %i[id title]
+        when Superthread::Objects::User
+          %i[user_id display_name email]
+        when Superthread::Objects::Project
+          %i[id title status]
+        when Superthread::Objects::Space
+          %i[id title]
+        when Superthread::Objects::Sprint
+          %i[id title status]
+        when Superthread::Objects::Comment
+          %i[id content user_id]
+        when Superthread::Objects::Page
+          %i[id title]
+        when Superthread::Objects::Note
+          %i[id title]
+        when Superthread::Objects::Tag
+          %i[id name color]
+        else
+          first.respond_to?(:keys) ? first.keys.take(5) : []
+        end
+      end
+
+      # Helper to get symbolized options for passing to API methods.
+      #
+      # @param keys [Array<Symbol>] Keys to extract
+      # @return [Hash] Hash with symbol keys
+      def symbolized_options(*keys)
+        keys.each_with_object({}) do |key, hash|
+          value = options[key.to_s]
+          hash[key] = value unless value.nil?
         end
       end
 
@@ -92,14 +181,5 @@ module Superthread
         say message, :yellow
       end
     end
-  end
-end
-
-# String extension for table formatting
-class String
-  def truncate(max_length, omission: "...")
-    return self if length <= max_length
-
-    "#{self[0, max_length - omission.length]}#{omission}"
   end
 end

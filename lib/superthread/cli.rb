@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "thor"
+require 'thor'
 
 module Superthread
   module Cli

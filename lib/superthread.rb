@@ -6,11 +6,12 @@ module Superthread
   class ConfigurationError < Error; end
 end
 
-require "zeitwerk"
+require 'zeitwerk'
 
 loader = Zeitwerk::Loader.for_gem
-loader.ignore(File.join(__dir__, "superthread", "error.rb"))
+loader.ignore(File.join(__dir__, 'superthread', 'error.rb'))
 loader.setup
 loader.eager_load_namespace(Superthread::Cli)
+loader.eager_load_namespace(Superthread::Objects)
 
-require_relative "superthread/error"
+require_relative 'superthread/error'
