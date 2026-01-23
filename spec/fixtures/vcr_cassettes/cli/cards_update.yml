@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: patch
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/cards/card-123
+    body:
+      encoding: UTF-8
+      string: '{"title":"Updated card title","priority":1}'
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"card":{"id":"card-123","title":"Updated card title","status":"started","priority":1,"board_id":"10","board_title":"Sprint Board","list_id":"101","list_title":"In Progress","time_created":1705312200000,"time_updated":1705399000000,"is_watching":true,"members":[{"user_id":"u123abc","role":"assignee"}],"tags":[{"id":"tag-1","name":"backend","color":"blue"}],"checklists":[]}}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0

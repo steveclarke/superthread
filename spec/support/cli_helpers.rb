@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "stringio"
+require "tmpdir"
 
 module CliHelpers
   # Capture stdout/stderr from a block

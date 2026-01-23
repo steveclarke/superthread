@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/cards
+    body:
+      encoding: UTF-8
+      string: '{"title":"New card from CLI","list_id":"101","board_id":"10"}'
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"card":{"id":"card-new-1","title":"New card from CLI","status":"not_started","priority":3,"board_id":"10","board_title":"Sprint Board","list_id":"101","list_title":"In Progress","time_created":1705312200000,"time_updated":1705312200000,"is_watching":false,"members":[],"tags":[],"checklists":[]}}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0
