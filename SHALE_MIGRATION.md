@@ -26,9 +26,12 @@ to Shale::Mapper models for cleaner, type-safe serialization.
 
 | Model | Status | Notes |
 |-------|--------|-------|
-| **Card** | Pending | Most complex - has nested members, tags, checklists |
-| **Member** | Pending | Nested in Card |
-| **LinkedCard** | Pending | Extends Card |
+| **Card** | ✅ Done | `lib/superthread/models/card.rb` - has nested members, tags, checklists |
+| **Member** | ✅ Done | `lib/superthread/models/member.rb` - nested in Card |
+| **LinkedCard** | ✅ Done | `lib/superthread/models/card.rb` - extends Card |
+| **Tag** | ✅ Done | `lib/superthread/models/tag.rb` |
+| **Checklist** | ✅ Done | `lib/superthread/models/checklist.rb` - has nested items |
+| **ChecklistItem** | ✅ Done | `lib/superthread/models/checklist_item.rb` |
 | **Board** | Pending | Has nested lists |
 | **List** | Pending | Nested in Board |
 | **User** | Pending | |
@@ -38,9 +41,6 @@ to Shale::Mapper models for cleaner, type-safe serialization.
 | **Comment** | Pending | |
 | **Page** | Pending | |
 | **Note** | Pending | |
-| **Tag** | Pending | |
-| **Checklist** | Pending | Has nested items |
-| **ChecklistItem** | Pending | Nested in Checklist |
 | **Collection** | Keep | Wrapper class, works with both systems |
 | **Object** | Keep | Base fallback for untyped responses |
 
@@ -49,11 +49,19 @@ to Shale::Mapper models for cleaner, type-safe serialization.
 ### New Files
 - `lib/superthread/model.rb` - Shale base class with helpers
 - `lib/superthread/cli/ui.rb` - Gum-based terminal UI module
-- `lib/superthread/models/` - New Shale model directory (once migration progresses)
+- `lib/superthread/models/` - Shale model directory
+  - `card.rb` - Card and LinkedCard models
+  - `member.rb` - Member model
+  - `tag.rb` - Tag model
+  - `checklist.rb` - Checklist model
+  - `checklist_item.rb` - ChecklistItem model
 
 ### Modified Files
 - `superthread.gemspec` - Added shale, gum dependencies
 - `lib/superthread/client.rb` - Updated to detect Shale models
+- `lib/superthread/resources/cards.rb` - Now uses Models::* instead of Objects::*
+- `lib/superthread/cli/cards.rb` - Added handle_error, confirming, Ui.success
+- `lib/superthread/cli/base.rb` - Added Models::* to default field detection
 
 ## Conversion Guide
 

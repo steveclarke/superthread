@@ -102,8 +102,14 @@ module Superthread
       # Default detail fields based on item type.
       def default_detail_fields(item)
         case item
-        when Superthread::Objects::Card
+        when Superthread::Models::Card, Superthread::Objects::Card
           %i[id title status priority list_title board_title time_created time_updated]
+        when Superthread::Models::Checklist, Superthread::Objects::Checklist
+          %i[id title card_id time_created]
+        when Superthread::Models::ChecklistItem, Superthread::Objects::ChecklistItem
+          %i[id title checked checklist_id]
+        when Superthread::Models::Tag, Superthread::Objects::Tag
+          %i[id name color total_cards]
         when Superthread::Objects::Board
           %i[id title description space_id time_created]
         when Superthread::Objects::User
@@ -120,8 +126,6 @@ module Superthread
           %i[id title space_id time_created time_updated]
         when Superthread::Objects::Note
           %i[id title time_created]
-        when Superthread::Objects::Tag
-          %i[id name color total_cards]
         else
           item.respond_to?(:keys) ? item.keys.take(10) : []
         end
@@ -133,8 +137,14 @@ module Superthread
         return [] if first.nil?
 
         case first
-        when Superthread::Objects::Card
+        when Superthread::Models::Card, Superthread::Objects::Card
           %i[id title status priority list_title]
+        when Superthread::Models::Checklist, Superthread::Objects::Checklist
+          %i[id title]
+        when Superthread::Models::ChecklistItem, Superthread::Objects::ChecklistItem
+          %i[id title checked]
+        when Superthread::Models::Tag, Superthread::Objects::Tag
+          %i[id name color]
         when Superthread::Objects::Board
           %i[id title]
         when Superthread::Objects::User
@@ -151,8 +161,6 @@ module Superthread
           %i[id title]
         when Superthread::Objects::Note
           %i[id title]
-        when Superthread::Objects::Tag
-          %i[id name color]
         else
           first.respond_to?(:keys) ? first.keys.take(5) : []
         end
@@ -193,7 +201,7 @@ module Superthread
         exit 1
       rescue Superthread::AuthenticationError => e
         Ui.error("Authentication failed: #{e.message}")
-        Ui.muted("Check your API key with: st config show")
+        Ui.muted('Check your API key with: st config show')
         exit 1
       rescue Superthread::ForbiddenError => e
         Ui.error("Access denied: #{e.message}")
@@ -226,7 +234,7 @@ module Superthread
         if Ui.confirm(question, default: false)
           yield
         else
-          Ui.muted("Aborted")
+          Ui.muted('Aborted')
           nil
         end
       end
