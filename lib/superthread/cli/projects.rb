@@ -18,30 +18,37 @@ module Superthread
 
       desc "create", "Create a new project"
       option :title, type: :string, required: true, desc: "Project title"
-      option :list_id, type: :string, required: true, desc: "List ID"
+      option :list, type: :string, required: true, aliases: "-l", desc: "List (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :content, type: :string, desc: "Project description"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
-      option :owner_id, type: :string, desc: "Owner user ID"
+      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
       option :priority, type: :numeric, desc: "Priority level"
       def create
-        project = client.projects.create(workspace_id,
-                                         **symbolized_options(:title, :list_id, :content, :start_date, :due_date,
-                                           :owner_id, :priority))
+        opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
+        opts[:list_id] = resolve_list(options[:list])
+        opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
+        project = client.projects.create(workspace_id, **opts)
         output_item project
       end
 
       desc "update PROJECT_ID", "Update a project"
       option :title, type: :string, desc: "New title"
-      option :list_id, type: :string, desc: "Move to list"
-      option :owner_id, type: :string, desc: "New owner"
+      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :owner, type: :string, aliases: "-o", desc: "New owner (user ID, name, or email)"
       option :start_date, type: :numeric, desc: "Start date"
       option :due_date, type: :numeric, desc: "Due date"
       option :priority, type: :numeric, desc: "Priority"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       def update(project_id)
-        project = client.projects.update(workspace_id, project_id,
-                                         **symbolized_options(:title, :list_id, :owner_id, :start_date, :due_date, :priority, :archived))
+        opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
+        opts[:list_id] = resolve_list(options[:list]) if options[:list]
+        opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
+        project = client.projects.update(workspace_id, project_id, **opts)
         output_item project
       end
 

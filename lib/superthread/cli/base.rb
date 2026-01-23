@@ -14,7 +14,7 @@ module Superthread
 
       class_option :verbose, type: :boolean, aliases: "-v", desc: "Detailed logging"
       class_option :quiet, type: :boolean, aliases: "-q", desc: "Minimal logging"
-      class_option :workspace, type: :string, aliases: "-w", desc: "Workspace ID"
+      class_option :workspace, type: :string, aliases: "-w", desc: "Workspace (ID or name)"
       class_option :json, type: :boolean, desc: "Output as JSON"
 
       private
@@ -23,52 +23,178 @@ module Superthread
         @client ||= Superthread::Client.new
       end
 
+      # ========================================
+      # Workspace resolution
+      # ========================================
+
       def workspace_id
         ws = options[:workspace] || client.default_workspace
-        return client.resolve_workspace(ws) if ws
+        return resolve_workspace(ws) if ws
 
         raise Thor::Error,
           "Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID " \
           "or add workspace to ~/.config/superthread/config.yaml"
       end
 
-      # Resolve a space reference to its ID.
-      # Accepts either a space ID or a space name.
-      # - Short alphanumeric values (IDs) are used directly without API calls
-      # - Values with spaces or special characters are looked up by name
-      #
-      # @param space_ref [String] Space ID or name
-      # @return [String] Space ID
-      def resolve_space(space_ref)
-        return space_ref if space_ref.nil?
+      def resolve_workspace(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
 
-        # If it looks like an ID (alphanumeric, possibly with underscores/hyphens, reasonably short)
-        # use it directly without making an API call
-        if space_ref.match?(/\A[a-zA-Z0-9_-]+\z/) && space_ref.length <= 30
-          return space_ref
+        # Look up by name
+        workspace = find_workspace_by_name(ref)
+        return workspace[:id] if workspace
+
+        raise Thor::Error, "Workspace not found: '#{ref}'. Use 'st workspaces list' to see available workspaces."
+      end
+
+      def find_workspace_by_name(name)
+        @workspaces_cache ||= extract_workspaces_from_user
+        @workspaces_cache.find { |w| w[:name]&.downcase == name.downcase }
+      end
+
+      def extract_workspaces_from_user
+        user = client.users.me
+        data = user.to_h
+        teams = data.dig(:user, :teams) || data[:teams] || data.dig(:user, :team_memberships) || []
+        teams.map do |team|
+          {id: team[:team_id] || team[:id], name: team[:team_name] || team[:name]}
         end
+      end
 
-        # Otherwise it's likely a space name - look it up
-        space = find_space_by_name(space_ref)
+      # ========================================
+      # Space resolution
+      # ========================================
+
+      def space_id
+        resolve_space(options[:space])
+      end
+
+      def resolve_space(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
+
+        space = find_space_by_name(ref)
         return space.id if space
 
-        raise Thor::Error, "Space not found: '#{space_ref}'. Use 'st spaces list' to see available spaces."
+        raise Thor::Error, "Space not found: '#{ref}'. Use 'st spaces list' to see available spaces."
       end
-
-      # Get space_id from options, resolving name if needed.
-      # Prefers --space over --space_id (both work).
-      #
-      # @return [String, nil] Resolved space ID
-      def space_id
-        ref = options[:space] || options[:space_id]
-        resolve_space(ref)
-      end
-
-      private
 
       def find_space_by_name(name)
         @spaces_cache ||= client.spaces.list(workspace_id)
         @spaces_cache.find { |s| s.title&.downcase == name.downcase }
+      end
+
+      # ========================================
+      # Board resolution
+      # ========================================
+
+      def board_id
+        resolve_board(options[:board])
+      end
+
+      def resolve_board(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
+
+        board = find_board_by_name(ref)
+        return board.id if board
+
+        raise Thor::Error, "Board not found: '#{ref}'. Use 'st boards list --space <space>' to see available boards."
+      end
+
+      def find_board_by_name(name)
+        # If space is specified, search only in that space
+        if options[:space]
+          @boards_cache ||= client.boards.list(workspace_id, space_id: space_id)
+          return @boards_cache.find { |b| b.title&.downcase == name.downcase }
+        end
+
+        # Otherwise search across all spaces
+        @all_boards_cache ||= load_all_boards
+        @all_boards_cache.find { |b| b.title&.downcase == name.downcase }
+      end
+
+      def load_all_boards
+        spaces = client.spaces.list(workspace_id)
+        spaces.flat_map do |space|
+          client.boards.list(workspace_id, space_id: space.id).to_a
+        rescue Superthread::ApiError
+          [] # Skip spaces we can't access
+        end
+      end
+
+      # ========================================
+      # User resolution
+      # ========================================
+
+      def resolve_user(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
+
+        user = find_user_by_name(ref)
+        return user.user_id if user
+
+        raise Thor::Error, "User not found: '#{ref}'. Use 'st users members' to see available users."
+      end
+
+      def find_user_by_name(name)
+        @users_cache ||= client.users.members(workspace_id)
+        @users_cache.find do |u|
+          u.display_name&.downcase == name.downcase ||
+            u.email&.downcase == name.downcase
+        end
+      end
+
+      # ========================================
+      # Tag resolution
+      # ========================================
+
+      def resolve_tag(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
+
+        tag = find_tag_by_name(ref)
+        return tag.id if tag
+
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags."
+      end
+
+      def find_tag_by_name(name)
+        @tags_cache ||= client.cards.tags(workspace_id, all: true)
+        @tags_cache.find { |t| t.name&.downcase == name.downcase }
+      end
+
+      # ========================================
+      # List resolution (requires board context)
+      # ========================================
+
+      def resolve_list(ref)
+        return ref if ref.nil?
+        return ref if looks_like_id?(ref)
+
+        list = find_list_by_name(ref)
+        return list.id if list
+
+        raise Thor::Error, "List not found: '#{ref}'. Specify a board with --board to search by list name."
+      end
+
+      def find_list_by_name(name)
+        return nil unless options[:board]
+
+        # Get the board which includes its lists
+        board = client.boards.find(workspace_id, board_id)
+        return nil unless board.lists
+
+        board.lists.find { |l| l.title&.downcase == name.downcase }
+      end
+
+      # ========================================
+      # Helper to detect if value looks like an ID
+      # ========================================
+
+      def looks_like_id?(value)
+        # IDs are typically short alphanumeric strings
+        value.match?(/\A[a-zA-Z0-9_-]+\z/) && value.length <= 30
       end
 
       # Check if color output is enabled.
