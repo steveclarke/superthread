@@ -144,10 +144,18 @@ module Superthread
         return item unless item.is_a?(Hash)
 
         if @item_class
-          @item_class.new(item)
+          if shale_model?(@item_class)
+            @item_class.from_response(item)
+          else
+            @item_class.new(item)
+          end
         else
           Superthread::Object.construct_from(item)
         end
+      end
+
+      def shale_model?(klass)
+        klass.respond_to?(:shale_model?) && klass.shale_model?
       end
     end
   end
