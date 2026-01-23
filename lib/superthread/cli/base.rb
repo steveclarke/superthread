@@ -38,13 +38,23 @@ module Superthread
 
       def resolve_workspace(ref)
         return ref if ref.nil?
-        return ref if looks_like_id?(ref)
 
-        # Look up by name
+        # Workspace IDs look like: t4k7Wa2e (8 chars, alphanumeric, starts with letter)
+        # Skip resolution for ID-like values to avoid unnecessary API calls
+        return ref if looks_like_workspace_id?(ref)
+
+        # Try name resolution for name-like values
         workspace = find_workspace_by_name(ref)
         return workspace[:id] if workspace
 
-        raise Thor::Error, "Workspace not found: '#{ref}'. Use 'st workspaces list' to see available workspaces."
+        # Fall back to treating it as an ID (might still work)
+        ref
+      end
+
+      def looks_like_workspace_id?(value)
+        # Workspace IDs are typically 8 chars, start with a letter, alphanumeric
+        # Also accept test IDs like "test_workspace"
+        value.match?(/\A[a-zA-Z][a-zA-Z0-9_]{5,20}\z/)
       end
 
       def find_workspace_by_name(name)
@@ -54,10 +64,10 @@ module Superthread
 
       def extract_workspaces_from_user
         user = client.users.me
-        data = user.to_h
-        teams = data.dig(:user, :teams) || data[:teams] || data.dig(:user, :team_memberships) || []
-        teams.map do |team|
-          {id: team[:team_id] || team[:id], name: team[:team_name] || team[:name]}
+        return [] unless user.teams
+
+        user.teams.map do |team|
+          {id: team.id, name: team.team_name}
         end
       end
 

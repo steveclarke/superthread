@@ -49,21 +49,13 @@ module Superthread
       private
 
       def extract_teams(user)
-        # Handle various API response structures
-        # The API typically returns user info with team memberships
-        # Convert to hash for safe navigation since response structure varies
-        data = user.to_h
+        return [] unless user.teams
 
-        teams = data.dig(:user, :teams) ||
-          data[:teams] ||
-          data.dig(:user, :team_memberships) ||
-          []
-
-        teams.map do |team|
+        user.teams.map do |team|
           {
-            id: team[:team_id] || team[:id],
-            name: team[:team_name] || team[:name] || "Unknown",
-            role: team[:role]
+            id: team.id,
+            name: team.team_name || "Unknown",
+            role: team.role
           }
         end
       end

@@ -43,9 +43,28 @@ module Superthread
       def from_response(data)
         return nil if data.nil?
 
-        # Shale's from_hash handles the conversion
-        from_hash(data.transform_keys(&:to_s))
+        # Shale's from_hash expects string keys, so we deep-transform
+        from_hash(deep_stringify_keys(data))
       end
+
+      private
+
+      # Recursively stringify hash keys for Shale compatibility.
+      #
+      # @param obj [Object] Object to process
+      # @return [Object] Object with stringified keys
+      def deep_stringify_keys(obj)
+        case obj
+        when Hash
+          obj.transform_keys(&:to_s).transform_values { |v| deep_stringify_keys(v) }
+        when Array
+          obj.map { |v| deep_stringify_keys(v) }
+        else
+          obj
+        end
+      end
+
+      public
 
       # Construct a collection of models from an array of hashes.
       #

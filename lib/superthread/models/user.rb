@@ -19,6 +19,7 @@ module Superthread
       attribute :role, Shale::Type::String
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
+      attribute :teams, Team, collection: true
 
       # Alias for user_id for consistency with other objects.
       #
