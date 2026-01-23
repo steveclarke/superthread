@@ -72,9 +72,6 @@
       "Bash(pip3:*)"
     ],
     "deny": [
-      "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rmdir:*)",
       "Bash(git push --force:*)",
       "Bash(git reset --hard:*)",
       "Bash(git clean:*)"
