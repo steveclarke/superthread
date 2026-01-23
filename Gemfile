@@ -9,6 +9,7 @@ group :development, :test do
   gem "rake", "~> 13.0"
   gem "rspec", "~> 3.12"
   gem "simplecov", require: false
+  gem "simplecov-review", require: false
   gem "standard", "~> 1.40"
   gem "vcr", "~> 6.0"
   gem "webmock", "~> 3.18"
