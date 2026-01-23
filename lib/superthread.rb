@@ -13,5 +13,6 @@ loader.ignore(File.join(__dir__, 'superthread', 'error.rb'))
 loader.setup
 loader.eager_load_namespace(Superthread::Cli)
 loader.eager_load_namespace(Superthread::Objects)
+loader.eager_load_namespace(Superthread::Models)
 
 require_relative 'superthread/error'

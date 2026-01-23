@@ -180,6 +180,72 @@ module Superthread
       def say_warning(message)
         say message, :yellow
       end
+
+      # Wraps a block with consistent error handling.
+      # Catches API and configuration errors and displays user-friendly messages.
+      #
+      # @yield Block to execute
+      # @return [Object] Block return value
+      def handle_error
+        yield
+      rescue Superthread::NotFoundError => e
+        Ui.error("Not found: #{e.message}")
+        exit 1
+      rescue Superthread::AuthenticationError => e
+        Ui.error("Authentication failed: #{e.message}")
+        Ui.muted("Check your API key with: st config show")
+        exit 1
+      rescue Superthread::ForbiddenError => e
+        Ui.error("Access denied: #{e.message}")
+        exit 1
+      rescue Superthread::RateLimitError => e
+        Ui.error("Rate limited: #{e.message}")
+        Ui.muted("Try again in #{e.retry_after || 60} seconds")
+        exit 1
+      rescue Superthread::ValidationError => e
+        Ui.error("Validation error: #{e.message}")
+        exit 1
+      rescue Superthread::ApiError => e
+        Ui.error("API error: #{e.message}")
+        exit 1
+      rescue Superthread::ConfigurationError => e
+        Ui.error("Configuration error: #{e.message}")
+        exit 1
+      end
+
+      # Wraps a block with confirmation prompt.
+      # Skips confirmation if --force flag is set.
+      #
+      # @param question [String] Confirmation question
+      # @param skip_option [Symbol] Option key to skip confirmation (default: :force)
+      # @yield Block to execute if confirmed
+      # @return [Object] Block return value or nil if aborted
+      def confirming(question, skip_option: :force)
+        return yield if options[skip_option]
+
+        if Ui.confirm(question, default: false)
+          yield
+        else
+          Ui.muted("Aborted")
+          nil
+        end
+      end
+
+      # Wraps a block with a spinner.
+      #
+      # @param title [String] Spinner message
+      # @yield Block to execute
+      # @return [Object] Block return value
+      def with_spinner(title, &block)
+        Ui.spin(title, &block)
+      end
+
+      # Access to UI module.
+      #
+      # @return [Module] The Ui module
+      def ui
+        Ui
+      end
     end
   end
 end

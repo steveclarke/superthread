@@ -83,28 +83,49 @@ module Superthread
       Superthread::Objects::Collection.from_response(data, key: items_key, item_class: item_class)
     end
 
-    # Convert raw hash data to a Superthread::Object.
+    # Convert raw hash data to a Superthread::Object or Model.
     #
     # @param data [Hash, Array] Raw response data
     # @param object_class [Class] Optional class to use
     # @param unwrap_key [Symbol] Optional key to unwrap
-    # @return [Superthread::Object, Array<Superthread::Object>]
+    # @return [Superthread::Object, Superthread::Model, Array]
     def convert_to_object(data, object_class: nil, unwrap_key: nil)
       # Unwrap nested response (e.g., { card: { ... } } -> { ... })
       data = data[unwrap_key] if unwrap_key && data.is_a?(Hash) && data.key?(unwrap_key)
 
       if object_class
-        case data
-        when Array
-          data.map { |item| object_class.new(item) }
-        when Hash
-          object_class.new(data)
+        # Use Shale's from_response for Model subclasses
+        if shale_model?(object_class)
+          case data
+          when Array
+            object_class.from_response_array(data)
+          when Hash
+            object_class.from_response(data)
+          else
+            data
+          end
         else
-          data
+          # Legacy Superthread::Object pattern
+          case data
+          when Array
+            data.map { |item| object_class.new(item) }
+          when Hash
+            object_class.new(data)
+          else
+            data
+          end
         end
       else
         Superthread::Object.construct_from(data)
       end
+    end
+
+    # Check if a class is a Shale-based Model.
+    #
+    # @param klass [Class] The class to check
+    # @return [Boolean] True if it's a Shale model
+    def shale_model?(klass)
+      klass.respond_to?(:shale_model?) && klass.shale_model?
     end
 
     private

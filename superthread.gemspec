@@ -34,6 +34,8 @@ Gem::Specification.new do |spec|
 
   # Runtime dependencies
   spec.add_dependency 'faraday', '~> 2.0'
+  spec.add_dependency 'gum', '~> 0.1'
+  spec.add_dependency 'shale', '~> 1.0'
   spec.add_dependency 'thor', '~> 1.3'
   spec.add_dependency 'zeitwerk', '>= 2.6', '< 3.0'
 end
