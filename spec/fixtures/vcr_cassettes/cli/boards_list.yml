@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/boards?project_id=1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"boards":[{"id":"10","title":"Sprint Board","description":"Current sprint tasks","space_id":"1","time_created":1705312200000,"lists":[{"id":"100","title":"To Do","color":"gray","position":0},{"id":"101","title":"In Progress","color":"blue","position":1}]},{"id":"11","title":"Backlog","space_id":"1","time_created":1705398600000,"lists":[]}]}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0
