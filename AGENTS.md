@@ -40,9 +40,9 @@ bundle exec rubocop -a
 bundle exec rake
 
 # Run CLI locally during development
-bundle exec bin/st version
-bundle exec bin/st cards get CARD_ID
-bundle exec bin/st cards assigned USER_ID
+bundle exec bin/suth version
+bundle exec bin/suth cards get CARD_ID
+bundle exec bin/suth cards assigned USER_ID
 ```
 
 ## Directory Structure

@@ -1,0 +1,146 @@
+# Release - Create GitHub Release and update Homebrew tap
+#
+# This workflow handles the complete release process:
+# 1. Validates the Ruby gem builds and tests pass
+# 2. Creates a GitHub Release
+# 3. Updates the Homebrew formula in steveclarke/homebrew-tap
+#
+# Trigger: Automatically runs when a tag matching 'v*' is pushed
+#          (e.g., v0.1.0, v1.0.0)
+#
+# Usage: Create and push a release tag:
+#        bin/rake release
+#        # or manually:
+#        git tag -a v0.1.0 -m "Release v0.1.0"
+#        git push origin v0.1.0
+#
+# Secrets required:
+# - HOMEBREW_TAP_TOKEN: Fine-grained PAT with Contents (read/write) on steveclarke/homebrew-tap
+#
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.TAG }}
+      version: ${{ steps.version.outputs.VERSION }}
+      commit_sha: ${{ steps.version.outputs.SHA }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Extract version and commit SHA from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          COMMIT_SHA=$(git rev-parse $TAG)
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "SHA=$COMMIT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        run: bundle exec rake
+
+      - name: Verify CLI runs
+        run: |
+          bundle exec exe/suth version
+          bundle exec exe/suth --help
+
+      - name: Build gem
+        run: gem build superthread.gemspec
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: superthread-${{ steps.version.outputs.VERSION }}.gem
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-homebrew-tap:
+    name: Update Homebrew Formula
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    steps:
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: steveclarke/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update formula
+        run: |
+          cd homebrew-tap
+          mkdir -p Formula
+          cat > Formula/superthread.rb << 'EOF'
+          class Superthread < Formula
+            desc "CLI for Superthread project management"
+            homepage "https://github.com/steveclarke/superthread"
+            url "https://github.com/steveclarke/superthread.git",
+                tag:      "${{ needs.build-and-release.outputs.tag }}",
+                revision: "${{ needs.build-and-release.outputs.commit_sha }}"
+            version "${{ needs.build-and-release.outputs.version }}"
+            license "MIT"
+            head "https://github.com/steveclarke/superthread.git", branch: "master"
+
+            depends_on "ruby"
+
+            def install
+              ENV["GEM_HOME"] = libexec
+              ENV["GEM_PATH"] = libexec
+
+              # Install dependencies (excluding dev/test groups)
+              system "bundle", "config", "set", "--local", "without", "development:test"
+              system "bundle", "install"
+
+              # Build and install the gem
+              system "gem", "build", "superthread.gemspec"
+              system "gem", "install", "--ignore-dependencies", "superthread-#{version}.gem"
+
+              # Install binary
+              bin.install libexec/"bin/suth"
+              bin.env_script_all_files(libexec/"bin", GEM_HOME: libexec, GEM_PATH: libexec)
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/suth version")
+            end
+          end
+          EOF
+
+      - name: Validate formula
+        run: |
+          cd homebrew-tap
+          brew style --fix Formula/superthread.rb || true
+
+      - name: Commit and push changes
+        run: |
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/superthread.rb
+          git commit -m "Update superthread to ${{ needs.build-and-release.outputs.version }}"
+          git push

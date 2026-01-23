@@ -39,7 +39,7 @@ workspaces:
 Initialize with defaults:
 
 ```bash
-st config init
+suth config init
 ```
 
 ### Environment Variables
@@ -52,7 +52,7 @@ st config init
 
 ## CLI Usage
 
-The CLI is available as `st` (or `superthread`).
+The CLI is available as `suth` (or `superthread`).
 
 ### Global Options
 
@@ -67,72 +67,72 @@ The CLI is available as `st` (or `superthread`).
 
 ```bash
 # Users
-st users me                              # Get current user
-st users members                         # List workspace members
+suth users me                              # Get current user
+suth users members                         # List workspace members
 
 # Cards
-st cards list --board-id brd_xxx         # List cards on a board
-st cards get CARD_ID                     # Get card details
-st cards create --title "Task" --list-id lst_xxx
-st cards update CARD_ID --title "New title"
-st cards delete CARD_ID
-st cards assigned                        # Cards assigned to you
-st cards add-member CARD_ID --user-id usr_xxx
-st cards remove-member CARD_ID --user-id usr_xxx
+suth cards list --board-id brd_xxx         # List cards on a board
+suth cards get CARD_ID                     # Get card details
+suth cards create --title "Task" --list-id lst_xxx
+suth cards update CARD_ID --title "New title"
+suth cards delete CARD_ID
+suth cards assigned                        # Cards assigned to you
+suth cards add-member CARD_ID --user-id usr_xxx
+suth cards remove-member CARD_ID --user-id usr_xxx
 
 # Boards
-st boards list                           # List all boards
-st boards get BOARD_ID                   # Get board details
-st boards create --name "Sprint Board" --space-id spc_xxx
-st boards update BOARD_ID --name "New name"
-st boards delete BOARD_ID
-st boards lists BOARD_ID                 # Get board lists/columns
+suth boards list                           # List all boards
+suth boards get BOARD_ID                   # Get board details
+suth boards create --name "Sprint Board" --space-id spc_xxx
+suth boards update BOARD_ID --name "New name"
+suth boards delete BOARD_ID
+suth boards lists BOARD_ID                 # Get board lists/columns
 
 # Projects (Epics)
-st projects list                         # List all projects
-st projects get PROJECT_ID
-st projects create --name "Q1 Roadmap" --space-id spc_xxx
-st projects add-card PROJECT_ID --card-id crd_xxx
-st projects remove-card PROJECT_ID --card-id crd_xxx
+suth projects list                         # List all projects
+suth projects get PROJECT_ID
+suth projects create --name "Q1 Roadmap" --space-id spc_xxx
+suth projects add-card PROJECT_ID --card-id crd_xxx
+suth projects remove-card PROJECT_ID --card-id crd_xxx
 
 # Spaces
-st spaces list                           # List all spaces
-st spaces get SPACE_ID
-st spaces create --name "Engineering"
-st spaces add-member SPACE_ID --user-id usr_xxx
-st spaces remove-member SPACE_ID --user-id usr_xxx
+suth spaces list                           # List all spaces
+suth spaces get SPACE_ID
+suth spaces create --name "Engineering"
+suth spaces add-member SPACE_ID --user-id usr_xxx
+suth spaces remove-member SPACE_ID --user-id usr_xxx
 
 # Pages
-st pages list --space-id spc_xxx         # List pages in a space
-st pages get PAGE_ID
-st pages create --title "Wiki" --space-id spc_xxx
-st pages archive PAGE_ID
-st pages delete PAGE_ID
+suth pages list --space-id spc_xxx         # List pages in a space
+suth pages get PAGE_ID
+suth pages create --title "Wiki" --space-id spc_xxx
+suth pages archive PAGE_ID
+suth pages delete PAGE_ID
 
 # Comments
-st comments get COMMENT_ID
-st comments create --card-id crd_xxx --content "Looks good!"
-st comments update COMMENT_ID --content "Updated comment"
-st comments delete COMMENT_ID
-st comments replies COMMENT_ID           # Get replies to a comment
+suth comments get COMMENT_ID
+suth comments create --card-id crd_xxx --content "Looks good!"
+suth comments update COMMENT_ID --content "Updated comment"
+suth comments delete COMMENT_ID
+suth comments replies COMMENT_ID           # Get replies to a comment
 
 # Notes
-st notes list --space-id spc_xxx
-st notes get NOTE_ID
-st notes create --title "Meeting notes" --space-id spc_xxx
-st notes delete NOTE_ID
+suth notes list --space-id spc_xxx
+suth notes get NOTE_ID
+suth notes create --title "Meeting notes" --space-id spc_xxx
+suth notes delete NOTE_ID
 
 # Sprints
-st sprints list --space-id spc_xxx
-st sprints get SPRINT_ID --space-id spc_xxx
+suth sprints list --space-id spc_xxx
+suth sprints get SPRINT_ID --space-id spc_xxx
 
 # Search
-st search query "bug fix" --types card,page
+suth search query "bug fix" --types card,page
 
 # Tags
-st tags create --name "urgent" --color "#ff0000"
-st tags update TAG_ID --name "critical"
-st tags delete TAG_ID
+suth tags create --name "urgent" --color "#ff0000"
+suth tags update TAG_ID --name "critical"
+suth tags delete TAG_ID
 ```
 
 ## Library Usage
@@ -209,7 +209,7 @@ bundle install
 bundle exec rspec
 
 # Run CLI locally
-bundle exec bin/st version
+bundle exec bin/suth version
 ```
 
 ## License

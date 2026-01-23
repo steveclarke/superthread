@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   end
 
   spec.bindir = "exe"
-  spec.executables = %w[st superthread]
+  spec.executables = %w[suth]
   spec.require_paths = ["lib"]
 
   # Runtime dependencies
