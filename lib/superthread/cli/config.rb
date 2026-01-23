@@ -62,6 +62,46 @@ module Superthread
         puts "  format: #{config.format}"
         puts "  workspaces: #{config.workspaces.keys.join(", ")}" unless config.workspaces.empty?
       end
+
+      desc "set KEY VALUE", "Set a configuration value"
+      long_desc <<~DESC
+        Set a configuration value in the config file.
+
+        Supported keys:
+          format    - Output format: json or table
+          api_key   - Your Superthread API key
+          base_url  - API base URL (advanced)
+
+        Examples:
+          st config set format json
+          st config set format table
+          st config set api_key stp_xxxxxxxxxxxx
+      DESC
+      def set(key, value)
+        config = Superthread::Configuration.new
+        config_path = config.config_path
+
+        unless %w[format api_key base_url].include?(key)
+          raise Thor::Error, "Unknown config key: #{key}. Valid keys: format, api_key, base_url"
+        end
+
+        if key == "format" && !%w[json table].include?(value)
+          raise Thor::Error, "Invalid format: #{value}. Valid values: json, table"
+        end
+
+        # Load existing config or create empty
+        existing = if File.exist?(config_path)
+          YAML.safe_load_file(config_path) || {}
+        else
+          FileUtils.mkdir_p(File.dirname(config_path))
+          {}
+        end
+
+        existing[key] = value
+        File.write(config_path, YAML.dump(existing))
+
+        say_success "Set #{key} = #{(key == "api_key") ? "#{value[0..10]}..." : value}"
+      end
     end
   end
 end

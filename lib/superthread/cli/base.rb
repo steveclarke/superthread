@@ -212,6 +212,16 @@ module Superthread
         $stdout.tty? && !options[:quiet]
       end
 
+      # Check if JSON output is enabled (via --json flag or config format).
+      def json_output?
+        options[:json] || config.format == "json"
+      end
+
+      # Get the configuration object.
+      def config
+        @config ||= Superthread::Configuration.new
+      end
+
       # Output a single item.
       # In JSON mode, outputs as JSON. Otherwise, outputs as key-value pairs.
       #
@@ -219,7 +229,7 @@ module Superthread
       # @param fields [Array<Symbol>] Fields to display in table mode
       # @param labels [Hash<Symbol, String>] Custom field labels
       def output_item(item, fields: nil, labels: {})
-        if options[:json]
+        if json_output?
           puts Formatter.json(item)
         else
           fields ||= default_detail_fields(item)
@@ -234,7 +244,7 @@ module Superthread
       # @param columns [Array<Symbol>] Columns to display in table mode
       # @param headers [Hash<Symbol, String>] Custom column headers
       def output_list(items, columns: nil, headers: {})
-        if options[:json]
+        if json_output?
           puts Formatter.json(items)
         else
           columns ||= default_list_columns(items)
@@ -252,7 +262,7 @@ module Superthread
       #
       # @param data [Object] Data to output
       def output(data)
-        if options[:json]
+        if json_output?
           puts Formatter.json(data)
         elsif data.respond_to?(:items)
           output_list(data)
@@ -267,7 +277,7 @@ module Superthread
       #
       # @param message [String] Message to display
       def output_success(message)
-        if options[:json]
+        if json_output?
           puts Formatter.json({success: true, message: message})
         else
           say message, :green unless options[:quiet]

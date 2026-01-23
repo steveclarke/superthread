@@ -12,7 +12,7 @@ module Superthread
 
     def initialize
       @base_url = DEFAULT_BASE_URL
-      @format = "json"
+      @format = "table"
       @workspaces = {}
       @timeout = 30
       @open_timeout = 10

@@ -114,4 +114,21 @@ end
 RSpec.configure do |config|
   config.include CliHelpers, type: :cli
   config.include CliHelpers, :cli
+
+  # Isolate CLI tests from user's real config
+  config.around(:each, :cli) do |example|
+    original_config_home = ENV["XDG_CONFIG_HOME"]
+    original_state_home = ENV["XDG_STATE_HOME"]
+
+    # Use temp directories to avoid loading user's actual config
+    Dir.mktmpdir do |temp_dir|
+      ENV["XDG_CONFIG_HOME"] = File.join(temp_dir, "config")
+      ENV["XDG_STATE_HOME"] = File.join(temp_dir, "state")
+
+      example.run
+    end
+  ensure
+    ENV["XDG_CONFIG_HOME"] = original_config_home
+    ENV["XDG_STATE_HOME"] = original_state_home
+  end
 end
