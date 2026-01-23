@@ -12,7 +12,7 @@ module Superthread
       def list(workspace_id)
         ws = safe_id('workspace_id', workspace_id)
         get_collection("/#{ws}/notes",
-                       item_class: Objects::Note, items_key: :notes)
+                       item_class: Models::Note, items_key: :notes)
       end
 
       # Gets a specific note.
@@ -20,12 +20,12 @@ module Superthread
       #
       # @param workspace_id [String] Workspace ID
       # @param note_id [String] Note ID
-      # @return [Superthread::Objects::Note] Note details
+      # @return [Superthread::Models::Note] Note details
       def find(workspace_id, note_id)
         ws = safe_id('workspace_id', workspace_id)
         note = safe_id('note_id', note_id)
         get_object("/#{ws}/notes/#{note}",
-                   object_class: Objects::Note, unwrap_key: :note)
+                   object_class: Models::Note, unwrap_key: :note)
       end
 
       # Creates a new note.
@@ -34,12 +34,12 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param title [String] Note title
       # @param params [Hash] Optional parameters (transcript, transcripts, user_notes, etc.)
-      # @return [Superthread::Objects::Note] Created note
+      # @return [Superthread::Models::Note] Created note
       def create(workspace_id, title:, **params)
         ws = safe_id('workspace_id', workspace_id)
         body = compact_params(title: title, **params)
         post_object("/#{ws}/notes", body: body,
-                                    object_class: Objects::Note, unwrap_key: :note)
+                                    object_class: Models::Note, unwrap_key: :note)
       end
 
       # Deletes a note.

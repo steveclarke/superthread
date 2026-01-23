@@ -12,7 +12,7 @@ module Superthread
       def list(workspace_id)
         ws = safe_id('workspace_id', workspace_id)
         get_collection("/#{ws}/projects",
-                       item_class: Objects::Space, items_key: :projects)
+                       item_class: Models::Space, items_key: :projects)
       end
 
       # Gets a specific space.
@@ -20,12 +20,12 @@ module Superthread
       #
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID (maps to project_id in API)
-      # @return [Superthread::Objects::Space] Space details
+      # @return [Superthread::Models::Space] Space details
       def find(workspace_id, space_id)
         ws = safe_id('workspace_id', workspace_id)
         space = safe_id('space_id', space_id)
         get_object("/#{ws}/projects/#{space}",
-                   object_class: Objects::Space, unwrap_key: :project)
+                   object_class: Models::Space, unwrap_key: :project)
       end
 
       # Creates a new space.
@@ -34,12 +34,12 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param title [String] Space title
       # @param params [Hash] Optional parameters (description, icon)
-      # @return [Superthread::Objects::Space] Created space
+      # @return [Superthread::Models::Space] Created space
       def create(workspace_id, title:, **params)
         ws = safe_id('workspace_id', workspace_id)
         body = compact_params(title: title, **params)
         post_object("/#{ws}/projects", body: body,
-                                       object_class: Objects::Space, unwrap_key: :project)
+                                       object_class: Models::Space, unwrap_key: :project)
       end
 
       # Updates a space.
@@ -48,12 +48,12 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID
       # @param params [Hash] Update parameters
-      # @return [Superthread::Objects::Space] Updated space
+      # @return [Superthread::Models::Space] Updated space
       def update(workspace_id, space_id, **params)
         ws = safe_id('workspace_id', workspace_id)
         space = safe_id('space_id', space_id)
         patch_object("/#{ws}/projects/#{space}", body: compact_params(**params),
-                                                 object_class: Objects::Space, unwrap_key: :project)
+                                                 object_class: Models::Space, unwrap_key: :project)
       end
 
       # Deletes a space.

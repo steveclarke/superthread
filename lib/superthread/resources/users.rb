@@ -7,9 +7,9 @@ module Superthread
       # Gets the current user's account information.
       # API: GET /users/me
       #
-      # @return [Superthread::Objects::User] User account information
+      # @return [Superthread::Models::User] User account information
       def me
-        get_object('/users/me', object_class: Objects::User, unwrap_key: :user)
+        get_object('/users/me', object_class: Models::User, unwrap_key: :user)
       end
 
       # Gets workspace members.
@@ -21,7 +21,7 @@ module Superthread
         ws = safe_id('workspace_id', workspace_id)
         # NOTE: API uses /teams/:id/members but we use workspace terminology
         get_collection("/teams/#{ws}/members",
-                       item_class: Objects::User, items_key: :members)
+                       item_class: Models::User, items_key: :members)
       end
     end
   end

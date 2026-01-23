@@ -114,19 +114,19 @@ module Superthread
           %i[id title description space_id time_created]
         when Superthread::Models::List, Superthread::Objects::List
           %i[id title color position board_id]
-        when Superthread::Objects::User
+        when Superthread::Models::User, Superthread::Objects::User
           %i[user_id display_name email role]
-        when Superthread::Objects::Project
+        when Superthread::Models::Project, Superthread::Objects::Project
           %i[id title status start_date due_date]
-        when Superthread::Objects::Space
+        when Superthread::Models::Space, Superthread::Objects::Space
           %i[id title description time_created]
-        when Superthread::Objects::Sprint
+        when Superthread::Models::Sprint, Superthread::Objects::Sprint
           %i[id title status start_date due_date]
-        when Superthread::Objects::Comment
+        when Superthread::Models::Comment, Superthread::Objects::Comment
           %i[id content user_id time_created]
-        when Superthread::Objects::Page
+        when Superthread::Models::Page, Superthread::Objects::Page
           %i[id title space_id time_created time_updated]
-        when Superthread::Objects::Note
+        when Superthread::Models::Note, Superthread::Objects::Note
           %i[id title time_created]
         else
           item.respond_to?(:keys) ? item.keys.take(10) : []
@@ -151,19 +151,19 @@ module Superthread
           %i[id title]
         when Superthread::Models::List, Superthread::Objects::List
           %i[id title color]
-        when Superthread::Objects::User
+        when Superthread::Models::User, Superthread::Objects::User
           %i[user_id display_name email]
-        when Superthread::Objects::Project
+        when Superthread::Models::Project, Superthread::Objects::Project
           %i[id title status]
-        when Superthread::Objects::Space
+        when Superthread::Models::Space, Superthread::Objects::Space
           %i[id title]
-        when Superthread::Objects::Sprint
+        when Superthread::Models::Sprint, Superthread::Objects::Sprint
           %i[id title status]
-        when Superthread::Objects::Comment
+        when Superthread::Models::Comment, Superthread::Objects::Comment
           %i[id content user_id]
-        when Superthread::Objects::Page
+        when Superthread::Models::Page, Superthread::Objects::Page
           %i[id title]
-        when Superthread::Objects::Note
+        when Superthread::Models::Note, Superthread::Objects::Note
           %i[id title]
         else
           first.respond_to?(:keys) ? first.keys.take(5) : []

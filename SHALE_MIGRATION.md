@@ -34,13 +34,13 @@ to Shale::Mapper models for cleaner, type-safe serialization.
 | **ChecklistItem** | ✅ Done | `lib/superthread/models/checklist_item.rb` |
 | **Board** | ✅ Done | `lib/superthread/models/board.rb` - has nested lists |
 | **List** | ✅ Done | `lib/superthread/models/list.rb` - nested in Board |
-| **User** | Pending | |
-| **Project** | Pending | |
-| **Space** | Pending | |
-| **Sprint** | Pending | |
-| **Comment** | Pending | |
-| **Page** | Pending | |
-| **Note** | Pending | |
+| **User** | ✅ Done | `lib/superthread/models/user.rb` |
+| **Project** | ✅ Done | `lib/superthread/models/project.rb` |
+| **Space** | ✅ Done | `lib/superthread/models/space.rb` - has nested members |
+| **Sprint** | ✅ Done | `lib/superthread/models/sprint.rb` |
+| **Comment** | ✅ Done | `lib/superthread/models/comment.rb` - has nested replies |
+| **Page** | ✅ Done | `lib/superthread/models/page.rb` |
+| **Note** | ✅ Done | `lib/superthread/models/note.rb` |
 | **Collection** | Keep | Wrapper class, works with both systems |
 | **Object** | Keep | Base fallback for untyped responses |
 
@@ -57,12 +57,18 @@ to Shale::Mapper models for cleaner, type-safe serialization.
   - `checklist_item.rb` - ChecklistItem model
   - `board.rb` - Board model
   - `list.rb` - List model
+  - `user.rb` - User model
+  - `project.rb` - Project model
+  - `space.rb` - Space model (with nested members)
+  - `sprint.rb` - Sprint model
+  - `comment.rb` - Comment model (with nested replies)
+  - `page.rb` - Page model
+  - `note.rb` - Note model
 
 ### Modified Files
 - `superthread.gemspec` - Added shale, gum dependencies
 - `lib/superthread/client.rb` - Updated to detect Shale models
-- `lib/superthread/resources/cards.rb` - Now uses Models::* instead of Objects::*
-- `lib/superthread/resources/boards.rb` - Now uses Models::* instead of Objects::*
+- `lib/superthread/resources/*.rb` - All resources now use Models::* instead of Objects::*
 - `lib/superthread/cli/cards.rb` - Added handle_error, confirming, Ui.success
 - `lib/superthread/cli/boards.rb` - Added handle_error, confirming, Ui.success
 - `lib/superthread/cli/base.rb` - Added Models::* to default field detection
@@ -132,6 +138,6 @@ end
 ## Testing
 
 After each migration:
-1. Run `bundle exec rspec spec/superthread/objects/MODEL_spec.rb`
+1. Run `bundle exec rspec spec/superthread/models/MODEL_spec.rb`
 2. Test CLI commands that use the model
 3. Verify JSON output matches previous format
