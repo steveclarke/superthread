@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'thor'
-require 'json'
+require "thor"
+require "json"
 
 module Superthread
   module Cli
@@ -12,10 +12,10 @@ module Superthread
         true
       end
 
-      class_option :verbose, type: :boolean, aliases: '-v', desc: 'Detailed logging'
-      class_option :quiet, type: :boolean, aliases: '-q', desc: 'Minimal logging'
-      class_option :workspace, type: :string, aliases: '-w', desc: 'Workspace ID'
-      class_option :json, type: :boolean, desc: 'Output as JSON'
+      class_option :verbose, type: :boolean, aliases: "-v", desc: "Detailed logging"
+      class_option :quiet, type: :boolean, aliases: "-q", desc: "Minimal logging"
+      class_option :workspace, type: :string, aliases: "-w", desc: "Workspace ID"
+      class_option :json, type: :boolean, desc: "Output as JSON"
 
       private
 
@@ -28,8 +28,8 @@ module Superthread
         return client.resolve_workspace(ws) if ws
 
         raise Thor::Error,
-              'Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID ' \
-              'or add workspace to ~/.config/superthread/config.yaml'
+          "Workspace required. Use --workspace or set SUPERTHREAD_WORKSPACE_ID " \
+          "or add workspace to ~/.config/superthread/config.yaml"
       end
 
       # Check if color output is enabled.
@@ -65,7 +65,7 @@ module Superthread
           columns ||= default_list_columns(items)
           result = Formatter.table(items, columns: columns, headers: headers, color_enabled: color_enabled?)
           if result.empty?
-            say 'No items found.', :yellow unless options[:quiet]
+            say "No items found.", :yellow unless options[:quiet]
           else
             puts result
           end
@@ -93,7 +93,7 @@ module Superthread
       # @param message [String] Message to display
       def output_success(message)
         if options[:json]
-          puts Formatter.json({ success: true, message: message })
+          puts Formatter.json({success: true, message: message})
         else
           say message, :green unless options[:quiet]
         end
@@ -205,7 +205,7 @@ module Superthread
         exit 1
       rescue Superthread::AuthenticationError => e
         Ui.error("Authentication failed: #{e.message}")
-        Ui.muted('Check your API key with: st config show')
+        Ui.muted("Check your API key with: st config show")
         exit 1
       rescue Superthread::ForbiddenError => e
         Ui.error("Access denied: #{e.message}")
@@ -238,7 +238,7 @@ module Superthread
         if Ui.confirm(question, default: false)
           yield
         else
-          Ui.muted('Aborted')
+          Ui.muted("Aborted")
           nil
         end
       end

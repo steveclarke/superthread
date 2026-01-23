@@ -9,7 +9,7 @@ module Superthread
       #
       # @return [Superthread::Models::User] User account information
       def me
-        get_object('/users/me', object_class: Models::User, unwrap_key: :user)
+        get_object("/users/me", object_class: Models::User, unwrap_key: :user)
       end
 
       # Gets workspace members.
@@ -18,10 +18,10 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @return [Superthread::Objects::Collection<User>] List of workspace members
       def members(workspace_id)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         # NOTE: API uses /teams/:id/members but we use workspace terminology
         get_collection("/teams/#{ws}/members",
-                       item_class: Models::User, items_key: :members)
+          item_class: Models::User, items_key: :members)
       end
     end
   end

@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require 'fileutils'
-require 'yaml'
+require "fileutils"
+require "yaml"
 
 module Superthread
   class Configuration
-    DEFAULT_BASE_URL = 'https://api.superthread.com/v1'
+    DEFAULT_BASE_URL = "https://api.superthread.com/v1"
 
     attr_accessor :api_key, :base_url, :workspace, :format, :workspaces,
-                  :timeout, :open_timeout
+      :timeout, :open_timeout
 
     def initialize
       @base_url = DEFAULT_BASE_URL
-      @format = 'json'
+      @format = "json"
       @workspaces = {}
       @timeout = 30
       @open_timeout = 10
@@ -23,9 +23,9 @@ module Superthread
 
     def config_path
       @config_path ||= File.join(
-        ENV.fetch('XDG_CONFIG_HOME', File.expand_path('~/.config')),
-        'superthread',
-        'config.yaml'
+        ENV.fetch("XDG_CONFIG_HOME", File.expand_path("~/.config")),
+        "superthread",
+        "config.yaml"
       )
     end
 
@@ -33,8 +33,8 @@ module Superthread
       return if api_key && !api_key.empty?
 
       raise Superthread::ConfigurationError,
-            'API key is required. Set SUPERTHREAD_API_KEY environment variable ' \
-            "or add api_key to #{config_path}"
+        "API key is required. Set SUPERTHREAD_API_KEY environment variable " \
+        "or add api_key to #{config_path}"
     end
 
     # Resolve workspace ID from alias or direct ID
@@ -47,7 +47,7 @@ module Superthread
     # Save workspace ID to config file
     def save_workspace(workspace_id)
       config = load_existing_config
-      config['workspace'] = workspace_id
+      config["workspace"] = workspace_id
 
       FileUtils.mkdir_p(File.dirname(config_path))
       File.write(config_path, YAML.dump(config))
@@ -83,9 +83,9 @@ module Superthread
     end
 
     def load_env_vars
-      @api_key = ENV['SUPERTHREAD_API_KEY'] if ENV['SUPERTHREAD_API_KEY']
-      @base_url = ENV['SUPERTHREAD_API_BASE_URL'] if ENV['SUPERTHREAD_API_BASE_URL']
-      @workspace = ENV['SUPERTHREAD_WORKSPACE_ID'] if ENV['SUPERTHREAD_WORKSPACE_ID']
+      @api_key = ENV["SUPERTHREAD_API_KEY"] if ENV["SUPERTHREAD_API_KEY"]
+      @base_url = ENV["SUPERTHREAD_API_BASE_URL"] if ENV["SUPERTHREAD_API_BASE_URL"]
+      @workspace = ENV["SUPERTHREAD_WORKSPACE_ID"] if ENV["SUPERTHREAD_WORKSPACE_ID"]
     end
   end
 end

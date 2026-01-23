@@ -10,11 +10,11 @@ module Superthread
     #   note.content     # => "<p>Discussed...</p>"
     #
     class Note < Superthread::Object
-      OBJECT_NAME = 'note'
+      OBJECT_NAME = "note"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :title, :content,
-                  :user_id, :time_created, :time_updated
+        :user_id, :time_created, :time_updated
 
       def initialize(data = {})
         super

@@ -11,11 +11,11 @@ module Superthread
     #   comment.replies      # => [#<Superthread::Objects::Comment ...>]
     #
     class Comment < Superthread::Object
-      OBJECT_NAME = 'comment'
+      OBJECT_NAME = "comment"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :content, :user_id, :card_id, :parent_id,
-                  :time_created, :time_updated
+        :time_created, :time_updated
 
       def initialize(data = {})
         super

@@ -28,13 +28,13 @@ module Superthread
     # @param data [Hash, Superthread::Object] The data to wrap
     def initialize(data = {})
       @data = case data
-              when Hash
-                data.transform_keys(&:to_sym)
-              when Superthread::Object
-                data.data.dup
-              else
-                {}
-              end
+      when Hash
+        data.transform_keys(&:to_sym)
+      when Superthread::Object
+        data.data.dup
+      else
+        {}
+      end
     end
 
     # Factory method to construct the appropriate typed object from API response data.
@@ -59,7 +59,7 @@ module Superthread
     # @param data [Hash] The data hash
     # @return [Class] The class to use for construction
     def self.object_class_for(data)
-      type = data[:type] || data['type']
+      type = data[:type] || data["type"]
       @object_types.fetch(type, Superthread::Object)
     end
 
@@ -139,7 +139,7 @@ module Superthread
     def key?(key)
       @data.key?(key.to_sym)
     end
-    alias has_key? key?
+    alias_method :has_key?, :key?
 
     # Convert to a plain Hash (deep conversion).
     #
@@ -158,7 +158,7 @@ module Superthread
         end
       end
     end
-    alias to_hash to_h
+    alias_method :to_hash, :to_h
 
     # Convert to JSON string.
     #
@@ -182,7 +182,7 @@ module Superthread
         false
       end
     end
-    alias eql? ==
+    alias_method :eql?, :==
 
     # Hash code for use in Hash keys.
     #
@@ -213,10 +213,10 @@ module Superthread
     # @return [Boolean] True if the method exists
     def respond_to_missing?(method_name, include_private = false)
       name = method_name.to_s
-      if name.end_with?('=')
+      if name.end_with?("=")
         true
-      elsif name.end_with?('?')
-        @data.key?(name.chomp('?').to_sym)
+      elsif name.end_with?("?")
+        @data.key?(name.chomp("?").to_sym)
       else
         @data.key?(name.to_sym) || super
       end
@@ -233,13 +233,13 @@ module Superthread
     def method_missing(method_name, *args)
       name = method_name.to_s
 
-      if name.end_with?('=')
+      if name.end_with?("=")
         # Setter: card.title = "New Title"
-        key = name.chomp('=').to_sym
+        key = name.chomp("=").to_sym
         @data[key] = args.first
-      elsif name.end_with?('?')
+      elsif name.end_with?("?")
         # Predicate: card.archived?
-        key = name.chomp('?').to_sym
+        key = name.chomp("?").to_sym
         !!@data[key]
       elsif @data.key?(name.to_sym)
         # Getter: card.title

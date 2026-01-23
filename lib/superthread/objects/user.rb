@@ -10,11 +10,11 @@ module Superthread
     #   user.email           # => "john@example.com"
     #
     class User < Superthread::Object
-      OBJECT_NAME = 'user'
+      OBJECT_NAME = "user"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :user_id, :type, :display_name, :email, :avatar,
-                  :role, :time_created, :time_updated
+        :role, :time_created, :time_updated
 
       def initialize(data = {})
         super

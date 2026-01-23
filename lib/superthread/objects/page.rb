@@ -10,11 +10,11 @@ module Superthread
     #   page.content     # => "<p>This project...</p>"
     #
     class Page < Superthread::Object
-      OBJECT_NAME = 'page'
+      OBJECT_NAME = "page"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :space_id, :title, :content,
-                  :icon, :user_id, :time_created, :time_updated
+        :icon, :user_id, :time_created, :time_updated
 
       def initialize(data = {})
         super

@@ -13,10 +13,10 @@ module Superthread
       # @param updated_recently [Boolean] Filter by recently updated
       # @return [Superthread::Objects::Collection<Page>] List of pages
       def list(workspace_id, space_id: nil, archived: nil, updated_recently: nil)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         params = compact_params(project_id: space_id, archived: archived, updated_recently: updated_recently)
         get_collection("/#{ws}/pages", params: params,
-                                       item_class: Models::Page, items_key: :pages)
+          item_class: Models::Page, items_key: :pages)
       end
 
       # Gets a specific page.
@@ -26,10 +26,10 @@ module Superthread
       # @param page_id [String] Page ID
       # @return [Superthread::Models::Page] Page details
       def find(workspace_id, page_id)
-        ws = safe_id('workspace_id', workspace_id)
-        page = safe_id('page_id', page_id)
+        ws = safe_id("workspace_id", workspace_id)
+        page = safe_id("page_id", page_id)
         get_object("/#{ws}/pages/#{page}",
-                   object_class: Models::Page, unwrap_key: :page)
+          object_class: Models::Page, unwrap_key: :page)
       end
 
       # Creates a new page.
@@ -40,10 +40,10 @@ module Superthread
       # @param params [Hash] Page parameters (title, content, schema, etc.)
       # @return [Superthread::Models::Page] Created page
       def create(workspace_id, space_id:, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         body = compact_params(project_id: space_id, **params)
         post_object("/#{ws}/pages", body: body,
-                                    object_class: Models::Page, unwrap_key: :page)
+          object_class: Models::Page, unwrap_key: :page)
       end
 
       # Updates a page.
@@ -54,10 +54,10 @@ module Superthread
       # @param params [Hash] Update parameters
       # @return [Superthread::Models::Page] Updated page
       def update(workspace_id, page_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        page = safe_id('page_id', page_id)
+        ws = safe_id("workspace_id", workspace_id)
+        page = safe_id("page_id", page_id)
         patch_object("/#{ws}/pages/#{page}", body: compact_params(**params),
-                                             object_class: Models::Page, unwrap_key: :page)
+          object_class: Models::Page, unwrap_key: :page)
       end
 
       # Duplicates a page.
@@ -69,11 +69,11 @@ module Superthread
       # @param params [Hash] Optional parameters (title, parent_page_id, position)
       # @return [Superthread::Models::Page] Duplicated page
       def duplicate(workspace_id, page_id, space_id:, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        page = safe_id('page_id', page_id)
+        ws = safe_id("workspace_id", workspace_id)
+        page = safe_id("page_id", page_id)
         body = compact_params(project_id: space_id, **params)
         post_object("/#{ws}/pages/#{page}/copy", body: body,
-                                                 object_class: Models::Page, unwrap_key: :page)
+          object_class: Models::Page, unwrap_key: :page)
       end
 
       # Archives a page.
@@ -93,8 +93,8 @@ module Superthread
       # @param page_id [String] Page ID
       # @return [Superthread::Object] Success response
       def destroy(workspace_id, page_id)
-        ws = safe_id('workspace_id', workspace_id)
-        page = safe_id('page_id', page_id)
+        ws = safe_id("workspace_id", workspace_id)
+        page = safe_id("page_id", page_id)
         http_delete("/#{ws}/pages/#{page}")
         success_response
       end

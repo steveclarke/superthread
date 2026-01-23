@@ -25,12 +25,12 @@ module Superthread
       # @return [Superthread::Models::Card] Created card
       def create(workspace_id, **params)
         unless params[:board_id] || params[:sprint_id]
-          raise ArgumentError, 'Either board_id or sprint_id must be provided'
+          raise ArgumentError, "Either board_id or sprint_id must be provided"
         end
 
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         post_object("/#{ws}/cards", body: params,
-                                    object_class: Models::Card, unwrap_key: :card)
+          object_class: Models::Card, unwrap_key: :card)
       end
 
       # Updates an existing card.
@@ -42,10 +42,10 @@ module Superthread
       # @param params [Hash] Update parameters (only specified fields are updated)
       # @return [Superthread::Models::Card] Updated card
       def update(workspace_id, card_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
         patch_object("/#{ws}/cards/#{card}", body: compact_params(**params),
-                                             object_class: Models::Card, unwrap_key: :card)
+          object_class: Models::Card, unwrap_key: :card)
       end
 
       # Gets a specific card with full details.
@@ -55,10 +55,10 @@ module Superthread
       # @param card_id [String] Card ID
       # @return [Superthread::Models::Card] Card details
       def find(workspace_id, card_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
         get_object("/#{ws}/cards/#{card}",
-                   object_class: Models::Card, unwrap_key: :card)
+          object_class: Models::Card, unwrap_key: :card)
       end
 
       # Deletes a card.
@@ -68,8 +68,8 @@ module Superthread
       # @param card_id [String] Card ID
       # @return [Superthread::Object] Success response
       def destroy(workspace_id, card_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
         http_delete("/#{ws}/cards/#{card}")
         success_response
       end
@@ -82,10 +82,10 @@ module Superthread
       # @param params [Hash] Optional destination parameters
       # @return [Superthread::Models::Card] Duplicated card
       def duplicate(workspace_id, card_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
         post_object("/#{ws}/cards/#{card}/copy", body: compact_params(**params),
-                                                 object_class: Models::Card, unwrap_key: :card)
+          object_class: Models::Card, unwrap_key: :card)
       end
 
       # Gets cards assigned to a user.
@@ -96,12 +96,12 @@ module Superthread
       # @param filters [Hash] Optional filters
       # @return [Superthread::Objects::Collection<Models::Card>] List of assigned cards
       def assigned(workspace_id, user_id:, **filters)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
 
         body = {
-          type: 'card',
+          type: "card",
           card_filters: {
-            include: { members: [user_id] }
+            include: {members: [user_id]}
           }
         }
 
@@ -111,7 +111,7 @@ module Superthread
         body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
 
         post_collection("/#{ws}/views/preview", body: body,
-                                                item_class: Models::Card, items_key: :cards)
+          item_class: Models::Card, items_key: :cards)
       end
 
       # Links two cards with a relationship.
@@ -123,13 +123,13 @@ module Superthread
       # @param relation_type [String] Type: blocks, blocked_by, related, duplicates
       # @return [Superthread::Object] Link result
       def add_related(workspace_id, card_id, related_card_id:, relation_type:)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
 
         post_object("/#{ws}/cards/#{card}/linked_cards", body: {
-                      card_id: related_card_id,
-                      linked_card_type: relation_type
-                    })
+          card_id: related_card_id,
+          linked_card_type: relation_type
+        })
       end
 
       # Removes a card relationship.
@@ -140,9 +140,9 @@ module Superthread
       # @param linked_card_id [String] Linked card ID to remove
       # @return [Superthread::Object] Success response
       def remove_related(workspace_id, card_id, linked_card_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        linked = safe_id('linked_card_id', linked_card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        linked = safe_id("linked_card_id", linked_card_id)
         http_delete("/#{ws}/cards/#{card}/linked_cards/#{linked}")
         success_response
       end
@@ -155,10 +155,10 @@ module Superthread
       # @param user_id [String] User ID to add
       # @param role [String] Member role (default: "member")
       # @return [Superthread::Object] Result
-      def add_member(workspace_id, card_id, user_id:, role: 'member')
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        post_object("/#{ws}/cards/#{card}/members", body: { user_id: user_id, role: role })
+      def add_member(workspace_id, card_id, user_id:, role: "member")
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        post_object("/#{ws}/cards/#{card}/members", body: {user_id: user_id, role: role})
       end
 
       # Removes a member from a card.
@@ -169,9 +169,9 @@ module Superthread
       # @param user_id [String] User ID to remove
       # @return [Superthread::Object] Success response
       def remove_member(workspace_id, card_id, user_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        user = safe_id('user_id', user_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        user = safe_id("user_id", user_id)
         http_delete("/#{ws}/cards/#{card}/members/#{user}")
         success_response
       end
@@ -184,10 +184,10 @@ module Superthread
       # @param title [String] Checklist title
       # @return [Superthread::Models::Checklist] Created checklist
       def create_checklist(workspace_id, card_id, title:)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        post_object("/#{ws}/cards/#{card}/checklists", body: { title: title },
-                                                       object_class: Models::Checklist)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        post_object("/#{ws}/cards/#{card}/checklists", body: {title: title},
+          object_class: Models::Checklist)
       end
 
       # Adds an item to a checklist.
@@ -200,15 +200,15 @@ module Superthread
       # @param checked [Boolean] Whether item is checked (default: false)
       # @return [Superthread::Models::ChecklistItem] Created item
       def add_checklist_item(workspace_id, card_id, checklist_id, title:, checked: false)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        checklist = safe_id('checklist_id', checklist_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        checklist = safe_id("checklist_id", checklist_id)
 
         post_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items", body: {
-                      title: title,
-                      checklist_id: checklist_id,
-                      checked: checked
-                    }, object_class: Models::ChecklistItem)
+          title: title,
+          checklist_id: checklist_id,
+          checked: checked
+        }, object_class: Models::ChecklistItem)
       end
 
       # Updates a checklist item.
@@ -221,13 +221,13 @@ module Superthread
       # @param params [Hash] Update parameters (title, checked)
       # @return [Superthread::Models::ChecklistItem] Updated item
       def update_checklist_item(workspace_id, card_id, checklist_id, item_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        checklist = safe_id('checklist_id', checklist_id)
-        item = safe_id('item_id', item_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        checklist = safe_id("checklist_id", checklist_id)
+        item = safe_id("item_id", item_id)
 
         patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
-                     body: compact_params(**params), object_class: Models::ChecklistItem)
+          body: compact_params(**params), object_class: Models::ChecklistItem)
       end
 
       # Deletes a checklist item.
@@ -239,10 +239,10 @@ module Superthread
       # @param item_id [String] Item ID
       # @return [Superthread::Object] Success response
       def delete_checklist_item(workspace_id, card_id, checklist_id, item_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        checklist = safe_id('checklist_id', checklist_id)
-        item = safe_id('item_id', item_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        checklist = safe_id("checklist_id", checklist_id)
+        item = safe_id("item_id", item_id)
 
         http_delete("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}")
         success_response
@@ -257,12 +257,12 @@ module Superthread
       # @param title [String] New title
       # @return [Superthread::Models::Checklist] Updated checklist
       def update_checklist(workspace_id, card_id, checklist_id, title:)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        checklist = safe_id('checklist_id', checklist_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        checklist = safe_id("checklist_id", checklist_id)
 
-        patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}", body: { title: title },
-                                                                     object_class: Models::Checklist)
+        patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}", body: {title: title},
+          object_class: Models::Checklist)
       end
 
       # Deletes a checklist.
@@ -273,9 +273,9 @@ module Superthread
       # @param checklist_id [String] Checklist ID
       # @return [Superthread::Object] Success response
       def delete_checklist(workspace_id, card_id, checklist_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        checklist = safe_id('checklist_id', checklist_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        checklist = safe_id("checklist_id", checklist_id)
 
         http_delete("/#{ws}/cards/#{card}/checklists/#{checklist}")
         success_response
@@ -289,10 +289,10 @@ module Superthread
       # @param all [Boolean] Whether to get all tags
       # @return [Superthread::Objects::Collection<Models::Tag>] List of tags
       def tags(workspace_id, project_id: nil, all: nil)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         params = compact_params(project_id: project_id, all: all)
         get_collection("/#{ws}/tags", params: params,
-                                      item_class: Models::Tag, items_key: :tags)
+          item_class: Models::Tag, items_key: :tags)
       end
 
       # Adds tags to a card.
@@ -303,10 +303,10 @@ module Superthread
       # @param tag_ids [Array<String>, String] Tag ID(s) to add
       # @return [Superthread::Object] Result
       def add_tags(workspace_id, card_id, tag_ids:)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
 
-        body = tag_ids.is_a?(Array) ? { ids: tag_ids } : { id: tag_ids }
+        body = tag_ids.is_a?(Array) ? {ids: tag_ids} : {id: tag_ids}
         post_object("/#{ws}/cards/#{card}/tags", body: body)
       end
 
@@ -318,9 +318,9 @@ module Superthread
       # @param tag_id [String] Tag ID to remove
       # @return [Superthread::Object] Success response
       def remove_tag(workspace_id, card_id, tag_id)
-        ws = safe_id('workspace_id', workspace_id)
-        card = safe_id('card_id', card_id)
-        tag = safe_id('tag_id', tag_id)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        tag = safe_id("tag_id", tag_id)
         http_delete("/#{ws}/cards/#{card}/tags/#{tag}")
         success_response
       end

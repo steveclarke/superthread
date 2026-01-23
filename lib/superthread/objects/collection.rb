@@ -44,7 +44,7 @@ module Superthread
       def self.from_response(data, key: nil, item_class: nil)
         # If the response is already an array, wrap it
         if data.is_a?(Array)
-          new({ items: data }, key: :items, item_class: item_class)
+          new({items: data}, key: :items, item_class: item_class)
         else
           new(data, key: key, item_class: item_class)
         end
@@ -63,8 +63,8 @@ module Superthread
       def count
         @items.count
       end
-      alias size count
-      alias length count
+      alias_method :size, :count
+      alias_method :length, :count
 
       # Check if empty.
       #
@@ -101,7 +101,7 @@ module Superthread
       def to_a
         @items.dup
       end
-      alias to_ary to_a
+      alias_method :to_ary, :to_a
 
       # Convert to array of hashes.
       #
@@ -114,14 +114,14 @@ module Superthread
       #
       # @return [Hash] Metadata
       def metadata
-        @data.reject { |k, _| items_keys.include?(k) }
+        @data.except(*items_keys)
       end
 
       private
 
       # Common keys that contain item arrays
       ITEMS_KEYS = %i[items cards boards lists users projects spaces sprints
-                      pages notes comments tags members results data].freeze
+        pages notes comments tags members results data].freeze
 
       def items_keys
         ITEMS_KEYS

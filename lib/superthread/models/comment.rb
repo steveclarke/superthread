@@ -49,9 +49,9 @@ module Superthread
       #
       # @return [String] Comment content preview
       def to_s
-        return '' if content.nil?
+        return "" if content.nil?
 
-        content.length > 50 ? "#{content[0..47]}..." : content
+        (content.length > 50) ? "#{content[0..47]}..." : content
       end
     end
   end

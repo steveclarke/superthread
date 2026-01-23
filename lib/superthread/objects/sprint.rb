@@ -11,12 +11,12 @@ module Superthread
     #   sprint.active?     # => true
     #
     class Sprint < Superthread::Object
-      OBJECT_NAME = 'sprint'
+      OBJECT_NAME = "sprint"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :space_id, :title, :description,
-                  :status, :start_date, :due_date, :user_id,
-                  :time_created, :time_updated
+        :status, :start_date, :due_date, :user_id,
+        :time_created, :time_updated
 
       def initialize(data = {})
         super
@@ -38,21 +38,21 @@ module Superthread
       #
       # @return [Boolean] True if active
       def active?
-        @status == 'active'
+        @status == "active"
       end
 
       # Check if sprint is complete.
       #
       # @return [Boolean] True if complete
       def complete?
-        @status == 'complete'
+        @status == "complete"
       end
 
       # Check if sprint is planned (not started).
       #
       # @return [Boolean] True if planned
       def planned?
-        @status == 'planned'
+        @status == "planned"
       end
 
       # Returns start_date as a Time object.

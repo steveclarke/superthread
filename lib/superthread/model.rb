@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'shale'
+require "shale"
 
 module Superthread
   # Base class for all Shale-based API response models.
@@ -104,7 +104,7 @@ module Superthread
     def key?(key)
       respond_to?(key.to_sym)
     end
-    alias has_key? key?
+    alias_method :has_key?, :key?
 
     # String representation for debugging.
     #
@@ -128,7 +128,7 @@ module Superthread
         send(attr) == other.send(attr)
       end
     end
-    alias eql? ==
+    alias_method :eql?, :==
 
     # Hash code based on attributes.
     #

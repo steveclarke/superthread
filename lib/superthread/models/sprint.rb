@@ -28,21 +28,21 @@ module Superthread
       #
       # @return [Boolean] True if active
       def active?
-        status == 'active'
+        status == "active"
       end
 
       # Check if sprint is complete.
       #
       # @return [Boolean] True if complete
       def complete?
-        status == 'complete'
+        status == "complete"
       end
 
       # Check if sprint is planned (not started).
       #
       # @return [Boolean] True if planned
       def planned?
-        status == 'planned'
+        status == "planned"
       end
 
       # Returns start_date as a Time object.

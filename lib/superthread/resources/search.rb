@@ -19,7 +19,7 @@ module Superthread
       # @option params [String] :cursor Pagination cursor
       # @return [Superthread::Objects::Collection] Search results
       def query(workspace_id, query:, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         search_params = compact_params(q: query, project_id: params[:space_id], **params.except(:space_id))
         get_collection("/#{ws}/search", params: search_params, items_key: :results)
       end

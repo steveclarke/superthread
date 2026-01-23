@@ -14,10 +14,10 @@ module Superthread
       # @param params [Hash] Optional parameters (schema, context)
       # @return [Superthread::Models::Comment] Created comment
       def create(workspace_id, content:, card_id: nil, page_id: nil, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         body = compact_params(content: content, card_id: card_id, page_id: page_id, **params)
         post_object("/#{ws}/comments", body: body,
-                                       object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Gets a specific comment.
@@ -27,10 +27,10 @@ module Superthread
       # @param comment_id [String] Comment ID
       # @return [Superthread::Models::Comment] Comment details
       def find(workspace_id, comment_id)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
         get_object("/#{ws}/comments/#{comment}",
-                   object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Updates a comment.
@@ -41,10 +41,10 @@ module Superthread
       # @param params [Hash] Update parameters (content, status, context, schema)
       # @return [Superthread::Models::Comment] Updated comment
       def update(workspace_id, comment_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
         patch_object("/#{ws}/comments/#{comment}", body: compact_params(**params),
-                                                   object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Deletes a comment.
@@ -54,8 +54,8 @@ module Superthread
       # @param comment_id [String] Comment ID
       # @return [Superthread::Object] Success response
       def destroy(workspace_id, comment_id)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
         http_delete("/#{ws}/comments/#{comment}")
         success_response
       end
@@ -69,11 +69,11 @@ module Superthread
       # @param params [Hash] Optional parameters (schema)
       # @return [Superthread::Models::Comment] Created reply
       def reply(workspace_id, comment_id, content:, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
         body = compact_params(content: content, **params)
         post_object("/#{ws}/comments/#{comment}/comments", body: body,
-                                                           object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Gets replies to a comment.
@@ -83,10 +83,10 @@ module Superthread
       # @param comment_id [String] Comment ID
       # @return [Superthread::Objects::Collection<Comment>] List of replies
       def replies(workspace_id, comment_id)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
         get_collection("/#{ws}/comments/#{comment}/comments",
-                       item_class: Models::Comment, items_key: :comments)
+          item_class: Models::Comment, items_key: :comments)
       end
 
       # Updates a reply.
@@ -98,11 +98,11 @@ module Superthread
       # @param params [Hash] Update parameters
       # @return [Superthread::Models::Comment] Updated reply
       def update_reply(workspace_id, comment_id, reply_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
-        reply = safe_id('reply_id', reply_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
+        reply = safe_id("reply_id", reply_id)
         patch_object("/#{ws}/comments/#{comment}/comments/#{reply}", body: compact_params(**params),
-                                                                     object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Deletes a reply.
@@ -113,9 +113,9 @@ module Superthread
       # @param reply_id [String] Reply ID
       # @return [Superthread::Object] Success response
       def delete_reply(workspace_id, comment_id, reply_id)
-        ws = safe_id('workspace_id', workspace_id)
-        comment = safe_id('comment_id', comment_id)
-        reply = safe_id('reply_id', reply_id)
+        ws = safe_id("workspace_id", workspace_id)
+        comment = safe_id("comment_id", comment_id)
+        reply = safe_id("reply_id", reply_id)
         http_delete("/#{ws}/comments/#{comment}/comments/#{reply}")
         success_response
       end

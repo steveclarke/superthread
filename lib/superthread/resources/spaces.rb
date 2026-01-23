@@ -10,9 +10,9 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @return [Superthread::Objects::Collection<Space>] List of spaces
       def list(workspace_id)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         get_collection("/#{ws}/projects",
-                       item_class: Models::Space, items_key: :projects)
+          item_class: Models::Space, items_key: :projects)
       end
 
       # Gets a specific space.
@@ -22,10 +22,10 @@ module Superthread
       # @param space_id [String] Space ID (maps to project_id in API)
       # @return [Superthread::Models::Space] Space details
       def find(workspace_id, space_id)
-        ws = safe_id('workspace_id', workspace_id)
-        space = safe_id('space_id', space_id)
+        ws = safe_id("workspace_id", workspace_id)
+        space = safe_id("space_id", space_id)
         get_object("/#{ws}/projects/#{space}",
-                   object_class: Models::Space, unwrap_key: :project)
+          object_class: Models::Space, unwrap_key: :project)
       end
 
       # Creates a new space.
@@ -36,10 +36,10 @@ module Superthread
       # @param params [Hash] Optional parameters (description, icon)
       # @return [Superthread::Models::Space] Created space
       def create(workspace_id, title:, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         body = compact_params(title: title, **params)
         post_object("/#{ws}/projects", body: body,
-                                       object_class: Models::Space, unwrap_key: :project)
+          object_class: Models::Space, unwrap_key: :project)
       end
 
       # Updates a space.
@@ -50,10 +50,10 @@ module Superthread
       # @param params [Hash] Update parameters
       # @return [Superthread::Models::Space] Updated space
       def update(workspace_id, space_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        space = safe_id('space_id', space_id)
+        ws = safe_id("workspace_id", workspace_id)
+        space = safe_id("space_id", space_id)
         patch_object("/#{ws}/projects/#{space}", body: compact_params(**params),
-                                                 object_class: Models::Space, unwrap_key: :project)
+          object_class: Models::Space, unwrap_key: :project)
       end
 
       # Deletes a space.
@@ -63,8 +63,8 @@ module Superthread
       # @param space_id [String] Space ID
       # @return [Superthread::Object] Success response
       def destroy(workspace_id, space_id)
-        ws = safe_id('workspace_id', workspace_id)
-        space = safe_id('space_id', space_id)
+        ws = safe_id("workspace_id", workspace_id)
+        space = safe_id("space_id", space_id)
         http_delete("/#{ws}/projects/#{space}")
         success_response
       end
@@ -78,8 +78,8 @@ module Superthread
       # @param role [String] Member role
       # @return [Superthread::Object] Result
       def add_member(workspace_id, space_id, user_id:, role: nil)
-        ws = safe_id('workspace_id', workspace_id)
-        space = safe_id('space_id', space_id)
+        ws = safe_id("workspace_id", workspace_id)
+        space = safe_id("space_id", space_id)
         body = compact_params(user_id: user_id, role: role)
         post_object("/#{ws}/projects/#{space}/members", body: body)
       end
@@ -92,9 +92,9 @@ module Superthread
       # @param member_id [String] Member ID to remove
       # @return [Superthread::Object] Success response
       def remove_member(workspace_id, space_id, member_id)
-        ws = safe_id('workspace_id', workspace_id)
-        space = safe_id('space_id', space_id)
-        member = safe_id('member_id', member_id)
+        ws = safe_id("workspace_id", workspace_id)
+        space = safe_id("space_id", space_id)
+        member = safe_id("member_id", member_id)
         http_delete("/#{ws}/projects/#{space}/members/#{member}")
         success_response
       end

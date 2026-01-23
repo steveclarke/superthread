@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'json'
+require "json"
 
 module Superthread
   class Client
     # Resource accessors for API endpoints
     attr_reader :users, :projects, :spaces, :boards, :cards,
-                :comments, :pages, :notes, :sprints, :search, :tags
+      :comments, :pages, :notes, :sprints, :search, :tags
 
     # The last HTTP response received (for accessing headers, status, etc.)
     attr_reader :last_response
@@ -148,14 +148,14 @@ module Superthread
     end
 
     def parse_response(response)
-      return { success: true } if response.status == 204
+      return {success: true} if response.status == 204
 
       body = response.body.to_s
-      return { success: true } if body.empty?
+      return {success: true} if body.empty?
 
       JSON.parse(body, symbolize_names: true)
     rescue JSON::ParserError
-      { success: true }
+      {success: true}
     end
   end
 end

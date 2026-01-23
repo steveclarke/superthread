@@ -91,11 +91,11 @@ module Superthread
       def safe_id(name, value)
         raise Superthread::PathValidationError, "#{name} must be a non-empty string" if value.nil? || value.to_s.empty?
 
-        cleaned = value.to_s.strip.gsub(/[^a-zA-Z0-9_-]/, '')
+        cleaned = value.to_s.strip.gsub(/[^a-zA-Z0-9_-]/, "")
 
         if cleaned.empty?
           raise Superthread::PathValidationError,
-                "#{name} must contain only letters, numbers, hyphen, or underscore"
+            "#{name} must contain only letters, numbers, hyphen, or underscore"
         end
 
         cleaned
@@ -114,8 +114,8 @@ module Superthread
       # @param workspace_id [String] The workspace ID
       # @param path [String] Additional path to append
       # @return [String] Full API path
-      def workspace_path(workspace_id, path = '')
-        ws = safe_id('workspace_id', workspace_id)
+      def workspace_path(workspace_id, path = "")
+        ws = safe_id("workspace_id", workspace_id)
         "/#{ws}#{path}"
       end
 

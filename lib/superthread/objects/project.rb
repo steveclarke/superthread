@@ -10,12 +10,12 @@ module Superthread
     #   project.status      # => "active"
     #
     class Project < Superthread::Object
-      OBJECT_NAME = 'project'
+      OBJECT_NAME = "project"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :space_id, :title, :description,
-                  :status, :icon, :user_id, :start_date, :due_date,
-                  :time_created, :time_updated
+        :status, :icon, :user_id, :start_date, :due_date,
+        :time_created, :time_updated
 
       def initialize(data = {})
         super

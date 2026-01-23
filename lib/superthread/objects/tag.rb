@@ -11,7 +11,7 @@ module Superthread
     #   tag.total_cards  # => 17
     #
     class Tag < Superthread::Object
-      OBJECT_NAME = 'tag'
+      OBJECT_NAME = "tag"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :team_id, :project_id, :name, :slug, :color, :total_cards

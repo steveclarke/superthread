@@ -13,7 +13,7 @@ module Superthread
     #   card.archived?      # => false
     #
     class Card < Superthread::Object
-      OBJECT_NAME = 'card'
+      OBJECT_NAME = "card"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       # Core identifiers
@@ -192,10 +192,10 @@ module Superthread
       # @return [String, nil] Priority name
       def priority_name
         case @priority
-        when 1 then 'urgent'
-        when 2 then 'high'
-        when 3 then 'medium'
-        when 4 then 'low'
+        when 1 then "urgent"
+        when 2 then "high"
+        when 3 then "medium"
+        when 4 then "low"
         end
       end
     end

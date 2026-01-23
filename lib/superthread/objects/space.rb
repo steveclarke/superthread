@@ -10,11 +10,11 @@ module Superthread
     #   space.members     # => [#<Superthread::Objects::Member ...>]
     #
     class Space < Superthread::Object
-      OBJECT_NAME = 'space'
+      OBJECT_NAME = "space"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :title, :description, :icon,
-                  :user_id, :time_created, :time_updated
+        :user_id, :time_created, :time_updated
 
       def initialize(data = {})
         super

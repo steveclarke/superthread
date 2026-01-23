@@ -13,10 +13,10 @@ module Superthread
       # @param params [Hash] Optional parameters (content, icon, color, layout)
       # @return [Superthread::Models::Board] Created board
       def create(workspace_id, space_id:, title:, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         body = compact_params(title: title, project_id: space_id, **params)
         post_object("/#{ws}/boards", body: body,
-                                     object_class: Models::Board, unwrap_key: :board)
+          object_class: Models::Board, unwrap_key: :board)
       end
 
       # Lists all boards in a space.
@@ -28,10 +28,10 @@ module Superthread
       # @param archived [Boolean] Include archived boards
       # @return [Superthread::Objects::Collection<Models::Board>] List of boards
       def list(workspace_id, space_id:, bookmarked: nil, archived: nil)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         params = compact_params(project_id: space_id, bookmarked: bookmarked, archived: archived)
         get_collection("/#{ws}/boards", params: params,
-                                        item_class: Models::Board, items_key: :boards)
+          item_class: Models::Board, items_key: :boards)
       end
 
       # Gets a specific board with lists and cards.
@@ -41,10 +41,10 @@ module Superthread
       # @param board_id [String] Board ID
       # @return [Superthread::Models::Board] Board details
       def find(workspace_id, board_id)
-        ws = safe_id('workspace_id', workspace_id)
-        board = safe_id('board_id', board_id)
+        ws = safe_id("workspace_id", workspace_id)
+        board = safe_id("board_id", board_id)
         get_object("/#{ws}/boards/#{board}",
-                   object_class: Models::Board, unwrap_key: :board)
+          object_class: Models::Board, unwrap_key: :board)
       end
 
       # Updates a board.
@@ -55,10 +55,10 @@ module Superthread
       # @param params [Hash] Update parameters
       # @return [Superthread::Models::Board] Updated board
       def update(workspace_id, board_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        board = safe_id('board_id', board_id)
+        ws = safe_id("workspace_id", workspace_id)
+        board = safe_id("board_id", board_id)
         patch_object("/#{ws}/boards/#{board}", body: compact_params(**params),
-                                               object_class: Models::Board, unwrap_key: :board)
+          object_class: Models::Board, unwrap_key: :board)
       end
 
       # Duplicates a board.
@@ -70,11 +70,11 @@ module Superthread
       # @param space_id [String] Optional destination space
       # @return [Superthread::Models::Board] Duplicated board
       def duplicate(workspace_id, board_id, title: nil, space_id: nil)
-        ws = safe_id('workspace_id', workspace_id)
-        board = safe_id('board_id', board_id)
+        ws = safe_id("workspace_id", workspace_id)
+        board = safe_id("board_id", board_id)
         body = compact_params(title: title, project_id: space_id)
         post_object("/#{ws}/boards/#{board}/copy", body: body,
-                                                   object_class: Models::Board, unwrap_key: :board)
+          object_class: Models::Board, unwrap_key: :board)
       end
 
       # Deletes a board.
@@ -84,8 +84,8 @@ module Superthread
       # @param board_id [String] Board ID
       # @return [Superthread::Object] Success response
       def destroy(workspace_id, board_id)
-        ws = safe_id('workspace_id', workspace_id)
-        board = safe_id('board_id', board_id)
+        ws = safe_id("workspace_id", workspace_id)
+        board = safe_id("board_id", board_id)
         http_delete("/#{ws}/boards/#{board}")
         success_response
       end
@@ -99,10 +99,10 @@ module Superthread
       # @param params [Hash] Optional parameters (content, icon, color, behavior)
       # @return [Superthread::Models::List] Created list
       def create_list(workspace_id, board_id:, title:, **params)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         body = compact_params(board_id: board_id, title: title, **params)
         post_object("/#{ws}/lists", body: body,
-                                    object_class: Models::List, unwrap_key: :list)
+          object_class: Models::List, unwrap_key: :list)
       end
 
       # Updates a list.
@@ -113,10 +113,10 @@ module Superthread
       # @param params [Hash] Update parameters
       # @return [Superthread::Models::List] Updated list
       def update_list(workspace_id, list_id, **params)
-        ws = safe_id('workspace_id', workspace_id)
-        list = safe_id('list_id', list_id)
+        ws = safe_id("workspace_id", workspace_id)
+        list = safe_id("list_id", list_id)
         patch_object("/#{ws}/lists/#{list}", body: compact_params(**params),
-                                             object_class: Models::List, unwrap_key: :list)
+          object_class: Models::List, unwrap_key: :list)
       end
 
       # Deletes a list.
@@ -126,8 +126,8 @@ module Superthread
       # @param list_id [String] List ID
       # @return [Superthread::Object] Success response
       def delete_list(workspace_id, list_id)
-        ws = safe_id('workspace_id', workspace_id)
-        list = safe_id('list_id', list_id)
+        ws = safe_id("workspace_id", workspace_id)
+        list = safe_id("list_id", list_id)
         http_delete("/#{ws}/lists/#{list}")
         success_response
       end

@@ -11,10 +11,10 @@ module Superthread
       # @param space_id [String] Space ID
       # @return [Superthread::Objects::Collection<Sprint>] List of sprints
       def list(workspace_id, space_id:)
-        ws = safe_id('workspace_id', workspace_id)
+        ws = safe_id("workspace_id", workspace_id)
         params = compact_params(project_id: space_id)
         get_collection("/#{ws}/sprints", params: params,
-                                         item_class: Models::Sprint, items_key: :sprints)
+          item_class: Models::Sprint, items_key: :sprints)
       end
 
       # Gets a specific sprint.
@@ -25,11 +25,11 @@ module Superthread
       # @param space_id [String] Space ID (required for this endpoint)
       # @return [Superthread::Models::Sprint] Sprint details with available lists
       def find(workspace_id, sprint_id, space_id:)
-        ws = safe_id('workspace_id', workspace_id)
-        sprint = safe_id('sprint_id', sprint_id)
+        ws = safe_id("workspace_id", workspace_id)
+        sprint = safe_id("sprint_id", sprint_id)
         params = compact_params(project_id: space_id)
         get_object("/#{ws}/sprints/#{sprint}", params: params,
-                                               object_class: Models::Sprint, unwrap_key: :sprint)
+          object_class: Models::Sprint, unwrap_key: :sprint)
       end
     end
   end

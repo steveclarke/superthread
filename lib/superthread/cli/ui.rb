@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'gum'
+require "gum"
 
 module Superthread
   module Cli

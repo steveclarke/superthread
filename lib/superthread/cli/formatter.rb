@@ -28,15 +28,15 @@ module Superthread
 
       # Status colors for different states
       STATUS_COLORS = {
-        'started' => :yellow,
-        'in_progress' => :yellow,
-        'done' => :green,
-        'completed' => :green,
-        'closed' => :green,
-        'blocked' => :red,
-        'active' => :green,
-        'planned' => :cyan,
-        'archived' => :gray
+        "started" => :yellow,
+        "in_progress" => :yellow,
+        "done" => :green,
+        "completed" => :green,
+        "closed" => :green,
+        "blocked" => :red,
+        "active" => :green,
+        "planned" => :cyan,
+        "archived" => :gray
       }.freeze
 
       # Priority colors and labels
@@ -48,10 +48,10 @@ module Superthread
       }.freeze
 
       PRIORITY_LABELS = {
-        1 => 'urgent',
-        2 => 'high',
-        3 => 'medium',
-        4 => 'low'
+        1 => "urgent",
+        2 => "high",
+        3 => "medium",
+        4 => "low"
       }.freeze
 
       module_function
@@ -62,7 +62,7 @@ module Superthread
       # @param max_length [Integer] Maximum length
       # @param omission [String] String to append when truncated
       # @return [String] Truncated string
-      def truncate(str, max_length, omission: '...')
+      def truncate(str, max_length, omission: "...")
         str = str.to_s
         return str if str.length <= max_length
 
@@ -87,7 +87,7 @@ module Superthread
       # @param color_enabled [Boolean] Whether color is enabled
       # @return [String] Formatted status
       def format_status(status, color_enabled: true)
-        return '-' if status.nil?
+        return "-" if status.nil?
 
         color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
         colorize(status, color, enabled: color_enabled)
@@ -99,7 +99,7 @@ module Superthread
       # @param color_enabled [Boolean] Whether color is enabled
       # @return [String] Formatted priority
       def format_priority(priority, color_enabled: true)
-        return '-' if priority.nil?
+        return "-" if priority.nil?
 
         label = PRIORITY_LABELS.fetch(priority, priority.to_s)
         color = PRIORITY_COLORS.fetch(priority, :white)
@@ -112,14 +112,14 @@ module Superthread
       # @param relative [Boolean] Use relative time (e.g., "2 days ago")
       # @return [String] Formatted time
       def format_time(timestamp, relative: true)
-        return '-' if timestamp.nil?
+        return "-" if timestamp.nil?
 
         time = timestamp.is_a?(Time) ? timestamp : Time.at(timestamp / 1000.0)
 
         if relative
           format_relative_time(time)
         else
-          time.strftime('%Y-%m-%d %H:%M')
+          time.strftime("%Y-%m-%d %H:%M")
         end
       end
 
@@ -131,11 +131,11 @@ module Superthread
         diff = Time.now - time
 
         case diff.abs
-        when 0..59 then 'just now'
+        when 0..59 then "just now"
         when 60..3599 then "#{(diff / 60).to_i}m ago"
         when 3600..86_399 then "#{(diff / 3600).to_i}h ago"
         when 86_400..604_799 then "#{(diff / 86_400).to_i}d ago"
-        else time.strftime('%b %d')
+        else time.strftime("%b %d")
         end
       end
 
@@ -146,9 +146,9 @@ module Superthread
       # @return [String] Formatted boolean
       def format_boolean(value, color_enabled: true)
         if value
-          colorize('yes', :green, enabled: color_enabled)
+          colorize("yes", :green, enabled: color_enabled)
         else
-          colorize('no', :gray, enabled: color_enabled)
+          colorize("no", :gray, enabled: color_enabled)
         end
       end
 
@@ -161,7 +161,7 @@ module Superthread
       # @return [String] Formatted table
       def table(data, columns:, headers: {}, color_enabled: true)
         items = data.respond_to?(:items) ? data.items : Array(data)
-        return '' if items.empty?
+        return "" if items.empty?
 
         # Calculate column widths
         widths = columns.map do |col|
@@ -175,7 +175,7 @@ module Superthread
         # Header row
         header_row = columns.zip(widths).map do |col, width|
           colorize(headers.fetch(col, col.to_s.upcase).ljust(width), :bold, enabled: color_enabled)
-        end.join('  ')
+        end.join("  ")
         lines << header_row
 
         # Data rows
@@ -185,8 +185,8 @@ module Superthread
             # Pad without color codes
             padding = width - strip_ansi(cell).length
             padding = 0 if padding.negative?
-            "#{cell}#{' ' * padding}"
-          end.join('  ')
+            "#{cell}#{" " * padding}"
+          end.join("  ")
           lines << row
         end
 
@@ -228,7 +228,7 @@ module Superthread
       # @param str [String] String with ANSI codes
       # @return [String] Plain string
       def strip_ansi(str)
-        str.to_s.gsub(/\e\[[0-9;]*m/, '')
+        str.to_s.gsub(/\e\[[0-9;]*m/, "")
       end
 
       # Humanizes a symbol or string.
@@ -236,7 +236,7 @@ module Superthread
       # @param key [Symbol, String] Key to humanize
       # @return [String] Humanized string
       def humanize(key)
-        key.to_s.tr('_', ' ').capitalize
+        key.to_s.tr("_", " ").capitalize
       end
 
       # Formats a cell value for a table.
@@ -268,7 +268,7 @@ module Superthread
       # @param color_enabled [Boolean] Whether color is enabled
       # @return [String] Formatted value
       def format_value(value, name, color_enabled: true)
-        return '-' if value.nil?
+        return "-" if value.nil?
 
         case name
         when :status
@@ -282,11 +282,11 @@ module Superthread
         when :title, :content, :description
           truncate(value.to_s, 60)
         when :tags
-          Array(value).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join(', ')
+          Array(value).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join(", ")
         when :members
-          Array(value).map { |m| m.respond_to?(:user_id) ? m.user_id : m.to_s }.join(', ')
+          Array(value).map { |m| m.respond_to?(:user_id) ? m.user_id : m.to_s }.join(", ")
         when Array
-          value.join(', ')
+          value.join(", ")
         else
           value.to_s
         end

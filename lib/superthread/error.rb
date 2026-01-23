@@ -85,9 +85,9 @@ module Superthread
     def self.extract_message(body)
       case body
       when Hash
-        body[:message] || body[:error] || body[:error_description] || 'Unknown error'
+        body[:message] || body[:error] || body[:error_description] || "Unknown error"
       else
-        body.to_s.empty? ? 'Unknown error' : body.to_s
+        body.to_s.empty? ? "Unknown error" : body.to_s
       end
     end
 
@@ -97,7 +97,7 @@ module Superthread
       parts = []
       parts << "HTTP #{@status}" if @status
       parts << message
-      parts.join(': ')
+      parts.join(": ")
     end
   end
 
@@ -127,7 +127,7 @@ module Superthread
     def retry_after
       return nil unless @response
 
-      @response.headers['retry-after']&.to_i
+      @response.headers["retry-after"]&.to_i
     end
   end
 

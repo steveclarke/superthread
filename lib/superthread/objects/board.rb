@@ -11,11 +11,11 @@ module Superthread
     #   board.lists.first.title  # => "To Do"
     #
     class Board < Superthread::Object
-      OBJECT_NAME = 'board'
+      OBJECT_NAME = "board"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :team_id, :space_id, :title, :description,
-                  :user_id, :time_created, :time_updated
+        :user_id, :time_created, :time_updated
 
       def initialize(data = {})
         super
@@ -68,11 +68,11 @@ module Superthread
 
     # Represents a list (column) on a board.
     class List < Superthread::Object
-      OBJECT_NAME = 'list'
+      OBJECT_NAME = "list"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :type, :board_id, :title, :color, :position,
-                  :user_id, :time_created, :time_updated
+        :user_id, :time_created, :time_updated
 
       def initialize(data = {})
         super

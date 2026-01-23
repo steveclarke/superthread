@@ -12,7 +12,7 @@ module Superthread
     #   checklist.items.first.checked?     # => true
     #
     class Checklist < Superthread::Object
-      OBJECT_NAME = 'checklist'
+      OBJECT_NAME = "checklist"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :title, :content, :card_id, :user_id, :time_created, :time_updated
@@ -82,7 +82,7 @@ module Superthread
 
     # Represents a checklist item.
     class ChecklistItem < Superthread::Object
-      OBJECT_NAME = 'checklist_item'
+      OBJECT_NAME = "checklist_item"
       Superthread::Object.register_type(OBJECT_NAME, self)
 
       attr_reader :id, :title, :content, :checklist_id, :user_id, :checked, :time_created, :time_updated
