@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/epics
+    body:
+      encoding: UTF-8
+      string: '{"title":"New Project","list_id":"100"}'
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"epic":{"id":"proj-new-1","title":"New Project","status":"planned","list_id":"100","time_created":1705398600000}}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0

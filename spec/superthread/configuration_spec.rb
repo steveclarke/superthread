@@ -10,8 +10,8 @@ RSpec.describe Superthread::Configuration do
       expect(config.base_url).to eq("https://api.superthread.com/v1")
     end
 
-    it "sets default format to json" do
-      expect(config.format).to eq("json")
+    it "sets default format to table" do
+      expect(config.format).to eq("table")
     end
   end
 

@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: patch
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/epics/proj-1
+    body:
+      encoding: UTF-8
+      string: '{"title":"Updated Roadmap"}'
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"epic":{"id":"proj-1","title":"Updated Roadmap","status":"in_progress","time_created":1705312200000,"time_updated":1705485000000}}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0

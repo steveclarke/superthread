@@ -1,0 +1,27 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.superthread.com/v1/<WORKSPACE_ID>/projects
+    body:
+      encoding: UTF-8
+      string: '{"title":"Marketing","description":"Marketing team space"}'
+    headers:
+      Authorization:
+      - Bearer <API_KEY>
+      Content-Type:
+      - application/json
+      Accept:
+      - application/json
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+    body:
+      encoding: UTF-8
+      string: '{"project":{"id":"space-new-1","title":"Marketing","description":"Marketing team space","time_created":1705398600000}}'
+  recorded_at: Thu, 15 Jan 2024 10:30:00 GMT
+recorded_with: VCR 6.0.0
