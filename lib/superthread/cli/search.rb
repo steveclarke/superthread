@@ -7,7 +7,8 @@ module Superthread
       desc "query SEARCH_TERM", "Search across workspace"
       option :field, type: :string, enum: %w[title content], desc: "Field to search"
       option :types, type: :string, desc: "Entity types (comma-separated: board,card,page,project,epic,note)"
-      option :space_id, type: :string, desc: "Filter by space"
+      option :space, type: :string, aliases: "-s", desc: "Filter by space (ID or name)"
+      option :space_id, type: :string, desc: "Filter by space ID (alias for --space)"
       option :archived, type: :boolean, desc: "Include archived"
       option :grouped, type: :boolean, desc: "Group results by type"
       def query(search_term)
@@ -17,7 +18,7 @@ module Superthread
           query: search_term,
           field: options[:field],
           types: types,
-          space_id: options[:space_id],
+          space_id: space_id,
           archived: options[:archived],
           grouped: options[:grouped]
         )

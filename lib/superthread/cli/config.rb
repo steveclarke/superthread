@@ -22,10 +22,7 @@ module Superthread
           # See: https://github.com/steveclarke/superthread
 
           # API key (required) - get from Superthread settings
-          # api_key: st_xxxxxxxxxxxx
-
-          # Default workspace ID (optional)
-          # workspace: ws_abc123
+          # api_key: stp_xxxxxxxxxxxx
 
           # Output format: json or table
           format: json
@@ -34,6 +31,9 @@ module Superthread
           # workspaces:
           #   personal: ws_abc123
           #   work: ws_def456
+
+          # Note: Current workspace is stored in state file, not here.
+          # Use 'st workspaces use <ID>' to set the default workspace.
         YAML
 
         say_success "Created config file at #{config_path}"
@@ -48,8 +48,12 @@ module Superthread
       desc "show", "Show current configuration (API key redacted)"
       def show
         config = Superthread::Configuration.new
+
         puts "Config file: #{config.config_path}"
         puts "  exists: #{File.exist?(config.config_path)}"
+        puts ""
+        puts "State file: #{config.state_path}"
+        puts "  exists: #{File.exist?(config.state_path)}"
         puts ""
         puts "Current settings:"
         puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : "(not set)"}"

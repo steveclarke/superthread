@@ -8,9 +8,9 @@ RSpec.describe "st boards", :cli do
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
-  describe "boards list --space-id=ID" do
+  describe "boards list --space" do
     it "lists boards in a space", vcr: {cassette_name: "cli/boards_list"} do
-      result = run_cli("boards", "list", "--space-id=1")
+      result = run_cli("boards", "list", "--space=1")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Sprint Board")
@@ -18,7 +18,7 @@ RSpec.describe "st boards", :cli do
     end
 
     it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_list"} do
-      json = cli_json("boards", "list", "--space-id=1")
+      json = cli_json("boards", "list", "--space=1")
 
       expect(json).to be_an(Array)
       expect(json.length).to eq(2)

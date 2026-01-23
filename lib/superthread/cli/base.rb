@@ -32,6 +32,45 @@ module Superthread
           "or add workspace to ~/.config/superthread/config.yaml"
       end
 
+      # Resolve a space reference to its ID.
+      # Accepts either a space ID or a space name.
+      # - Short alphanumeric values (IDs) are used directly without API calls
+      # - Values with spaces or special characters are looked up by name
+      #
+      # @param space_ref [String] Space ID or name
+      # @return [String] Space ID
+      def resolve_space(space_ref)
+        return space_ref if space_ref.nil?
+
+        # If it looks like an ID (alphanumeric, possibly with underscores/hyphens, reasonably short)
+        # use it directly without making an API call
+        if space_ref.match?(/\A[a-zA-Z0-9_-]+\z/) && space_ref.length <= 30
+          return space_ref
+        end
+
+        # Otherwise it's likely a space name - look it up
+        space = find_space_by_name(space_ref)
+        return space.id if space
+
+        raise Thor::Error, "Space not found: '#{space_ref}'. Use 'st spaces list' to see available spaces."
+      end
+
+      # Get space_id from options, resolving name if needed.
+      # Prefers --space over --space_id (both work).
+      #
+      # @return [String, nil] Resolved space ID
+      def space_id
+        ref = options[:space] || options[:space_id]
+        resolve_space(ref)
+      end
+
+      private
+
+      def find_space_by_name(name)
+        @spaces_cache ||= client.spaces.list(workspace_id)
+        @spaces_cache.find { |s| s.title&.downcase == name.downcase }
+      end
+
       # Check if color output is enabled.
       def color_enabled?
         $stdout.tty? && !options[:quiet]

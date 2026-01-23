@@ -5,12 +5,13 @@ module Superthread
     # CLI commands for board operations.
     class Boards < Base
       desc "list", "List all boards in a space"
-      option :space_id, type: :string, required: true, desc: "Space ID"
+      option :space, type: :string, required: true, aliases: "-s", desc: "Space ID or name"
+      option :space_id, type: :string, desc: "Space ID (alias for --space)"
       option :bookmarked, type: :boolean, desc: "Filter by bookmarked"
       option :archived, type: :boolean, desc: "Include archived"
       def list
         handle_error do
-          boards = client.boards.list(workspace_id, **symbolized_options(:space_id, :bookmarked, :archived))
+          boards = client.boards.list(workspace_id, space_id: space_id, **symbolized_options(:bookmarked, :archived))
           output_list boards, columns: %i[id title]
         end
       end
@@ -24,14 +25,15 @@ module Superthread
       end
 
       desc "create", "Create a new board"
-      option :space_id, type: :string, required: true, desc: "Space ID"
+      option :space, type: :string, required: true, aliases: "-s", desc: "Space ID or name"
+      option :space_id, type: :string, desc: "Space ID (alias for --space)"
       option :title, type: :string, required: true, desc: "Board title"
       option :content, type: :string, desc: "Board description"
       option :icon, type: :string, desc: "Board icon"
       option :color, type: :string, desc: "Board color"
       def create
         handle_error do
-          board = client.boards.create(workspace_id, **symbolized_options(:space_id, :title, :content, :icon, :color))
+          board = client.boards.create(workspace_id, space_id: space_id, **symbolized_options(:title, :content, :icon, :color))
           output_item board
         end
       end
@@ -52,10 +54,13 @@ module Superthread
 
       desc "duplicate BOARD_ID", "Duplicate a board"
       option :title, type: :string, desc: "Title for the copy"
-      option :space_id, type: :string, desc: "Destination space"
+      option :space, type: :string, aliases: "-s", desc: "Destination space (ID or name)"
+      option :space_id, type: :string, desc: "Destination space ID (alias for --space)"
       def duplicate(board_id)
         handle_error do
-          board = client.boards.duplicate(workspace_id, board_id, **symbolized_options(:title, :space_id))
+          opts = symbolized_options(:title)
+          opts[:space_id] = space_id if space_id
+          board = client.boards.duplicate(workspace_id, board_id, **opts)
           output_item board
         end
       end

@@ -79,27 +79,46 @@ RSpec.describe Superthread::Configuration do
     end
   end
 
+  describe "#state_path" do
+    it "returns XDG-compliant path" do
+      expect(config.state_path).to end_with("superthread/context.yaml")
+    end
+
+    context "when XDG_STATE_HOME is set" do
+      around do |example|
+        original = ENV["XDG_STATE_HOME"]
+        ENV["XDG_STATE_HOME"] = "/custom/state"
+        example.run
+        ENV["XDG_STATE_HOME"] = original
+      end
+
+      it "uses XDG_STATE_HOME" do
+        expect(config.state_path).to eq("/custom/state/superthread/context.yaml")
+      end
+    end
+  end
+
   describe "#save_workspace" do
     let(:temp_dir) { Dir.mktmpdir }
-    let(:config_path) { File.join(temp_dir, "superthread", "config.yaml") }
+    let(:state_path) { File.join(temp_dir, "superthread", "context.yaml") }
 
     around do |example|
-      original = ENV["XDG_CONFIG_HOME"]
-      ENV["XDG_CONFIG_HOME"] = temp_dir
+      original = ENV["XDG_STATE_HOME"]
+      ENV["XDG_STATE_HOME"] = temp_dir
       example.run
-      ENV["XDG_CONFIG_HOME"] = original
+      ENV["XDG_STATE_HOME"] = original
       FileUtils.rm_rf(temp_dir)
     end
 
-    it "creates config directory and file" do
+    it "creates state directory and file" do
       config.save_workspace("ws_test123")
-      expect(File.exist?(config_path)).to be true
+      expect(File.exist?(state_path)).to be true
     end
 
-    it "saves workspace to config file" do
+    it "saves workspace to state file" do
       config.save_workspace("ws_test123")
-      saved_config = YAML.safe_load_file(config_path)
-      expect(saved_config["workspace"]).to eq("ws_test123")
+      saved_state = YAML.safe_load_file(state_path)
+      expect(saved_state["workspace"]).to eq("ws_test123")
     end
 
     it "updates instance workspace" do
@@ -107,16 +126,109 @@ RSpec.describe Superthread::Configuration do
       expect(config.workspace).to eq("ws_test123")
     end
 
-    it "preserves existing config values" do
-      FileUtils.mkdir_p(File.dirname(config_path))
-      File.write(config_path, YAML.dump({"api_key" => "existing_key", "format" => "table"}))
+    it "preserves existing state values" do
+      FileUtils.mkdir_p(File.dirname(state_path))
+      File.write(state_path, YAML.dump({"other_key" => "other_value"}))
 
       config.save_workspace("ws_new")
 
-      saved_config = YAML.safe_load_file(config_path)
-      expect(saved_config["api_key"]).to eq("existing_key")
-      expect(saved_config["format"]).to eq("table")
-      expect(saved_config["workspace"]).to eq("ws_new")
+      saved_state = YAML.safe_load_file(state_path)
+      expect(saved_state["other_key"]).to eq("other_value")
+      expect(saved_state["workspace"]).to eq("ws_new")
+    end
+  end
+
+  describe "#clear_workspace" do
+    let(:temp_dir) { Dir.mktmpdir }
+    let(:state_path) { File.join(temp_dir, "superthread", "context.yaml") }
+
+    around do |example|
+      original = ENV["XDG_STATE_HOME"]
+      ENV["XDG_STATE_HOME"] = temp_dir
+      example.run
+      ENV["XDG_STATE_HOME"] = original
+      FileUtils.rm_rf(temp_dir)
+    end
+
+    it "clears instance workspace" do
+      config.save_workspace("ws_test123")
+      config.clear_workspace
+      expect(config.workspace).to be_nil
+    end
+
+    it "removes state file if workspace was the only key" do
+      config.save_workspace("ws_test123")
+      config.clear_workspace
+      expect(File.exist?(state_path)).to be false
+    end
+
+    it "preserves state file if other values exist" do
+      FileUtils.mkdir_p(File.dirname(state_path))
+      File.write(state_path, YAML.dump({"workspace" => "ws_test", "other" => "value"}))
+
+      # Reload config to pick up state
+      new_config = described_class.new
+      new_config.clear_workspace
+
+      expect(File.exist?(state_path)).to be true
+      saved_state = YAML.safe_load_file(state_path)
+      expect(saved_state["other"]).to eq("value")
+      expect(saved_state).not_to have_key("workspace")
+    end
+  end
+
+  describe "workspace loading priority" do
+    let(:config_dir) { Dir.mktmpdir }
+    let(:state_dir) { Dir.mktmpdir }
+    let(:config_path) { File.join(config_dir, "superthread", "config.yaml") }
+    let(:state_path) { File.join(state_dir, "superthread", "context.yaml") }
+
+    around do |example|
+      original_config = ENV["XDG_CONFIG_HOME"]
+      original_state = ENV["XDG_STATE_HOME"]
+      original_workspace = ENV["SUPERTHREAD_WORKSPACE_ID"]
+      ENV["XDG_CONFIG_HOME"] = config_dir
+      ENV["XDG_STATE_HOME"] = state_dir
+      ENV.delete("SUPERTHREAD_WORKSPACE_ID")
+      example.run
+      ENV["XDG_CONFIG_HOME"] = original_config
+      ENV["XDG_STATE_HOME"] = original_state
+      ENV["SUPERTHREAD_WORKSPACE_ID"] = original_workspace if original_workspace
+      FileUtils.rm_rf(config_dir)
+      FileUtils.rm_rf(state_dir)
+    end
+
+    it "loads workspace from state file" do
+      FileUtils.mkdir_p(File.dirname(state_path))
+      File.write(state_path, YAML.dump("workspace" => "ws_from_state"))
+
+      expect(config.workspace).to eq("ws_from_state")
+    end
+
+    it "env var overrides state file" do
+      FileUtils.mkdir_p(File.dirname(state_path))
+      File.write(state_path, YAML.dump("workspace" => "ws_from_state"))
+      ENV["SUPERTHREAD_WORKSPACE_ID"] = "ws_from_env"
+
+      expect(config.workspace).to eq("ws_from_env")
+    end
+
+    context "legacy migration" do
+      it "migrates workspace from config to state if state doesn't exist" do
+        FileUtils.mkdir_p(File.dirname(config_path))
+        File.write(config_path, YAML.dump("workspace" => "ws_legacy"))
+
+        expect(config.workspace).to eq("ws_legacy")
+      end
+
+      it "prefers state file over legacy config workspace" do
+        FileUtils.mkdir_p(File.dirname(config_path))
+        FileUtils.mkdir_p(File.dirname(state_path))
+        File.write(config_path, YAML.dump("workspace" => "ws_legacy"))
+        File.write(state_path, YAML.dump("workspace" => "ws_current"))
+
+        expect(config.workspace).to eq("ws_current")
+      end
     end
   end
 end

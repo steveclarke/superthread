@@ -31,7 +31,7 @@ module Superthread
         config = Superthread::Configuration.new
         config.save_workspace(workspace_id)
         say_success "Default workspace set to: #{workspace_id}"
-        say_info "Saved to: #{config.config_path}"
+        say_info "Saved to: #{config.state_path}"
       end
 
       desc "current", "Show current default workspace"

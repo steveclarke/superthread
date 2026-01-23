@@ -18,11 +18,11 @@ RSpec.describe "CLI error handling", :cli do
   end
 
   describe "missing required options" do
-    it "shows error for boards list without --space-id" do
+    it "shows error for boards list without --space" do
       result = run_cli("boards", "list")
 
       expect(result[:exit_code]).to eq(1)
-      expect(result[:stderr]).to include("--space-id")
+      expect(result[:stderr]).to include("--space")
     end
   end
 

@@ -7,9 +7,12 @@ module Superthread
       desc "create", "Create a new tag"
       option :name, type: :string, required: true, desc: "Tag name"
       option :color, type: :string, required: true, desc: "Tag color (hex)"
-      option :space_id, type: :string, desc: "Space ID"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name)"
+      option :space_id, type: :string, desc: "Space ID (alias for --space)"
       def create
-        tag = client.tags.create(workspace_id, **symbolized_options(:name, :color, :space_id))
+        opts = symbolized_options(:name, :color)
+        opts[:space_id] = space_id if space_id
+        tag = client.tags.create(workspace_id, **opts)
         output_item tag, fields: %i[id name color]
       end
 
