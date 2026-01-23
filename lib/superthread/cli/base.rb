@@ -110,8 +110,10 @@ module Superthread
           %i[id title checked checklist_id]
         when Superthread::Models::Tag, Superthread::Objects::Tag
           %i[id name color total_cards]
-        when Superthread::Objects::Board
+        when Superthread::Models::Board, Superthread::Objects::Board
           %i[id title description space_id time_created]
+        when Superthread::Models::List, Superthread::Objects::List
+          %i[id title color position board_id]
         when Superthread::Objects::User
           %i[user_id display_name email role]
         when Superthread::Objects::Project
@@ -145,8 +147,10 @@ module Superthread
           %i[id title checked]
         when Superthread::Models::Tag, Superthread::Objects::Tag
           %i[id name color]
-        when Superthread::Objects::Board
+        when Superthread::Models::Board, Superthread::Objects::Board
           %i[id title]
+        when Superthread::Models::List, Superthread::Objects::List
+          %i[id title color]
         when Superthread::Objects::User
           %i[user_id display_name email]
         when Superthread::Objects::Project

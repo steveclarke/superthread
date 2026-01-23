@@ -32,8 +32,8 @@ to Shale::Mapper models for cleaner, type-safe serialization.
 | **Tag** | ✅ Done | `lib/superthread/models/tag.rb` |
 | **Checklist** | ✅ Done | `lib/superthread/models/checklist.rb` - has nested items |
 | **ChecklistItem** | ✅ Done | `lib/superthread/models/checklist_item.rb` |
-| **Board** | Pending | Has nested lists |
-| **List** | Pending | Nested in Board |
+| **Board** | ✅ Done | `lib/superthread/models/board.rb` - has nested lists |
+| **List** | ✅ Done | `lib/superthread/models/list.rb` - nested in Board |
 | **User** | Pending | |
 | **Project** | Pending | |
 | **Space** | Pending | |
@@ -55,12 +55,16 @@ to Shale::Mapper models for cleaner, type-safe serialization.
   - `tag.rb` - Tag model
   - `checklist.rb` - Checklist model
   - `checklist_item.rb` - ChecklistItem model
+  - `board.rb` - Board model
+  - `list.rb` - List model
 
 ### Modified Files
 - `superthread.gemspec` - Added shale, gum dependencies
 - `lib/superthread/client.rb` - Updated to detect Shale models
 - `lib/superthread/resources/cards.rb` - Now uses Models::* instead of Objects::*
+- `lib/superthread/resources/boards.rb` - Now uses Models::* instead of Objects::*
 - `lib/superthread/cli/cards.rb` - Added handle_error, confirming, Ui.success
+- `lib/superthread/cli/boards.rb` - Added handle_error, confirming, Ui.success
 - `lib/superthread/cli/base.rb` - Added Models::* to default field detection
 
 ## Conversion Guide
