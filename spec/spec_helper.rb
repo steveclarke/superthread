@@ -1,5 +1,19 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start do
+  add_filter "/spec/"
+  add_filter "/vendor/"
+
+  add_group "CLI", "lib/superthread/cli"
+  add_group "Resources", "lib/superthread/resources"
+  add_group "Models", "lib/superthread/models"
+  add_group "Objects", "lib/superthread/objects"
+
+  # Set minimum coverage threshold (optional)
+  # minimum_coverage 80
+end
+
 require "bundler/setup"
 require "superthread"
 require "vcr"
