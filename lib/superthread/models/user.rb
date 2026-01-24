@@ -16,6 +16,7 @@ module Superthread
 
       presents_as :display_name
 
+      attribute :id, Shale::Type::String
       attribute :user_id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :display_name, Shale::Type::String
@@ -28,11 +29,12 @@ module Superthread
 
       timestamps :time_created, :time_updated
 
-      # Alias for user_id for consistency with other objects.
+      # Returns the user ID, checking both 'id' and 'user_id' fields
+      # (API returns different fields in different contexts)
       #
       # @return [String] User ID
-      def id
-        user_id
+      def user_identifier
+        id || user_id
       end
     end
   end

@@ -50,10 +50,19 @@ RSpec.describe Superthread::Models::User do
     end
   end
 
-  describe "#id" do
-    it "returns user_id for consistency" do
-      expect(user.id).to eq("user-123")
-      expect(user.id).to eq(user.user_id)
+  describe "#user_identifier" do
+    it "returns user_id when id is not present" do
+      expect(user.user_identifier).to eq("user-123")
+    end
+
+    it "returns id when present" do
+      user_with_id = described_class.from_json({ "id" => "u-456", "display_name" => "Test" }.to_json)
+      expect(user_with_id.user_identifier).to eq("u-456")
+    end
+
+    it "prefers id over user_id" do
+      user_with_both = described_class.from_json({ "id" => "u-456", "user_id" => "user-789" }.to_json)
+      expect(user_with_both.user_identifier).to eq("u-456")
     end
   end
 

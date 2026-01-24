@@ -164,7 +164,7 @@ module Superthread
         return ref if looks_like_id?(ref)
 
         user = find_user_by_name(ref)
-        return user.user_id if user
+        return user.user_identifier if user
 
         raise Thor::Error, "User not found: '#{ref}'. Use 'st users members' to see available users."
       end

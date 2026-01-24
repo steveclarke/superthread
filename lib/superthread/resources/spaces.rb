@@ -75,12 +75,12 @@ module Superthread
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID
       # @param user_id [String] User ID to add
-      # @param role [String] Member role
+      # @param role [String] Member role (admin, member, viewer)
       # @return [Superthread::Object] Result
-      def add_member(workspace_id, space_id, user_id:, role: nil)
+      def add_member(workspace_id, space_id, user_id:, role: "member")
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        body = compact_params(user_id: user_id, role: role)
+        body = {members: [{user_id: user_id, role: role}]}
         post_object("/#{ws}/projects/#{space}/members", body: body)
       end
 
