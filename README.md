@@ -249,6 +249,36 @@ suth search query "bug fix" [--types card,page] [-s SPACE] [--grouped]
 suth tags create --name "urgent" --color "#ff0000"
 suth tags update TAG --name "critical"
 suth tags delete TAG
+
+# Shell Completion
+suth completion bash                           # Generate bash completion script
+suth completion zsh                            # Generate zsh completion script
+suth completion fish                           # Generate fish completion script
+```
+
+### Shell Completion
+
+**Setup (zsh):**
+```bash
+# Load for current session
+source <(suth completion zsh)
+
+# Load for every session (macOS with Homebrew)
+suth completion zsh > $(brew --prefix)/share/zsh/site-functions/_suth
+```
+
+**Setup (bash):**
+```bash
+# Load for current session
+source <(suth completion bash)
+
+# Load for every session (macOS with Homebrew)
+suth completion bash > $(brew --prefix)/etc/bash_completion.d/suth
+```
+
+**Setup (fish):**
+```bash
+suth completion fish > ~/.config/fish/completions/suth.fish
 ```
 
 ### Option Aliases
