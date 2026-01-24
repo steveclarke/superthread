@@ -122,7 +122,7 @@ The CLI is available as `suth`.
 ```
 -a, --account NAME    Use specific account for this command
 -w, --workspace ID    Workspace ID (or use config/env var)
--y, --yes             Auto-confirm prompts (for scripts/agents)
+-y, --yes             Skip confirmation prompts (for scripts/agents)
 -v, --verbose         Detailed logging
 -q, --quiet           Minimal logging
 --json                Output in JSON format (default is table)
@@ -292,7 +292,7 @@ Common options have short aliases:
 | `--list` | `-l` | List (ID or name) |
 | `--owner` | `-o` | Owner (user ID, name, or email) |
 | `--open` | `-o` | Open in browser (on get commands) |
-| `--yes` | `-y` | Auto-confirm prompts |
+| `--yes` | `-y` | Skip confirmation prompts |
 
 ### Tips
 

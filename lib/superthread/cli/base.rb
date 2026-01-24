@@ -19,7 +19,7 @@ module Superthread
       class_option :workspace, type: :string, aliases: "-w", desc: "Workspace (ID or name)"
       class_option :json, type: :boolean, desc: "Output as JSON"
       class_option :account, type: :string, aliases: "-a", desc: "Use specific account"
-      class_option :yes, type: :boolean, aliases: "-y", desc: "Auto-confirm prompts"
+      class_option :skip_confirm, type: :boolean, aliases: ["-y", "--yes"], desc: "Auto-confirm prompts"
 
       private
 
@@ -454,14 +454,13 @@ module Superthread
       end
 
       # Wraps a block with confirmation prompt.
-      # Wraps a block with confirmation prompt.
-      # Skips confirmation if --yes flag is set.
+      # Skips confirmation if --skip-confirm/-y flag is set.
       #
       # @param question [String] Confirmation question
       # @yield Block to execute if confirmed
       # @return [Object] Block return value or nil if aborted
       def confirming(question)
-        return yield if options[:yes]
+        return yield if options[:skip_confirm]
 
         if Ui.confirm(question, default: false)
           yield
