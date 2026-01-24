@@ -11,9 +11,15 @@ module Superthread
       end
 
       desc "get SPACE", "Get space details"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(space_ref)
-        space = client.spaces.find(workspace_id, resolve_space(space_ref))
-        output_item space, fields: %i[id title description time_created time_updated]
+        handle_error do
+          resolved_space_id = resolve_space(space_ref)
+          space = client.spaces.find(workspace_id, resolved_space_id)
+          output_item space, fields: %i[id title description time_created time_updated]
+
+          open_in_browser(:space, resolved_space_id)
+        end
       end
 
       desc "create", "Create a new space"

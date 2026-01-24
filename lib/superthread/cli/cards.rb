@@ -30,6 +30,7 @@ module Superthread
       desc "get CARD_ID", "Get card details"
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       option :no_content, type: :boolean, desc: "Hide content, show only metadata"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
@@ -57,6 +58,8 @@ module Superthread
               end
             end
           end
+
+          open_in_browser(:card, card_id)
         end
       end
 

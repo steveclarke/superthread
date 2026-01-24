@@ -11,9 +11,14 @@ module Superthread
       end
 
       desc "get PROJECT_ID", "Get project details"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(project_id)
-        project = client.projects.find(workspace_id, project_id)
-        output_item project, fields: %i[id title status start_date due_date time_created time_updated]
+        handle_error do
+          project = client.projects.find(workspace_id, project_id)
+          output_item project, fields: %i[id title status start_date due_date time_created time_updated]
+
+          open_in_browser(:project, project_id)
+        end
       end
 
       desc "create", "Create a new project"

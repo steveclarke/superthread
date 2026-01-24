@@ -11,9 +11,14 @@ module Superthread
       end
 
       desc "get NOTE_ID", "Get note details"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(note_id)
-        note = client.notes.find(workspace_id, note_id)
-        output_item note, fields: %i[id title content time_created time_updated]
+        handle_error do
+          note = client.notes.find(workspace_id, note_id)
+          output_item note, fields: %i[id title content time_created time_updated]
+
+          open_in_browser(:note, note_id)
+        end
       end
 
       desc "create", "Create a new note"
