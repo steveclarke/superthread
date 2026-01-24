@@ -60,9 +60,9 @@ RSpec.describe Superthread::Objects::Collection do
 
     it "wraps items with specified item_class" do
       data = {tags: [{id: "1", name: "bug", color: "red"}]}
-      collection = described_class.new(data, key: :tags, item_class: Superthread::Objects::Tag)
+      collection = described_class.new(data, key: :tags, item_class: Superthread::Models::Tag)
 
-      expect(collection.first).to be_a(Superthread::Objects::Tag)
+      expect(collection.first).to be_a(Superthread::Models::Tag)
       expect(collection.first.name).to eq("bug")
     end
   end

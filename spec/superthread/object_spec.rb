@@ -43,10 +43,10 @@ RSpec.describe Superthread::Object do
       expect(described_class.construct_from(123)).to eq(123)
     end
 
-    it "uses registered type for typed objects" do
-      # Objects::Tag is registered for type "tag"
+    it "returns base Object for unregistered types" do
+      # No objects are registered by default now (using Shale models instead)
       result = described_class.construct_from(type: "tag", name: "bug")
-      expect(result).to be_a(Superthread::Objects::Tag)
+      expect(result).to be_a(Superthread::Object)
     end
   end
 
@@ -230,16 +230,18 @@ RSpec.describe Superthread::Object do
   describe "type registration" do
     it "stores registered types" do
       expect(described_class.object_types).to be_a(Hash)
-      expect(described_class.object_types["tag"]).to eq(Superthread::Objects::Tag)
+    end
+
+    it "allows registering custom types" do
+      # Create a test class
+      test_class = Class.new(described_class)
+      described_class.register_type("test_type", test_class)
+
+      expect(described_class.object_types["test_type"]).to eq(test_class)
     end
   end
 
   describe ".object_class_for" do
-    it "returns registered class for known type" do
-      klass = described_class.object_class_for(type: "tag")
-      expect(klass).to eq(Superthread::Objects::Tag)
-    end
-
     it "returns base Object for unknown type" do
       klass = described_class.object_class_for(type: "unknown")
       expect(klass).to eq(described_class)

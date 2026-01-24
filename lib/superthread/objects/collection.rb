@@ -10,7 +10,7 @@ module Superthread
     #   cards.each { |card| puts card.title }
     #   cards.count        # => 5
     #   cards.empty?       # => false
-    #   cards.to_a         # => [#<Superthread::Objects::Card ...>, ...]
+    #   cards.to_a         # => [#<Superthread::Models::Card ...>, ...]
     #
     class Collection
       include Enumerable
