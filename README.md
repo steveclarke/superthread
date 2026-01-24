@@ -216,8 +216,23 @@ bundle install
 # Run tests
 bundle exec rspec
 
+# Run linter
+bundle exec standardrb
+
 # Run CLI locally
 bundle exec bin/suth version
+```
+
+### Releasing
+
+```bash
+# Bump version (commits automatically)
+rake bump:patch   # 0.0.x
+rake bump:minor   # 0.x.0
+rake bump:major   # x.0.0
+
+# Release (creates tag, pushes, triggers GitHub Actions)
+rake release
 ```
 
 ## License
