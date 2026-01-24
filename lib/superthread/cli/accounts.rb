@@ -6,7 +6,7 @@ module Superthread
     class Accounts < Base
       desc "list", "List all configured accounts"
       def list
-        accounts = config.accounts
+        accounts = app_config.accounts
 
         if accounts.empty?
           Ui.warning "No accounts configured"
@@ -14,11 +14,11 @@ module Superthread
           return
         end
 
-        current = config.current_account
+        current = app_config.current_account
 
         Ui.section "Accounts"
         accounts.each do |name, _data|
-          state = config.account_state(name.to_s)
+          state = app_config.account_state(name.to_s)
           workspace_name = state&.dig(:workspace_name) || state&.dig(:workspace_id) || "(no workspace)"
           marker = (name.to_s == current) ? "*" : " "
           puts "  #{marker} #{name.to_s.ljust(15)} #{workspace_name}"
@@ -29,7 +29,7 @@ module Superthread
 
       desc "show [NAME]", "Show account details (defaults to current account)"
       def show(name = nil)
-        name ||= config.current_account
+        name ||= app_config.current_account
 
         unless name
           Ui.warning "No account selected"
@@ -37,15 +37,15 @@ module Superthread
           return
         end
 
-        unless config.accounts.key?(name.to_sym)
+        unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"
-          Ui.muted "Available accounts: #{config.accounts.keys.join(", ")}"
+          Ui.muted "Available accounts: #{app_config.accounts.keys.join(", ")}"
           return
         end
 
-        account_config = config.accounts[name.to_sym]
-        state = config.account_state(name)
-        is_current = name == config.current_account
+        account_config = app_config.accounts[name.to_sym]
+        state = app_config.account_state(name)
+        is_current = name == app_config.current_account
 
         label = is_current ? "Account: #{name} (current)" : "Account: #{name}"
         Ui.section label
@@ -56,14 +56,14 @@ module Superthread
 
       desc "use NAME", "Switch to a different account"
       def use(name)
-        unless config.accounts.key?(name.to_sym)
+        unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"
-          Ui.muted "Available accounts: #{config.accounts.keys.join(", ")}"
+          Ui.muted "Available accounts: #{app_config.accounts.keys.join(", ")}"
           return
         end
 
-        config.current_account = name
-        state = config.account_state(name)
+        app_config.current_account = name
+        state = app_config.account_state(name)
         workspace_name = state&.dig(:workspace_name) || name
 
         Ui.success "Switched to account '#{name}' (#{workspace_name})"
@@ -71,7 +71,7 @@ module Superthread
 
       desc "add NAME", "Add a new account"
       def add(name)
-        if config.accounts.key?(name.to_sym)
+        if app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' already exists"
           Ui.muted "Use 'suth account remove #{name}' first to replace it"
           return
@@ -109,11 +109,11 @@ module Superthread
         end
 
         # Save account
-        config.add_account(name, api_key: api_key)
-        config.save_account_state(name,
+        app_config.add_account(name, api_key: api_key)
+        app_config.save_account_state(name,
           workspace_id: workspace.id,
           workspace_name: workspace.team_name)
-        config.set_current_account(name)
+        app_config.set_current_account(name)
 
         Ui.success "Account '#{name}' configured (#{workspace.team_name || workspace.id})"
       end
@@ -121,19 +121,19 @@ module Superthread
       desc "remove NAME", "Remove an account"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove(name)
-        unless config.accounts.key?(name.to_sym)
+        unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"
           return
         end
 
         confirming("Remove account '#{name}'?") do
-          config.remove_account(name)
+          app_config.remove_account(name)
           Ui.success "Account '#{name}' removed"
 
-          if config.accounts.empty?
+          if app_config.accounts.empty?
             Ui.muted "No accounts remaining. Run 'suth setup' to add one."
-          elsif config.current_account.nil?
-            first_account = config.accounts.keys.first
+          elsif app_config.current_account.nil?
+            first_account = app_config.accounts.keys.first
             Ui.muted "Tip: Run 'suth account use #{first_account}' to select an account"
           end
         end

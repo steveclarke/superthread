@@ -22,7 +22,7 @@ RSpec.describe "st workspaces", :cli do
     end
   end
 
-  describe "workspaces use WORKSPACE_ID" do
+  describe "workspaces use WORKSPACE" do
     # Need to set up an account first since workspace is saved per-account
     let(:config_path) { File.join(ENV["XDG_CONFIG_HOME"], "superthread", "config.yaml") }
 
@@ -35,13 +35,29 @@ RSpec.describe "st workspaces", :cli do
       state_path = File.join(ENV["XDG_STATE_HOME"], "superthread", "context.yaml")
       FileUtils.mkdir_p(File.dirname(state_path))
       File.write(state_path, YAML.dump({"current_account" => "test"}))
+
+      stub_api_get("users/me", response: ApiFixtures::Workspaces::LIST)
     end
 
-    it "sets the default workspace" do
+    it "sets the default workspace by ID" do
       result = run_cli("workspaces", "use", "ws-456")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Default workspace set to: ws-456")
+      expect(result[:stdout]).to include("Default workspace set to: Other Team (ws-456)")
+    end
+
+    it "sets the default workspace by name" do
+      result = run_cli("workspaces", "use", "My Team")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Default workspace set to: My Team (ws-123)")
+    end
+
+    it "shows error for unknown workspace" do
+      result = run_cli("workspaces", "use", "unknown")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Workspace 'unknown' not found")
     end
   end
 

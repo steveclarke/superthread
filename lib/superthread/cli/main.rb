@@ -16,14 +16,37 @@ module Superthread
       desc "config SUBCOMMAND", "Manage configuration"
       subcommand "config", Superthread::Cli::Config
 
+      desc "me", "Show current user account info"
+      def me
+        handle_error do
+          user = client.users.me
+
+          if json_output?
+            output_item user
+          else
+            # Show basic user info
+            output_item user, fields: %i[display_name email time_created]
+
+            # Show workspaces with roles
+            if user.teams&.any?
+              say ""
+              say "Workspaces:", :cyan
+              user.teams.each do |team|
+                say "  #{team.team_name} (#{team.id}) - #{team.role}"
+              end
+            end
+          end
+        end
+      end
+
       desc "accounts SUBCOMMAND", "Manage accounts"
       subcommand "accounts", Superthread::Cli::Accounts
 
       desc "workspaces SUBCOMMAND", "List and select workspaces"
       subcommand "workspaces", Superthread::Cli::Workspaces
 
-      desc "users SUBCOMMAND", "User and workspace member commands"
-      subcommand "users", Superthread::Cli::Users
+      desc "members SUBCOMMAND", "Workspace member commands"
+      subcommand "members", Superthread::Cli::Members
 
       desc "cards SUBCOMMAND", "Card management commands"
       subcommand "cards", Superthread::Cli::Cards

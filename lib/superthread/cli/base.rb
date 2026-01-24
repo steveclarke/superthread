@@ -236,12 +236,14 @@ module Superthread
 
       # Check if JSON output is enabled (via --json flag or config format).
       def json_output?
-        options[:json] || config.format == "json"
+        options[:json] || app_config.format == "json"
       end
 
       # Get the configuration object.
-      def config
-        @config ||= Superthread::Configuration.new
+      # Named app_config to avoid collision with Thor's subcommand delegation
+      # (Thor generates a `config` method for the `config` subcommand).
+      def app_config
+        @app_config ||= Superthread::Configuration.new
       end
 
       # Output a single item.

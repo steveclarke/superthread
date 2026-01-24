@@ -27,22 +27,36 @@ module Superthread
         say "Use 'suth workspaces use <ID>' to set default workspace."
       end
 
-      desc "use WORKSPACE_ID", "Set default workspace for current account"
-      def use(workspace_id)
-        cfg = Superthread::Configuration.new
+      desc "use WORKSPACE", "Set default workspace for current account"
+      def use(workspace_ref)
+        handle_error do
+          cfg = Superthread::Configuration.new
 
-        unless cfg.current_account
-          Ui.error "No account selected"
-          Ui.muted "Run 'suth setup' to configure an account first"
-          return
+          unless cfg.current_account
+            Ui.error "No account selected"
+            Ui.muted "Run 'suth setup' to configure an account first"
+            return
+          end
+
+          # Fetch workspaces and resolve the reference
+          user = client.users.me
+          teams = extract_teams(user)
+
+          workspace = teams.find { |t| t[:id] == workspace_ref || t[:name] == workspace_ref }
+
+          unless workspace
+            Ui.error "Workspace '#{workspace_ref}' not found"
+            Ui.muted "Available workspaces:"
+            teams.each { |t| Ui.muted "  #{t[:id]} - #{t[:name]}" }
+            return
+          end
+
+          cfg.save_account_state(cfg.current_account,
+            workspace_id: workspace[:id],
+            workspace_name: workspace[:name])
+
+          Ui.success "Default workspace set to: #{workspace[:name]} (#{workspace[:id]})"
         end
-
-        cfg.save_account_state(cfg.current_account,
-          workspace_id: workspace_id,
-          workspace_name: nil) # Could fetch name from API if desired
-
-        say_success "Default workspace set to: #{workspace_id}"
-        say_info "Saved to account: #{cfg.current_account}"
       end
 
       desc "current", "Show current default workspace"
