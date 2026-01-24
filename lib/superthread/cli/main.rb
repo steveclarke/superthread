@@ -48,6 +48,9 @@ module Superthread
       desc "members SUBCOMMAND", "Workspace member commands"
       subcommand "members", Superthread::Cli::Members
 
+      desc "my SUBCOMMAND", "Personal shortcuts (my cards, boards, etc.)"
+      subcommand "my", Superthread::Cli::My
+
       desc "cards SUBCOMMAND", "Card management commands"
       subcommand "cards", Superthread::Cli::Cards
 

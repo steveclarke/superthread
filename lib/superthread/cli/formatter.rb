@@ -225,7 +225,14 @@ module Superthread
       # @param data [Object] Data to format
       # @return [String] JSON string
       def json(data)
-        obj = data.respond_to?(:to_h) ? data.to_h : data
+        obj = if data.is_a?(Array)
+          # Plain arrays of model objects need to be mapped to hashes
+          data.map { |item| item.respond_to?(:to_h) ? item.to_h : item }
+        elsif data.respond_to?(:to_h)
+          data.to_h
+        else
+          data
+        end
         JSON.pretty_generate(obj)
       end
 
