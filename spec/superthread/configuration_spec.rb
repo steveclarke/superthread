@@ -6,6 +6,19 @@ RSpec.describe Superthread::Configuration do
   subject(:config) { described_class.new }
 
   describe "#initialize" do
+    let(:temp_dir) { Dir.mktmpdir }
+
+    around do |example|
+      original_config = ENV["XDG_CONFIG_HOME"]
+      original_state = ENV["XDG_STATE_HOME"]
+      ENV["XDG_CONFIG_HOME"] = temp_dir
+      ENV["XDG_STATE_HOME"] = temp_dir
+      example.run
+      ENV["XDG_CONFIG_HOME"] = original_config
+      ENV["XDG_STATE_HOME"] = original_state
+      FileUtils.rm_rf(temp_dir)
+    end
+
     it "sets default base_url" do
       expect(config.base_url).to eq("https://api.superthread.com/v1")
     end
