@@ -24,6 +24,19 @@ module Superthread
         end
       end
 
+      desc "lists BOARD", "List columns/lists on a board"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      def lists(board_ref)
+        handle_error do
+          board = client.boards.find(workspace_id, resolve_board(board_ref))
+          if board.lists.nil? || board.lists.empty?
+            say "No lists found on this board.", :yellow
+          else
+            output_list board.lists, columns: %i[id title color]
+          end
+        end
+      end
+
       desc "create", "Create a new board"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
       option :title, type: :string, required: true, desc: "Board title"
