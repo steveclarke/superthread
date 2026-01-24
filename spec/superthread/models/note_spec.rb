@@ -9,8 +9,8 @@ RSpec.describe Superthread::Models::Note do
       "title" => "Meeting Notes",
       "content" => "<p>Discussed the project timeline and deliverables.</p>",
       "user_id" => "user-001",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 

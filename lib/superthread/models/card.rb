@@ -133,10 +133,11 @@ module Superthread
       end
 
       # Human-readable priority name.
+      # Priority values: 4=urgent, 3=high, 2=medium, 1=low
       #
       # @return [String, nil] Priority name
       def priority_name
-        {1 => "urgent", 2 => "high", 3 => "medium", 4 => "low"}[priority]
+        {4 => "urgent", 3 => "high", 2 => "medium", 1 => "low"}[priority]
       end
 
       # String representation.

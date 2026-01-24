@@ -8,15 +8,15 @@ RSpec.describe Superthread::Models::Comment do
       "content" => "This looks great! Nice work on the implementation.",
       "user_id" => "user-456",
       "card_id" => "card-789",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000,
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600,
       "replies" => [
         {
           "id" => "reply-1",
           "content" => "Thanks!",
           "user_id" => "user-001",
           "parent_id" => "comment-123",
-          "time_created" => 1_705_398_600_000
+          "time_created" => 1_705_398_600
         }
       ]
     }

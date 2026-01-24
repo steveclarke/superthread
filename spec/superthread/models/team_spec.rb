@@ -10,8 +10,8 @@ RSpec.describe Superthread::Models::Team do
       status: "active",
       creator_user_id: "user-1",
       subscription_plan_id: "plan-1",
-      time_created: 1705312200000,
-      time_updated: 1705398600000
+      time_created: 1_705_312_200,
+      time_updated: 1_705_398_600
     }
   end
 

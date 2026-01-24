@@ -9,8 +9,8 @@ RSpec.describe Superthread::Models::ChecklistItem do
       "checklist_id" => "checklist-456",
       "user_id" => "user-789",
       "checked" => true,
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 

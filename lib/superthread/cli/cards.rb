@@ -12,22 +12,42 @@ module Superthread
         "edit-item" => :edit_item,
         "rm-item" => :rm_item
 
+      desc "list", "List cards on a board"
+      option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :list, type: :string, aliases: "-l", desc: "Filter by list (ID or name)"
+      option :archived, type: :boolean, desc: "Include archived"
+      def list
+        handle_error do
+          opts = symbolized_options(:archived)
+          opts[:board_id] = board_id
+          opts[:list_id] = resolve_list(options[:list]) if options[:list]
+          cards = client.cards.list(workspace_id, **opts)
+          output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
+        end
+      end
+
       desc "get CARD_ID", "Get card details"
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
+      option :no_content, type: :boolean, desc: "Hide content, show only metadata"
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
 
           if json_output?
-            output_item card, fields: %i[id title content status priority list_title board_title
-              owner_id start_date due_date time_created time_updated]
+            fields = %i[id title status priority list_title board_title
+              members start_date due_date time_created time_updated]
+            fields.insert(2, :content) unless options[:no_content]
+            output_item card, fields: fields
           else
-            # Output metadata fields
-            output_item card, fields: %i[id title status priority list_title board_title
-              owner_id start_date due_date time_created time_updated]
+            # Output metadata fields (status used for coloring list, not shown separately)
+            output_item card,
+              fields: %i[id title priority list_title board_title
+                members start_date due_date time_created time_updated],
+              labels: {list_title: "List", board_title: "Board"}
 
             # Render content separately with markdown formatting
-            if card.content && !card.content.empty?
+            if !options[:no_content] && card.content && !card.content.empty?
               puts ""
               Ui.section "Content"
               if options[:raw]
@@ -120,7 +140,7 @@ module Superthread
           opts[:board_id] = board_id if options[:board]
           opts[:project_id] = options[:project] if options[:project]
           cards = client.cards.assigned(workspace_id, **opts)
-          output_list cards, columns: %i[id title status priority list_title]
+          output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
         end
       end
 

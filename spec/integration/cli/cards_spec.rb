@@ -18,8 +18,7 @@ RSpec.describe "st cards", :cli do
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Implement feature X")
-      expect(result[:stdout]).to include("started")
-      expect(result[:stdout]).to include("In Progress")
+      expect(result[:stdout]).to include("In Progress")  # List name (colored by status)
     end
 
     it "outputs JSON with --json flag" do

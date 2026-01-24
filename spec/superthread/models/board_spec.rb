@@ -10,8 +10,8 @@ RSpec.describe Superthread::Models::Board do
       "title" => "Sprint Board",
       "description" => "Board for sprint tasks",
       "user_id" => "user-001",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000,
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600,
       "lists" => [
         {"id" => "list-1", "title" => "To Do", "color" => "gray", "position" => 0},
         {"id" => "list-2", "title" => "In Progress", "color" => "blue", "position" => 1},
@@ -46,7 +46,7 @@ RSpec.describe Superthread::Models::Board do
 
     it "returns true when archived" do
       archived_board = described_class.from_response(
-        board_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200_000})
+        board_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
       )
       expect(archived_board.archived?).to be true
     end

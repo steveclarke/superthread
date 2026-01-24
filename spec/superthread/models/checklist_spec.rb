@@ -8,8 +8,8 @@ RSpec.describe Superthread::Models::Checklist do
       "content" => "Checklist for requirements",
       "card_id" => "card-456",
       "user_id" => "user-789",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000,
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600,
       "items" => [
         {"id" => "item-1", "title" => "Write specs", "checked" => true},
         {"id" => "item-2", "title" => "Implement", "checked" => false},

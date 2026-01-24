@@ -10,11 +10,11 @@ RSpec.describe Superthread::Models::Sprint do
       "title" => "Sprint 42",
       "description" => "The meaning of sprints",
       "status" => "active",
-      "start_date" => 1_705_312_200_000,
-      "due_date" => 1_706_521_800_000,
+      "start_date" => 1_705_312_200,
+      "due_date" => 1_706_521_800,
       "user_id" => "user-001",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 

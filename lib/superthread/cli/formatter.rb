@@ -39,19 +39,19 @@ module Superthread
         "archived" => :gray
       }.freeze
 
-      # Priority colors and labels
+      # Priority colors and labels (4=urgent, 3=high, 2=medium, 1=low)
       PRIORITY_COLORS = {
-        1 => :red,      # urgent
-        2 => :yellow,   # high
-        3 => :blue,     # medium
-        4 => :gray      # low
+        4 => :red,      # urgent
+        3 => :yellow,   # high
+        2 => :blue,     # medium
+        1 => :gray      # low
       }.freeze
 
       PRIORITY_LABELS = {
-        1 => "urgent",
-        2 => "high",
-        3 => "medium",
-        4 => "low"
+        4 => "urgent",
+        3 => "high",
+        2 => "medium",
+        1 => "low"
       }.freeze
 
       module_function
@@ -112,9 +112,9 @@ module Superthread
       # @param relative [Boolean] Use relative time (e.g., "2 days ago")
       # @return [String] Formatted time
       def format_time(timestamp, relative: true)
-        return "-" if timestamp.nil?
+        return "-" if timestamp.nil? || timestamp == 0
 
-        time = timestamp.is_a?(Time) ? timestamp : Time.at(timestamp / 1000.0)
+        time = timestamp.is_a?(Time) ? timestamp : Time.at(timestamp)
 
         if relative
           format_relative_time(time)
@@ -135,7 +135,13 @@ module Superthread
         when 60..3599 then "#{(diff / 60).to_i}m ago"
         when 3600..86_399 then "#{(diff / 3600).to_i}h ago"
         when 86_400..604_799 then "#{(diff / 86_400).to_i}d ago"
-        else time.strftime("%b %d")
+        else
+          # Include year if not current year
+          if time.year == Time.now.year
+            time.strftime("%b %d")
+          else
+            time.strftime("%b %d, %Y")
+          end
         end
       end
 
@@ -247,6 +253,16 @@ module Superthread
       # @return [String] Formatted cell value
       def format_cell(item, column, color_enabled: true)
         value = item.respond_to?(column) ? item.send(column) : item[column]
+
+        # Special case: color list_title by status
+        if column == :list_title && color_enabled
+          status = item.respond_to?(:status) ? item.status : item[:status]
+          if status
+            color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
+            return colorize(value || "-", color, enabled: true)
+          end
+        end
+
         format_value(value, column, color_enabled: color_enabled)
       end
 
@@ -258,6 +274,16 @@ module Superthread
       # @return [String] Formatted field value
       def format_field(data, field, color_enabled: true)
         value = data[field]
+
+        # Special case: color list_title by status
+        if field == :list_title && color_enabled
+          status = data[:status]
+          if status
+            color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
+            return colorize(value || "-", color, enabled: true)
+          end
+        end
+
         format_value(value, field, color_enabled: color_enabled)
       end
 
@@ -284,7 +310,15 @@ module Superthread
         when :tags
           Array(value).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join(", ")
         when :members
-          Array(value).map { |m| m.respond_to?(:user_id) ? m.user_id : m.to_s }.join(", ")
+          Array(value).map { |m|
+            if m.respond_to?(:user_id)
+              m.user_id
+            elsif m.is_a?(Hash)
+              m[:user_id] || m["user_id"]
+            else
+              m.to_s
+            end
+          }.join(", ")
         when Array
           value.join(", ")
         else

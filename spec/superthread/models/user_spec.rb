@@ -9,8 +9,8 @@ RSpec.describe Superthread::Models::User do
       "email" => "john@example.com",
       "avatar" => "https://example.com/avatar.png",
       "role" => "admin",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 

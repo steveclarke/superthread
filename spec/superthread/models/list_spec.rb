@@ -10,8 +10,8 @@ RSpec.describe Superthread::Models::List do
       "color" => "blue",
       "position" => 1,
       "user_id" => "user-789",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 
@@ -46,7 +46,7 @@ RSpec.describe Superthread::Models::List do
 
     it "returns true when archived" do
       archived_list = described_class.from_response(
-        list_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200_000})
+        list_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
       )
       expect(archived_list.archived?).to be true
     end

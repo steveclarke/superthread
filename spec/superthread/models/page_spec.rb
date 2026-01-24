@@ -11,8 +11,8 @@ RSpec.describe Superthread::Models::Page do
       "content" => "<p>This is the project overview document.</p>",
       "icon" => "document",
       "user_id" => "user-001",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600
     }
   end
 
@@ -42,7 +42,7 @@ RSpec.describe Superthread::Models::Page do
 
     it "returns true when archived" do
       archived_page = described_class.from_response(
-        page_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200_000})
+        page_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
       )
       expect(archived_page.archived?).to be true
     end

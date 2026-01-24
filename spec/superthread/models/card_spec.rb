@@ -6,17 +6,17 @@ RSpec.describe Superthread::Models::Card do
       "id" => "card-123",
       "title" => "Test Card",
       "status" => "started",
-      "priority" => 1,
+      "priority" => 4,  # 4=urgent, 3=high, 2=medium, 1=low
       "board_id" => "board-456",
       "board_title" => "Sprint Board",
       "list_id" => "list-789",
       "list_title" => "In Progress",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000,
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600,
       "is_watching" => true,
       "is_bookmarked" => false,
       "members" => [
-        {"user_id" => "user-1", "role" => "assignee", "assigned_date" => 1_705_312_200_000}
+        {"user_id" => "user-1", "role" => "assignee", "assigned_date" => 1_705_312_200}
       ],
       "tags" => [
         {"id" => "tag-1", "name" => "bug", "color" => "red"}
@@ -44,9 +44,9 @@ RSpec.describe Superthread::Models::Card do
     end
 
     it "coerces types correctly" do
-      expect(card.priority).to eq(1)
+      expect(card.priority).to eq(4)  # 4=urgent
       expect(card.priority).to be_a(Integer)
-      expect(card.time_created).to eq(1_705_312_200_000)
+      expect(card.time_created).to eq(1_705_312_200)
     end
   end
 

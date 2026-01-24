@@ -5,7 +5,7 @@ RSpec.describe Superthread::Models::Member do
     {
       "user_id" => "user-123",
       "role" => "assignee",
-      "assigned_date" => 1_705_312_200_000
+      "assigned_date" => 1_705_312_200
     }
   end
 

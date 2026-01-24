@@ -10,11 +10,11 @@ RSpec.describe Superthread::Models::Space do
       "description" => "Engineering team space",
       "icon" => "code",
       "user_id" => "user-001",
-      "time_created" => 1_705_312_200_000,
-      "time_updated" => 1_705_398_600_000,
+      "time_created" => 1_705_312_200,
+      "time_updated" => 1_705_398_600,
       "members" => [
-        {"user_id" => "user-1", "role" => "admin", "assigned_date" => 1_705_312_200_000},
-        {"user_id" => "user-2", "role" => "member", "assigned_date" => 1_705_398_600_000}
+        {"user_id" => "user-1", "role" => "admin", "assigned_date" => 1_705_312_200},
+        {"user_id" => "user-2", "role" => "member", "assigned_date" => 1_705_398_600}
       ]
     }
   end
@@ -45,7 +45,7 @@ RSpec.describe Superthread::Models::Space do
 
     it "returns true when archived" do
       archived_space = described_class.from_response(
-        space_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200_000})
+        space_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
       )
       expect(archived_space.archived?).to be true
     end

@@ -158,13 +158,14 @@ module Superthread
 
     protected
 
-    # Helper to convert Unix milliseconds to Time.
+    # Helper to convert Unix timestamp to Time.
     # Use in helper methods for timestamp fields.
+    # Note: API returns timestamps in seconds, not milliseconds.
     #
-    # @param ms [Integer, nil] Unix timestamp in milliseconds
+    # @param ts [Integer, nil] Unix timestamp in seconds
     # @return [Time, nil] Time object or nil
-    def ms_to_time(ms)
-      ms && Time.at(ms / 1000.0)
+    def ms_to_time(ts)
+      ts && ts != 0 && Time.at(ts)
     end
   end
 end

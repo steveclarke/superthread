@@ -88,6 +88,34 @@ module Superthread
           object_class: Models::Card, unwrap_key: :card)
       end
 
+      # Lists cards with optional filters.
+      # API: POST /:workspace/views/preview
+      #
+      # @param workspace_id [String] Workspace ID
+      # @param filters [Hash] Filter options
+      # @option filters [String] :board_id Filter by board ID
+      # @option filters [String] :list_id Filter by list ID
+      # @option filters [String] :project_id Filter by project ID
+      # @option filters [Boolean] :archived Include archived cards
+      # @return [Superthread::Objects::Collection<Models::Card>] List of cards
+      def list(workspace_id, **filters)
+        ws = safe_id("workspace_id", workspace_id)
+
+        body = {
+          type: "card",
+          card_filters: {}
+        }
+
+        body[:card_filters][:is_archived] = filters[:archived] unless filters[:archived].nil?
+        body[:card_filters][:include] = {}
+        body[:card_filters][:include][:boards] = [filters[:board_id]] if filters[:board_id]
+        body[:card_filters][:include][:lists] = [filters[:list_id]] if filters[:list_id]
+        body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
+
+        post_collection("/#{ws}/views/preview", body: body,
+          item_class: Models::Card, items_key: :cards)
+      end
+
       # Gets cards assigned to a user.
       # API: POST /:workspace/views/preview
       #
