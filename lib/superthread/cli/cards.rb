@@ -29,6 +29,10 @@ module Superthread
       option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
       def create
         handle_error do
+          unless options[:board] || options[:sprint]
+            raise Thor::Error, "Either --board or --sprint is required"
+          end
+
           opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
           opts[:list_id] = resolve_list(options[:list])
           opts[:board_id] = board_id if options[:board]
