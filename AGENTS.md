@@ -19,6 +19,7 @@ bundle exec rspec spec/path_spec.rb:42         # Single test by line
 bundle exec standardrb                         # Check code style
 bundle exec standardrb --fix                   # Auto-fix style issues
 bundle exec bin/suth cards get CARD_ID         # Run CLI locally
+bundle exec bin/suth cards get CARD_ID --json  # Raw JSON (useful for debugging API responses)
 ```
 
 **IMPORTANT:** After making code changes, always run `bundle exec standardrb --fix` to ensure code follows StandardRB conventions.
