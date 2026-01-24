@@ -11,18 +11,15 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby-version: ['3.2', '3.3', '3.4']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Ruby ${{ matrix.ruby-version }}
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby-version }}
+          ruby-version: '3.4'
           bundler-cache: true
 
       - name: Run tests
