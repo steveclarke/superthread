@@ -12,35 +12,112 @@ module Superthread
         Ui.header "Superthread CLI Setup"
         Ui.blank
 
-        # Step 1: API Key
+        config = Superthread::Configuration.new
+
+        # Step 1: Determine if adding new or reconfiguring
+        account_name = prompt_account_name(config)
+        return unless account_name
+
+        # Step 2: API Key
+        Ui.blank
         api_key = prompt_api_key
         return unless api_key
 
-        # Step 2: Validate and fetch workspaces
+        # Step 3: Validate and fetch workspaces
         Ui.blank
         workspaces = fetch_workspaces(api_key)
         return unless workspaces
 
-        # Step 3: Select workspace
+        # Step 4: Select workspace (auto-selects if only one)
         Ui.blank
-        workspace_id = prompt_workspace(workspaces)
-        return unless workspace_id
+        workspace = select_workspace(workspaces)
+        return unless workspace
 
-        # Step 4: Save configuration
+        # Step 5: Save configuration
         Ui.blank
-        save_configuration(api_key, workspace_id)
+        save_account(config, account_name, api_key, workspace)
 
         # Done!
         Ui.blank
         Ui.success "Setup complete!"
         Ui.blank
+        Ui.muted "Account '#{account_name}' is now active."
+        Ui.blank
         Ui.muted "Try: suth spaces list"
         Ui.muted "     suth boards list --space SPACE_ID"
         Ui.muted "     suth cards list --board BOARD_ID"
+        Ui.blank
+        Ui.muted "To add another account: suth account add <name>"
+        Ui.muted "To switch accounts:     suth account use <name>"
+      end
+
+      def prompt_account_name(config)
+        Ui.section "Step 1: Account"
+
+        existing = config.accounts.keys.map(&:to_s)
+
+        # No existing accounts - first time setup
+        if existing.empty?
+          return prompt_new_account_name("personal")
+        end
+
+        # Show existing accounts
+        current = config.current_account
+        Ui.muted "Existing accounts: #{existing.map { |a| (a == current) ? "#{a} (current)" : a }.join(", ")}"
+        Ui.blank
+
+        # Let user choose what to do
+        choice = Ui.choose(
+          ["Add new account", "Reconfigure existing account"],
+          header: "What would you like to do?"
+        )
+        return nil if choice.nil?
+
+        Ui.blank
+
+        if choice.start_with?("Add")
+          # Suggest a name that doesn't exist
+          suggestion = %w[personal work].find { |n| !existing.include?(n) }
+          prompt_new_account_name(suggestion)
+        else
+          prompt_existing_account(existing)
+        end
+      end
+
+      def prompt_new_account_name(suggestion)
+        prompt = if suggestion
+          "Account name (default: #{suggestion}):"
+        else
+          "Account name:"
+        end
+
+        input = Ui.input(prompt)
+        name = input&.strip
+        name = suggestion if name.nil? || name.empty?
+
+        if name.nil? || name.empty?
+          Ui.error "Account name is required"
+          return nil
+        end
+
+        name
+      end
+
+      def prompt_existing_account(existing)
+        if existing.length == 1
+          name = existing.first
+          Ui.info "Reconfiguring account: #{name}"
+          return name
+        end
+
+        choice = Ui.choose(existing, header: "Select account to reconfigure:")
+        return nil if choice.nil?
+
+        choice
       end
 
       def prompt_api_key
-        Ui.section "Step 1: API Key"
+        Ui.section "Step 2: API Key"
         Ui.muted "Get your API key from Superthread Settings > API"
         Ui.blank
 
@@ -55,7 +132,7 @@ module Superthread
       end
 
       def fetch_workspaces(api_key)
-        Ui.section "Step 2: Connecting..."
+        Ui.section "Step 3: Connecting..."
 
         workspaces = Ui.spin("Fetching workspaces...") do
           temp_client = Superthread::Client.new(api_key: api_key)
@@ -78,14 +155,14 @@ module Superthread
         nil
       end
 
-      def prompt_workspace(workspaces)
-        Ui.section "Step 3: Select Workspace"
+      def select_workspace(workspaces)
+        Ui.section "Step 4: Select Workspace"
         Ui.blank
 
         if workspaces.length == 1
           ws = workspaces.first
           Ui.info "Using workspace: #{ws[:name]}"
-          return ws[:id]
+          return ws
         end
 
         choices = workspaces.map { |ws| "#{ws[:name]} (#{ws[:id]})" }
@@ -93,35 +170,26 @@ module Superthread
 
         return nil if selected.nil?
 
-        # Extract ID from selection
-        workspaces.find { |ws| selected.include?(ws[:id]) }&.dig(:id)
+        # Find the selected workspace
+        workspaces.find { |ws| selected.include?(ws[:id]) }
       end
 
-      def save_configuration(api_key, workspace_id)
-        Ui.section "Step 4: Saving Configuration"
+      def save_account(config, account_name, api_key, workspace)
+        Ui.section "Step 5: Saving Configuration"
 
-        config = Superthread::Configuration.new
-        config_path = config.config_path
-        config_dir = File.dirname(config_path)
+        # Add/update account with API key in config file
+        config.add_account(account_name, api_key: api_key)
+        Ui.muted "Saved account '#{account_name}' to #{config.config_path}"
 
-        # Create config directory
-        FileUtils.mkdir_p(config_dir)
-
-        # Save API key to config file
-        config_data = if File.exist?(config_path)
-          YAML.safe_load_file(config_path) || {}
-        else
-          {}
-        end
-
-        config_data["api_key"] = api_key
-        config_data["format"] ||= "table"
-        File.write(config_path, YAML.dump(config_data))
-        Ui.muted "Saved API key to #{config_path}"
-
-        # Save workspace to state file
-        config.save_workspace(workspace_id)
+        # Save workspace to account state
+        config.save_account_state(account_name,
+          workspace_id: workspace[:id],
+          workspace_name: workspace[:name])
         Ui.muted "Saved workspace to #{config.state_path}"
+
+        # Set as current account
+        config.current_account = account_name
+        Ui.muted "Set '#{account_name}' as current account"
       end
 
       def extract_teams(user)

@@ -21,23 +21,19 @@ module Superthread
           # Superthread CLI Configuration
           # See: https://github.com/steveclarke/superthread
 
-          # API key (required) - get from Superthread settings
-          # api_key: stp_xxxxxxxxxxxx
+          # Accounts are configured via 'suth setup' or 'suth account add'
+          # accounts:
+          #   personal:
+          #     api_key: stp_xxxxxxxxxxxx
+          #   work:
+          #     api_key: stp_yyyyyyyyyyyy
 
           # Output format: json or table
-          format: json
-
-          # Workspace aliases for quick switching
-          # workspaces:
-          #   personal: ws_abc123
-          #   work: ws_def456
-
-          # Note: Current workspace is stored in state file, not here.
-          # Use 'st workspaces use <ID>' to set the default workspace.
+          format: table
         YAML
 
         say_success "Created config file at #{config_path}"
-        say_info "Edit the file to add your API key and workspace settings"
+        say_info "Run 'suth setup' to configure your account"
       end
 
       desc "path", "Show config file path"
@@ -45,22 +41,35 @@ module Superthread
         puts Superthread::Configuration.new.config_path
       end
 
-      desc "show", "Show current configuration (API key redacted)"
+      desc "show", "Show current configuration"
       def show
-        config = Superthread::Configuration.new
+        cfg = Superthread::Configuration.new
 
-        puts "Config file: #{config.config_path}"
-        puts "  exists: #{File.exist?(config.config_path)}"
+        puts "Config file: #{cfg.config_path}"
+        puts "  exists: #{File.exist?(cfg.config_path)}"
         puts ""
-        puts "State file: #{config.state_path}"
-        puts "  exists: #{File.exist?(config.state_path)}"
+        puts "State file: #{cfg.state_path}"
+        puts "  exists: #{File.exist?(cfg.state_path)}"
         puts ""
         puts "Current settings:"
-        puts "  api_key: #{config.api_key ? "#{config.api_key[0..10]}..." : "(not set)"}"
-        puts "  base_url: #{config.base_url}"
-        puts "  workspace: #{config.workspace || "(not set)"}"
-        puts "  format: #{config.format}"
-        puts "  workspaces: #{config.workspaces.keys.join(", ")}" unless config.workspaces.empty?
+        puts "  current_account: #{cfg.current_account || "(not set)"}"
+        puts "  api_key: #{cfg.api_key ? "#{cfg.api_key[0..6]}..." : "(not set)"}"
+        puts "  workspace: #{cfg.workspace || "(not set)"}"
+        puts "  format: #{cfg.format}"
+        puts ""
+
+        if cfg.accounts.any?
+          puts "Accounts:"
+          cfg.accounts.each do |name, _data|
+            state = cfg.account_state(name.to_s)
+            workspace = state&.dig(:workspace_name) || state&.dig(:workspace_id) || "(no workspace)"
+            marker = (name.to_s == cfg.current_account) ? "*" : " "
+            puts "  #{marker} #{name}: #{workspace}"
+          end
+        else
+          puts "Accounts: (none configured)"
+          puts "  Run 'suth setup' to add an account"
+        end
       end
 
       desc "set KEY VALUE", "Set a configuration value"
@@ -69,38 +78,35 @@ module Superthread
 
         Supported keys:
           format    - Output format: json or table
-          api_key   - Your Superthread API key
           base_url  - API base URL (advanced)
 
+        Note: API keys are managed per-account. Use 'suth account add' to configure accounts.
+
         Examples:
-          st config set format json
-          st config set format table
-          st config set api_key stp_xxxxxxxxxxxx
+          suth config set format json
+          suth config set format table
       DESC
       def set(key, value)
-        config = Superthread::Configuration.new
-        config_path = config.config_path
+        cfg = Superthread::Configuration.new
 
-        unless %w[format api_key base_url].include?(key)
-          raise Thor::Error, "Unknown config key: #{key}. Valid keys: format, api_key, base_url"
+        unless %w[format base_url].include?(key)
+          raise Thor::Error, "Unknown config key: #{key}. Valid keys: format, base_url"
         end
 
         if key == "format" && !%w[json table].include?(value)
           raise Thor::Error, "Invalid format: #{value}. Valid values: json, table"
         end
 
-        # Load existing config or create empty
-        existing = if File.exist?(config_path)
-          YAML.safe_load_file(config_path) || {}
-        else
-          FileUtils.mkdir_p(File.dirname(config_path))
-          {}
+        case key
+        when "format"
+          cfg.format = value
+        when "base_url"
+          cfg.base_url = value
         end
 
-        existing[key] = value
-        File.write(config_path, YAML.dump(existing))
+        cfg.save_config_file
 
-        say_success "Set #{key} = #{(key == "api_key") ? "#{value[0..10]}..." : value}"
+        say_success "Set #{key} = #{value}"
       end
     end
   end

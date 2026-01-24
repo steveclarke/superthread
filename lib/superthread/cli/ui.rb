@@ -128,6 +128,7 @@ module Superthread
       # @param placeholder [String, nil] Placeholder text
       # @return [String] User's input
       def input(prompt, placeholder: nil)
+        prompt = "#{prompt} " unless prompt.end_with?(" ")
         Gum.input(prompt: prompt, placeholder: placeholder)
       end
 
@@ -136,6 +137,7 @@ module Superthread
       # @param prompt [String] Input prompt
       # @return [String] User's input
       def password(prompt)
+        prompt = "#{prompt} " unless prompt.end_with?(" ")
         Gum.input(prompt: prompt, password: true)
       end
 

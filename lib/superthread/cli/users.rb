@@ -7,7 +7,22 @@ module Superthread
       desc "me", "Show current user account info"
       def me
         user = client.users.me
-        output_item user, fields: %i[user_id display_name email role time_created]
+
+        if json_output?
+          output_item user
+        else
+          # Show basic user info
+          output_item user, fields: %i[display_name email time_created]
+
+          # Show workspaces with roles
+          if user.teams&.any?
+            say ""
+            say "Workspaces:", :cyan
+            user.teams.each do |team|
+              say "  #{team.team_name} (#{team.id}) - #{team.role}"
+            end
+          end
+        end
       end
 
       desc "members", "List workspace members"

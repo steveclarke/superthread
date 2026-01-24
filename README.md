@@ -33,23 +33,6 @@ gem "superthread"
 
 ## Configuration
 
-### Config File
-
-Create `~/.config/superthread/config.yaml`:
-
-```yaml
-# API key (required) - get from Superthread settings
-api_key: stp_xxxxxxxxxxxx
-
-# Output format: json or table
-format: json
-
-# Workspace aliases for quick switching
-workspaces:
-  personal: ws_abc123
-  work: ws_def456
-```
-
 ### Quick Setup
 
 Run the interactive setup wizard:
@@ -59,9 +42,9 @@ suth setup
 ```
 
 The wizard will:
-1. Prompt for your API key (from Superthread Settings → API)
-2. Validate and fetch your workspaces
-3. Let you select a default workspace
+1. Prompt for an account name (e.g., "personal" or "work")
+2. Prompt for your API key (from Superthread Settings → API)
+3. Validate and auto-detect your workspace
 4. Save configuration
 
 After setup, try:
@@ -69,6 +52,50 @@ After setup, try:
 suth spaces list
 suth boards list -s SPACE
 suth cards assigned me
+```
+
+### Multi-Account Support
+
+You can configure multiple Superthread accounts (e.g., personal and work):
+
+```bash
+# Add another account
+suth account add work
+
+# List all accounts
+suth account list
+
+# Switch active account
+suth account use work
+
+# Use specific account for one command
+suth --account personal cards assigned me
+```
+
+### Config Files
+
+Configuration is split between a **config file** (credentials) and a **state file** (ephemeral context):
+
+**Config file** (`~/.config/superthread/config.yaml`):
+```yaml
+# Account credentials
+accounts:
+  personal:
+    api_key: stp_xxxxxxxxxxxx
+  work:
+    api_key: stp_yyyyyyyyyyyy
+
+# Global preferences
+format: table
+```
+
+**State file** (`~/.local/state/superthread/context.yaml`):
+```yaml
+current_account: personal
+accounts:
+  personal:
+    workspace_id: t4k7Wa2e
+    workspace_name: "My Team"
 ```
 
 Or initialize a blank config file manually:
@@ -83,6 +110,7 @@ suth config init
 |----------|-------------|
 | `SUPERTHREAD_API_KEY` | API key (overrides config file) |
 | `SUPERTHREAD_WORKSPACE_ID` | Default workspace ID |
+| `SUPERTHREAD_ACCOUNT` | Account name to use |
 | `SUPERTHREAD_API_BASE_URL` | API endpoint (default: `https://api.superthread.com/v1`) |
 
 ## CLI Usage
@@ -92,6 +120,7 @@ The CLI is available as `suth`.
 ### Global Options
 
 ```
+-a, --account NAME    Use specific account for this command
 -w, --workspace ID    Workspace ID (or use config/env var)
 -v, --verbose         Detailed logging
 -q, --quiet           Minimal logging
@@ -108,6 +137,13 @@ suth config init                               # Create default config file
 suth config show                               # Show current configuration
 suth config set KEY VALUE                      # Set a config value
 suth config path                               # Show config file path
+
+# Accounts
+suth account list                              # List all configured accounts
+suth account show                              # Show current account details
+suth account use NAME                          # Switch to account
+suth account add NAME                          # Add new account (interactive)
+suth account remove NAME                       # Remove account
 
 # Workspaces
 suth workspaces list                           # List available workspaces

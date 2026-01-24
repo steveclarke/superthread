@@ -3,10 +3,11 @@
 RSpec.describe Superthread::Client do
   subject(:client) { described_class.new }
 
-  before do
-    Superthread.configure do |config|
-      config.api_key = "test_api_key"
-    end
+  around do |example|
+    original_api_key = ENV["SUPERTHREAD_API_KEY"]
+    ENV["SUPERTHREAD_API_KEY"] = "test_api_key"
+    example.run
+    ENV["SUPERTHREAD_API_KEY"] = original_api_key
   end
 
   describe "#initialize" do

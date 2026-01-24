@@ -5,7 +5,6 @@ require "spec_helper"
 RSpec.describe "st workspaces", :cli do
   before do
     ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
   describe "workspaces list" do
@@ -24,6 +23,20 @@ RSpec.describe "st workspaces", :cli do
   end
 
   describe "workspaces use WORKSPACE_ID" do
+    # Need to set up an account first since workspace is saved per-account
+    let(:config_path) { File.join(ENV["XDG_CONFIG_HOME"], "superthread", "config.yaml") }
+
+    before do
+      FileUtils.mkdir_p(File.dirname(config_path))
+      File.write(config_path, YAML.dump({
+        "accounts" => {"test" => {"api_key" => "test_key"}}
+      }))
+
+      state_path = File.join(ENV["XDG_STATE_HOME"], "superthread", "context.yaml")
+      FileUtils.mkdir_p(File.dirname(state_path))
+      File.write(state_path, YAML.dump({"current_account" => "test"}))
+    end
+
     it "sets the default workspace" do
       result = run_cli("workspaces", "use", "ws-456")
 
@@ -33,21 +46,16 @@ RSpec.describe "st workspaces", :cli do
   end
 
   describe "workspaces current" do
-    it "shows current workspace when set via use command" do
-      # Clear env var to test state file
-      ENV.delete("SUPERTHREAD_WORKSPACE_ID")
-
-      # First set a workspace
-      run_cli("workspaces", "use", "ws-789")
+    it "shows current workspace from environment variable" do
+      ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
 
       result = run_cli("workspaces", "current")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Current workspace: ws-789")
+      expect(result[:stdout]).to include("Current workspace: test_workspace")
     end
 
     it "shows message when no workspace set" do
-      # Clear env var to test "no workspace" state
       ENV.delete("SUPERTHREAD_WORKSPACE_ID")
 
       result = run_cli("workspaces", "current")
@@ -56,11 +64,31 @@ RSpec.describe "st workspaces", :cli do
       expect(result[:stdout]).to include("No default workspace set")
     end
 
-    it "shows workspace from environment variable" do
-      result = run_cli("workspaces", "current")
+    context "with account configured" do
+      let(:config_path) { File.join(ENV["XDG_CONFIG_HOME"], "superthread", "config.yaml") }
+      let(:state_path) { File.join(ENV["XDG_STATE_HOME"], "superthread", "context.yaml") }
 
-      expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Current workspace: test_workspace")
+      before do
+        ENV.delete("SUPERTHREAD_WORKSPACE_ID")
+
+        FileUtils.mkdir_p(File.dirname(config_path))
+        File.write(config_path, YAML.dump({
+          "accounts" => {"test" => {"api_key" => "test_key"}}
+        }))
+
+        FileUtils.mkdir_p(File.dirname(state_path))
+        File.write(state_path, YAML.dump({
+          "current_account" => "test",
+          "accounts" => {"test" => {"workspace_id" => "ws-789"}}
+        }))
+      end
+
+      it "shows workspace from account state" do
+        result = run_cli("workspaces", "current")
+
+        expect(result[:exit_code]).to eq(0)
+        expect(result[:stdout]).to include("Current workspace: ws-789")
+      end
     end
   end
 end

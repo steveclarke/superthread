@@ -16,9 +16,24 @@ Ruby gem providing a library and CLI for the Superthread project management API.
 ```bash
 bundle exec rspec                              # Run tests
 bundle exec rspec spec/path_spec.rb:42         # Single test by line
-bundle exec rubocop -a                         # Lint and auto-fix
+bundle exec standardrb                         # Check code style
+bundle exec standardrb --fix                   # Auto-fix style issues
 bundle exec bin/suth cards get CARD_ID         # Run CLI locally
 ```
+
+**IMPORTANT:** After making code changes, always run `bundle exec standardrb --fix` to ensure code follows StandardRB conventions.
+
+## Code Style (StandardRB)
+
+This project uses [StandardRB](https://github.com/standardrb/standard) for code style. Key conventions:
+
+- **Double quotes** for strings: `"hello"` not `'hello'`
+- **No trailing commas** in multi-line arrays/hashes
+- **2-space indentation**
+- **No semicolons**
+- **Spaces inside braces**: `{ foo: bar }` not `{foo: bar}`
+
+StandardRB is opinionated and non-configurable by design. Run `bundle exec standardrb --fix` after all code changes to auto-fix style issues.
 
 ## Resource Pattern
 
@@ -71,8 +86,9 @@ output_success "Card deleted"                    # Success message
 
 | Variable | Description |
 |----------|-------------|
-| `SUPERTHREAD_API_KEY` | API authentication key |
+| `SUPERTHREAD_API_KEY` | API authentication key (overrides account) |
 | `SUPERTHREAD_WORKSPACE_ID` | Default workspace ID |
+| `SUPERTHREAD_ACCOUNT` | Account name to use (from config) |
 | `SUPERTHREAD_API_BASE_URL` | API endpoint (default: https://api.superthread.com/v1) |
 
 ## Adding a New Resource

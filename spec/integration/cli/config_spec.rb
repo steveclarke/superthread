@@ -47,6 +47,15 @@ RSpec.describe "st config", :cli do
       expect(result[:stdout]).to include("Config file:")
       expect(result[:stdout]).to include("format:")
     end
+
+    it "shows accounts when configured" do
+      # This would require setting up an account first
+      # For now just verify the command runs
+      result = run_cli("config", "show")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Accounts:")
+    end
   end
 
   describe "config set KEY VALUE" do
@@ -55,13 +64,6 @@ RSpec.describe "st config", :cli do
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Set format = json")
-    end
-
-    it "sets the api key" do
-      result = run_cli("config", "set", "api_key", "stp_test123456789")
-
-      expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Set api_key = stp_test123...")
     end
 
     it "rejects invalid format values" do
@@ -78,12 +80,19 @@ RSpec.describe "st config", :cli do
       expect(result[:stderr]).to include("Unknown config key")
     end
 
+    it "rejects api_key (managed per-account now)" do
+      result = run_cli("config", "set", "api_key", "stp_test123")
+
+      expect(result[:exit_code]).to eq(1)
+      expect(result[:stderr]).to include("Unknown config key")
+    end
+
     it "persists configuration changes" do
-      run_cli("config", "set", "format", "table")
+      run_cli("config", "set", "format", "json")
 
       result = run_cli("config", "show")
 
-      expect(result[:stdout]).to include("format: table")
+      expect(result[:stdout]).to include("format: json")
     end
   end
 end

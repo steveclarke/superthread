@@ -16,11 +16,33 @@ module Superthread
       class_option :quiet, type: :boolean, aliases: "-q", desc: "Minimal logging"
       class_option :workspace, type: :string, aliases: "-w", desc: "Workspace (ID or name)"
       class_option :json, type: :boolean, desc: "Output as JSON"
+      class_option :account, type: :string, aliases: "-a", desc: "Use specific account"
 
       private
 
       def client
-        @client ||= Superthread::Client.new
+        @client ||= if options[:account]
+          # Create client with specific account's API key
+          cfg = config_for_account(options[:account])
+          Superthread::Client.new(api_key: cfg.api_key)
+        else
+          Superthread::Client.new
+        end
+      end
+
+      # Get configuration for a specific account (for --account flag).
+      def config_for_account(account_name)
+        cfg = Superthread::Configuration.new
+        account_data = cfg.accounts[account_name]
+
+        unless account_data
+          raise Thor::Error, "Account '#{account_name}' not found. " \
+            "Use 'suth account list' to see configured accounts."
+        end
+
+        # Create a new config with this account as current
+        cfg.current_account = account_name
+        cfg
       end
 
       # ========================================
