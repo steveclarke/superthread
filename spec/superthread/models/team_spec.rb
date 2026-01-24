@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Team do
+  it_behaves_like "presentable" do
+    let(:model_class) { described_class }
+    let(:presentation_attribute) { :team_name }
+    let(:presentation_value) { "Engineering" }
+  end
+
+  it_behaves_like "timestampable" do
+    let(:model_class) { described_class }
+    let(:timestamp_mappings) do
+      {time_created: :created_at}
+    end
+  end
+
   let(:team_data) do
     {
       id: "team-123",

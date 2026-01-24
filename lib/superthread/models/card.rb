@@ -8,13 +8,17 @@ module Superthread
     #   card = client.cards.find(workspace_id, card_id)
     #   card.title          # => "Implement feature X"
     #   card.status         # => "started"
-    #   card.priority       # => 1
+    #   card.priority       # => 4
     #   card.priority_name  # => "urgent"
     #   card.members        # => [#<Superthread::Models::Member ...>]
     #   card.archived?      # => false
     #   card.created_at     # => 2024-01-15 10:30:00 -0800
     #
     class Card < Superthread::Model
+      include Concerns::Archivable
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       # Core identifiers
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
@@ -44,7 +48,7 @@ module Superthread
       attribute :user_id, Shale::Type::String
       attribute :user_id_updated, Shale::Type::String
 
-      # Timestamps (Unix milliseconds)
+      # Timestamps (Unix seconds)
       attribute :start_date, Shale::Type::Integer
       attribute :due_date, Shale::Type::Integer
       attribute :completed_date, Shale::Type::Integer
@@ -76,12 +80,8 @@ module Superthread
       attribute :linked_cards, Shale::Type::Value
       attribute :epic, Shale::Type::Value
 
-      # Check if the card is archived.
-      #
-      # @return [Boolean] True if archived
-      def archived?
-        !!archived
-      end
+      timestamps :time_created, :time_updated
+      timestamps start_date: :start_time, due_date: :due_time, completed_date: :completed_time
 
       # Check if the card is being watched.
       #
@@ -97,54 +97,12 @@ module Superthread
         !!is_bookmarked
       end
 
-      # Returns start_date as a Time object.
-      #
-      # @return [Time, nil] Start date
-      def start_time
-        ms_to_time(start_date)
-      end
-
-      # Returns due_date as a Time object.
-      #
-      # @return [Time, nil] Due date
-      def due_time
-        ms_to_time(due_date)
-      end
-
-      # Returns completed_date as a Time object.
-      #
-      # @return [Time, nil] Completed date
-      def completed_time
-        ms_to_time(completed_date)
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
       # Human-readable priority name.
       # Priority values: 4=urgent, 3=high, 2=medium, 1=low
       #
       # @return [String, nil] Priority name
       def priority_name
         {4 => "urgent", 3 => "high", 2 => "medium", 1 => "low"}[priority]
-      end
-
-      # String representation.
-      #
-      # @return [String] Card title
-      def to_s
-        title.to_s
       end
     end
 

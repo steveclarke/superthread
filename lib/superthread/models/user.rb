@@ -11,6 +11,11 @@ module Superthread
     #   user.id              # => "u123"
     #
     class User < Superthread::Model
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
+      presents_as :display_name
+
       attribute :user_id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :display_name, Shale::Type::String
@@ -21,32 +26,13 @@ module Superthread
       attribute :time_updated, Shale::Type::Integer
       attribute :teams, Team, collection: true
 
+      timestamps :time_created, :time_updated
+
       # Alias for user_id for consistency with other objects.
       #
       # @return [String] User ID
       def id
         user_id
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Display name
-      def to_s
-        display_name.to_s
       end
     end
   end

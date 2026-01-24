@@ -11,6 +11,10 @@ module Superthread
     #   project.archived?   # => false
     #
     class Project < Superthread::Model
+      include Concerns::Archivable
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :team_id, Shale::Type::String
@@ -28,47 +32,8 @@ module Superthread
       # Archived info (hash with user_id and time_archived)
       attribute :archived, Shale::Type::Value
 
-      # Check if the project is archived.
-      #
-      # @return [Boolean] True if archived
-      def archived?
-        !!archived
-      end
-
-      # Returns start_date as a Time object.
-      #
-      # @return [Time, nil] Start date
-      def start_time
-        ms_to_time(start_date)
-      end
-
-      # Returns due_date as a Time object.
-      #
-      # @return [Time, nil] Due date
-      def due_time
-        ms_to_time(due_date)
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Project title
-      def to_s
-        title.to_s
-      end
+      timestamps :time_created, :time_updated
+      timestamps start_date: :start_time, due_date: :due_time
     end
   end
 end

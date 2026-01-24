@@ -1,6 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Member do
+  it_behaves_like "presentable" do
+    let(:model_class) { described_class }
+    let(:presentation_attribute) { :user_id }
+    let(:presentation_value) { "user-123" }
+  end
+
+  it_behaves_like "timestampable" do
+    let(:model_class) { described_class }
+    let(:timestamp_mappings) do
+      {assigned_date: :assigned_at}
+    end
+  end
+
   let(:member_data) do
     {
       "user_id" => "user-123",

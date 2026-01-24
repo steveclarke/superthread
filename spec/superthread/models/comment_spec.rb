@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Comment do
+  # Note: Comment has custom to_s that truncates content, so no presentable shared example
+
+  it_behaves_like "timestampable" do
+    let(:model_class) { described_class }
+    let(:timestamp_mappings) do
+      {
+        time_created: :created_at,
+        time_updated: :updated_at
+      }
+    end
+  end
+
   let(:comment_data) do
     {
       "id" => "comment-123",

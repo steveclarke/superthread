@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Checklist do
+  # Note: Checklist has custom to_s that shows progress, so no presentable shared example
+
+  it_behaves_like "timestampable" do
+    let(:model_class) { described_class }
+    let(:timestamp_mappings) do
+      {
+        time_created: :created_at,
+        time_updated: :updated_at
+      }
+    end
+  end
+
   let(:checklist_data) do
     {
       "id" => "checklist-123",

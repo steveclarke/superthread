@@ -11,6 +11,10 @@ module Superthread
     #   space.archived?   # => false
     #
     class Space < Superthread::Model
+      include Concerns::Archivable
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :team_id, Shale::Type::String
@@ -27,33 +31,7 @@ module Superthread
       # Archived info (hash with user_id and time_archived)
       attribute :archived, Shale::Type::Value
 
-      # Check if the space is archived.
-      #
-      # @return [Boolean] True if archived
-      def archived?
-        !!archived
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Space title
-      def to_s
-        title.to_s
-      end
+      timestamps :time_created, :time_updated
     end
   end
 end

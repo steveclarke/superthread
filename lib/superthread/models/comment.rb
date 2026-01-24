@@ -12,6 +12,8 @@ module Superthread
     #   comment.reply?       # => false
     #
     class Comment < Superthread::Model
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :content, Shale::Type::String
@@ -24,25 +26,13 @@ module Superthread
       # Nested replies (self-referential)
       attribute :replies, Comment, collection: true
 
+      timestamps :time_created, :time_updated
+
       # Check if this is a reply to another comment.
       #
       # @return [Boolean] True if this is a reply
       def reply?
         !!parent_id
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
       end
 
       # String representation (truncated content).

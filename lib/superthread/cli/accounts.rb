@@ -27,20 +27,28 @@ module Superthread
         Ui.muted "Use 'suth account use <name>' to switch accounts"
       end
 
-      desc "show", "Show current account details"
-      def show
-        current = config.current_account
+      desc "show [NAME]", "Show account details (defaults to current account)"
+      def show(name = nil)
+        name ||= config.current_account
 
-        unless current
+        unless name
           Ui.warning "No account selected"
           Ui.muted "Run 'suth setup' to configure an account"
           return
         end
 
-        account_config = config.accounts[current.to_sym]
-        state = config.account_state(current)
+        unless config.accounts.key?(name.to_sym)
+          Ui.error "Account '#{name}' not found"
+          Ui.muted "Available accounts: #{config.accounts.keys.join(", ")}"
+          return
+        end
 
-        Ui.section "Current Account: #{current}"
+        account_config = config.accounts[name.to_sym]
+        state = config.account_state(name)
+        is_current = name == config.current_account
+
+        label = is_current ? "Account: #{name} (current)" : "Account: #{name}"
+        Ui.section label
         puts "  API Key:        #{mask_api_key(account_config&.dig(:api_key))}"
         puts "  Workspace ID:   #{state&.dig(:workspace_id) || "(not set)"}"
         puts "  Workspace Name: #{state&.dig(:workspace_name) || "(not set)"}"
@@ -70,7 +78,7 @@ module Superthread
         end
 
         # Prompt for API key
-        api_key = Ui.prompt("API key for '#{name}'")
+        api_key = Ui.password("API key for '#{name}'")
         if api_key.nil? || api_key.empty?
           Ui.error "API key is required"
           return
@@ -96,7 +104,7 @@ module Superthread
           teams.each_with_index do |team, i|
             puts "  #{i + 1}. #{team.team_name || team.id}"
           end
-          choice = Ui.prompt("Select workspace (1-#{teams.length})")&.to_i || 1
+          choice = Ui.input("Select workspace (1-#{teams.length})")&.to_i || 1
           teams[choice - 1] || teams.first
         end
 

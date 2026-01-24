@@ -1,6 +1,28 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Project do
+  it_behaves_like "archivable" do
+    let(:model_class) { described_class }
+  end
+
+  it_behaves_like "presentable" do
+    let(:model_class) { described_class }
+    let(:presentation_attribute) { :title }
+    let(:presentation_value) { "Q4 Planning" }
+  end
+
+  it_behaves_like "timestampable" do
+    let(:model_class) { described_class }
+    let(:timestamp_mappings) do
+      {
+        time_created: :created_at,
+        time_updated: :updated_at,
+        start_date: :start_time,
+        due_date: :due_time
+      }
+    end
+  end
+
   let(:project_data) do
     {
       "id" => "project-123",

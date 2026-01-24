@@ -11,6 +11,11 @@ module Superthread
     #   end
     #
     class Team < Superthread::Model
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
+      presents_as :team_name
+
       attribute :id, Shale::Type::String
       attribute :team_name, Shale::Type::String
       attribute :sub_domain, Shale::Type::String
@@ -21,25 +26,13 @@ module Superthread
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
 
+      timestamps :time_created
+
       # Alias for team_name for consistency.
       #
       # @return [String] Team/workspace name
       def name
         team_name
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # String representation.
-      #
-      # @return [String] Team name
-      def to_s
-        team_name.to_s
       end
     end
   end

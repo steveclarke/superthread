@@ -11,6 +11,9 @@ module Superthread
     #   sprint.active?     # => true
     #
     class Sprint < Superthread::Model
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :team_id, Shale::Type::String
@@ -23,6 +26,9 @@ module Superthread
       attribute :user_id, Shale::Type::String
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
+
+      timestamps :time_created, :time_updated
+      timestamps start_date: :start_time, due_date: :due_time
 
       # Check if sprint is active.
       #
@@ -43,41 +49,6 @@ module Superthread
       # @return [Boolean] True if planned
       def planned?
         status == "planned"
-      end
-
-      # Returns start_date as a Time object.
-      #
-      # @return [Time, nil] Start date
-      def start_time
-        ms_to_time(start_date)
-      end
-
-      # Returns due_date as a Time object.
-      #
-      # @return [Time, nil] Due date
-      def due_time
-        ms_to_time(due_date)
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Sprint title
-      def to_s
-        title.to_s
       end
     end
   end

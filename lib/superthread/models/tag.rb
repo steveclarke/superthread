@@ -11,6 +11,10 @@ module Superthread
     #   tag.total_cards  # => 17
     #
     class Tag < Superthread::Model
+      include Concerns::Presentable
+
+      presents_as :name
+
       attribute :id, Shale::Type::String
       attribute :team_id, Shale::Type::String
       attribute :project_id, Shale::Type::String
@@ -18,13 +22,6 @@ module Superthread
       attribute :slug, Shale::Type::String
       attribute :color, Shale::Type::String
       attribute :total_cards, Shale::Type::Integer
-
-      # String representation.
-      #
-      # @return [String] Tag name
-      def to_s
-        name.to_s
-      end
     end
   end
 end

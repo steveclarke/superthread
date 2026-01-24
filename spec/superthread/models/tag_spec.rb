@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Tag do
+  it_behaves_like "presentable" do
+    let(:model_class) { described_class }
+    let(:presentation_attribute) { :name }
+    let(:presentation_value) { "bug" }
+  end
+
   let(:tag_data) do
     {
       "id" => "tag-123",

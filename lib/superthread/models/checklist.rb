@@ -13,6 +13,8 @@ module Superthread
     #   checklist.progress                 # => 66.7
     #
     class Checklist < Superthread::Model
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :title, Shale::Type::String
       attribute :content, Shale::Type::String
@@ -22,19 +24,7 @@ module Superthread
       attribute :time_updated, Shale::Type::Integer
       attribute :items, ChecklistItem, collection: true
 
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
+      timestamps :time_created, :time_updated
 
       # Count of completed items.
       #

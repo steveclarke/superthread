@@ -10,6 +10,9 @@ module Superthread
     #   note.content     # => "<p>Discussed...</p>"
     #
     class Note < Superthread::Model
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
       attribute :team_id, Shale::Type::String
@@ -19,26 +22,7 @@ module Superthread
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
 
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Note title
-      def to_s
-        title.to_s
-      end
+      timestamps :time_created, :time_updated
     end
   end
 end

@@ -10,6 +10,9 @@ module Superthread
     #   item.checked?  # => true
     #
     class ChecklistItem < Superthread::Model
+      include Concerns::Presentable
+      include Concerns::Timestampable
+
       attribute :id, Shale::Type::String
       attribute :title, Shale::Type::String
       attribute :content, Shale::Type::String
@@ -18,6 +21,8 @@ module Superthread
       attribute :checked, Shale::Type::Boolean
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
+
+      timestamps :time_created, :time_updated
 
       # Check if the item is checked.
       #
@@ -31,27 +36,6 @@ module Superthread
       # @return [Boolean] True if complete
       def complete?
         checked?
-      end
-
-      # Returns time_created as a Time object.
-      #
-      # @return [Time, nil] Created time
-      def created_at
-        ms_to_time(time_created)
-      end
-
-      # Returns time_updated as a Time object.
-      #
-      # @return [Time, nil] Updated time
-      def updated_at
-        ms_to_time(time_updated)
-      end
-
-      # String representation.
-      #
-      # @return [String] Title
-      def to_s
-        title.to_s
       end
     end
   end
