@@ -81,8 +81,8 @@ RSpec.describe "st notes", :cli do
       stub_api_delete("test_workspace/notes/note-to-delete")
     end
 
-    it "deletes a note" do
-      result = run_cli("notes", "delete", "note-to-delete")
+    it "deletes a note with --force" do
+      result = run_cli("notes", "delete", "note-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Note note-to-delete deleted")

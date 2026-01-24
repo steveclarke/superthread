@@ -56,8 +56,8 @@ RSpec.describe "st tags", :cli do
       stub_api_delete("test_workspace/tags/tag-to-delete")
     end
 
-    it "deletes a tag" do
-      result = run_cli("tags", "delete", "tag-to-delete")
+    it "deletes a tag with --force" do
+      result = run_cli("tags", "delete", "tag-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Tag tag-to-delete deleted")

@@ -53,9 +53,14 @@ module Superthread
       end
 
       desc "delete PROJECT_ID", "Delete a project"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(project_id)
-        client.projects.destroy(workspace_id, project_id)
-        output_success "Project #{project_id} deleted"
+        handle_error do
+          confirming("Delete project #{project_id}?") do
+            client.projects.destroy(workspace_id, project_id)
+            output_success "Project #{project_id} deleted"
+          end
+        end
       end
 
       desc "add_card PROJECT_ID CARD_ID", "Link a card to a project"

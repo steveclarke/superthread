@@ -150,8 +150,8 @@ RSpec.describe "st pages", :cli do
       stub_api_delete("test_workspace/pages/page-to-delete")
     end
 
-    it "deletes a page" do
-      result = run_cli("pages", "delete", "page-to-delete")
+    it "deletes a page with --force" do
+      result = run_cli("pages", "delete", "page-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Page page-to-delete deleted")

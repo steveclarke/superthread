@@ -80,8 +80,8 @@ RSpec.describe "st comments", :cli do
       stub_api_delete("test_workspace/comments/comment-to-delete")
     end
 
-    it "deletes a comment" do
-      result = run_cli("comments", "delete", "comment-to-delete")
+    it "deletes a comment with --force" do
+      result = run_cli("comments", "delete", "comment-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Comment comment-to-delete deleted")
@@ -156,8 +156,8 @@ RSpec.describe "st comments", :cli do
       stub_api_delete("test_workspace/comments/comment-1/comments/reply-to-delete")
     end
 
-    it "deletes a reply" do
-      result = run_cli("comments", "delete_reply", "comment-1", "reply-to-delete")
+    it "deletes a reply with --force" do
+      result = run_cli("comments", "delete_reply", "comment-1", "reply-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Reply reply-to-delete deleted")

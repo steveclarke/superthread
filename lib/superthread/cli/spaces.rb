@@ -37,10 +37,15 @@ module Superthread
       end
 
       desc "delete SPACE", "Delete a space"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(space_ref)
-        resolved = resolve_space(space_ref)
-        client.spaces.destroy(workspace_id, resolved)
-        output_success "Space #{space_ref} deleted"
+        handle_error do
+          resolved = resolve_space(space_ref)
+          confirming("Delete space #{space_ref}?") do
+            client.spaces.destroy(workspace_id, resolved)
+            output_success "Space #{space_ref} deleted"
+          end
+        end
       end
 
       desc "add_member SPACE USER", "Add a member to a space"

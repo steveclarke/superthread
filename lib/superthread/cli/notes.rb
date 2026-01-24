@@ -27,9 +27,14 @@ module Superthread
       end
 
       desc "delete NOTE_ID", "Delete a note"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(note_id)
-        client.notes.destroy(workspace_id, note_id)
-        output_success "Note #{note_id} deleted"
+        handle_error do
+          confirming("Delete note #{note_id}?") do
+            client.notes.destroy(workspace_id, note_id)
+            output_success "Note #{note_id} deleted"
+          end
+        end
       end
     end
   end

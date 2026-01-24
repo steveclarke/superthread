@@ -28,9 +28,14 @@ module Superthread
       end
 
       desc "delete COMMENT_ID", "Delete a comment"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(comment_id)
-        client.comments.destroy(workspace_id, comment_id)
-        output_success "Comment #{comment_id} deleted"
+        handle_error do
+          confirming("Delete comment #{comment_id}?") do
+            client.comments.destroy(workspace_id, comment_id)
+            output_success "Comment #{comment_id} deleted"
+          end
+        end
       end
 
       desc "reply COMMENT_ID", "Reply to a comment"
@@ -56,9 +61,14 @@ module Superthread
       end
 
       desc "delete_reply COMMENT_ID REPLY_ID", "Delete a reply"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete_reply(comment_id, reply_id)
-        client.comments.delete_reply(workspace_id, comment_id, reply_id)
-        output_success "Reply #{reply_id} deleted"
+        handle_error do
+          confirming("Delete reply #{reply_id}?") do
+            client.comments.delete_reply(workspace_id, comment_id, reply_id)
+            output_success "Reply #{reply_id} deleted"
+          end
+        end
       end
     end
   end

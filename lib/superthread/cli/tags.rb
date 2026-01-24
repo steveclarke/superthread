@@ -25,10 +25,15 @@ module Superthread
       end
 
       desc "delete TAG", "Delete a tag"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(tag_ref)
-        tag_id = resolve_tag(tag_ref)
-        client.tags.destroy(workspace_id, tag_id)
-        output_success "Tag #{tag_ref} deleted"
+        handle_error do
+          tag_id = resolve_tag(tag_ref)
+          confirming("Delete tag #{tag_ref}?") do
+            client.tags.destroy(workspace_id, tag_id)
+            output_success "Tag #{tag_ref} deleted"
+          end
+        end
       end
     end
   end
