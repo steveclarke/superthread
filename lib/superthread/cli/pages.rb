@@ -16,9 +16,14 @@ module Superthread
       end
 
       desc "get PAGE_ID", "Get page details"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(page_id)
-        page = client.pages.find(workspace_id, page_id)
-        output_item page, fields: %i[id title space_id time_created time_updated]
+        handle_error do
+          page = client.pages.find(workspace_id, page_id)
+          output_item page, fields: %i[id title space_id time_created time_updated]
+
+          open_in_browser(:page, page_id)
+        end
       end
 
       desc "create", "Create a new page"

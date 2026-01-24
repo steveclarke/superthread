@@ -8,6 +8,8 @@ module Superthread
     # Base class for all CLI commands.
     # Provides common options, client access, and output formatting.
     class Base < Thor
+      include Concerns::Openable
+
       def self.exit_on_failure?
         true
       end

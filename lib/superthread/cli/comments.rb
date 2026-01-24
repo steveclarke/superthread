@@ -5,9 +5,21 @@ module Superthread
     # CLI commands for comment operations.
     class Comments < Base
       desc "get COMMENT_ID", "Get comment details"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(comment_id)
-        comment = client.comments.find(workspace_id, comment_id)
-        output_item comment, fields: %i[id content user_id card_id time_created time_updated]
+        handle_error do
+          comment = client.comments.find(workspace_id, comment_id)
+          output_item comment, fields: %i[id content user_id card_id time_created time_updated]
+
+          # For comments, open the parent card if available
+          if options[:open]
+            if comment.card_id
+              open_in_browser(:card, comment.card_id)
+            else
+              Ui.warning "Cannot open comment in browser (no associated card)"
+            end
+          end
+        end
       end
 
       desc "create", "Create a comment"

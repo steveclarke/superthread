@@ -17,10 +17,14 @@ module Superthread
 
       desc "get BOARD", "Get board details"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(board_ref)
         handle_error do
-          board = client.boards.find(workspace_id, resolve_board(board_ref))
+          resolved_board_id = resolve_board(board_ref)
+          board = client.boards.find(workspace_id, resolved_board_id)
           output_item board, fields: %i[id title description space_id time_created time_updated]
+
+          open_in_browser(:board, resolved_board_id)
         end
       end
 
