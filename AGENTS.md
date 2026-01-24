@@ -5,7 +5,7 @@ Guidelines for AI coding agents working in this repository.
 ## Project Overview
 
 Ruby gem providing a library and CLI for the Superthread project management API.
-- **Language:** Ruby >= 3.1.0
+- **Language:** Ruby >= 3.2.0
 - **CLI Framework:** Thor
 - **HTTP Client:** Faraday
 - **Autoloading:** Zeitwerk
