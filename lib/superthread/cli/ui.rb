@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require "glamour"
 require "gum"
+require "reverse_markdown"
 
 module Superthread
   module Cli
@@ -175,6 +177,29 @@ module Superthread
         else
           formatted
         end
+      end
+
+      # Render HTML/Markdown content with terminal styling.
+      # Converts HTML to Markdown, then renders with glamour.
+      #
+      # @param content [String] HTML or Markdown content
+      # @param width [Integer] Word wrap width (default: 80)
+      # @return [String] Rendered content for terminal display
+      def render_markdown(content, width: 80)
+        return "" if content.nil? || content.empty?
+
+        # Convert HTML to Markdown if it looks like HTML
+        markdown = if content.include?("<") && content.include?(">")
+          ReverseMarkdown.convert(content, unknown_tags: :bypass)
+        else
+          content
+        end
+
+        # Render with glamour
+        Glamour.render(markdown, width: width, style: "auto")
+      rescue => e
+        # Fall back to plain text if rendering fails
+        content
       end
     end
   end

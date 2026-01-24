@@ -5,11 +5,30 @@ module Superthread
     # CLI commands for card operations.
     class Cards < Base
       desc "get CARD_ID", "Get card details"
+      option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
-          output_item card, fields: %i[id title content status priority list_title board_title
-            owner_id start_date due_date time_created time_updated]
+
+          if json_output?
+            output_item card, fields: %i[id title content status priority list_title board_title
+              owner_id start_date due_date time_created time_updated]
+          else
+            # Output metadata fields
+            output_item card, fields: %i[id title status priority list_title board_title
+              owner_id start_date due_date time_created time_updated]
+
+            # Render content separately with markdown formatting
+            if card.content && !card.content.empty?
+              puts ""
+              Ui.section "Content"
+              if options[:raw]
+                puts card.content
+              else
+                puts Ui.render_markdown(card.content)
+              end
+            end
+          end
         end
       end
 
