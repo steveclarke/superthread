@@ -12,7 +12,10 @@ module Superthread
     #   comment.reply?       # => false
     #
     class Comment < Superthread::Model
+      include Concerns::Presentable
       include Concerns::Timestampable
+
+      presents_as(:content) { content.to_s.then { |c| (c.length > 50) ? "#{c[0..47]}..." : c } }
 
       attribute :id, Shale::Type::String
       attribute :type, Shale::Type::String
@@ -33,15 +36,6 @@ module Superthread
       # @return [Boolean] True if this is a reply
       def reply?
         !!parent_id
-      end
-
-      # String representation (truncated content).
-      #
-      # @return [String] Comment content preview
-      def to_s
-        return "" if content.nil?
-
-        (content.length > 50) ? "#{content[0..47]}..." : content
       end
     end
   end

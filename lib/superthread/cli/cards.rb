@@ -7,10 +7,10 @@ module Superthread
       # Kebab-case aliases for commands
       map "add-checklist" => :add_checklist,
         "edit-checklist" => :edit_checklist,
-        "rm-checklist" => :rm_checklist,
+        "remove-checklist" => :remove_checklist,
         "add-item" => :add_item,
         "edit-item" => :edit_item,
-        "rm-item" => :rm_item
+        "remove-item" => :remove_item
 
       desc "list", "List cards on a board"
       option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
@@ -206,9 +206,9 @@ module Superthread
         end
       end
 
-      desc "rm-checklist CARD_ID CHECKLIST_ID", "Delete a checklist"
+      desc "remove-checklist CARD_ID CHECKLIST_ID", "Delete a checklist"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
-      def rm_checklist(card_id, checklist_id)
+      def remove_checklist(card_id, checklist_id)
         handle_error do
           confirming("Delete checklist #{checklist_id}?") do
             client.cards.delete_checklist(workspace_id, card_id, checklist_id)
@@ -245,9 +245,9 @@ module Superthread
         end
       end
 
-      desc "rm-item CARD_ID CHECKLIST_ID ITEM_ID", "Delete a checklist item"
+      desc "remove-item CARD_ID CHECKLIST_ID ITEM_ID", "Delete a checklist item"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
-      def rm_item(card_id, checklist_id, item_id)
+      def remove_item(card_id, checklist_id, item_id)
         handle_error do
           confirming("Delete checklist item #{item_id}?") do
             client.cards.delete_checklist_item(workspace_id, card_id, checklist_id, item_id)

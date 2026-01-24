@@ -269,13 +269,13 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards rm-checklist CARD_ID CHECKLIST_ID" do
+  describe "cards remove-checklist CARD_ID CHECKLIST_ID" do
     before do
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1")
     end
 
     it "deletes a checklist with --force" do
-      result = run_cli("cards", "rm-checklist", "card-123", "checklist-1", "--force")
+      result = run_cli("cards", "remove-checklist", "card-123", "checklist-1", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Deleted checklist checklist-1")
@@ -307,13 +307,13 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards rm-item CARD_ID CHECKLIST_ID ITEM_ID" do
+  describe "cards remove-item CARD_ID CHECKLIST_ID ITEM_ID" do
     before do
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1/items/item-1")
     end
 
     it "deletes a checklist item with --force" do
-      result = run_cli("cards", "rm-item", "card-123", "checklist-1", "item-1", "--force")
+      result = run_cli("cards", "remove-item", "card-123", "checklist-1", "item-1", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Deleted checklist item item-1")

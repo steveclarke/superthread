@@ -27,19 +27,31 @@ module Superthread
       #
       #   user.to_s  # => "John Doe"
       #
+      # @example With block for custom formatting
+      #   class Checklist < Superthread::Model
+      #     include Concerns::Presentable
+      #     presents_as(:title) { "#{title} (#{completed_count}/#{total_count})" }
+      #   end
+      #
+      #   checklist.to_s  # => "Requirements (2/3)"
+      #
       module Presentable
         extend ActiveSupport::Concern
 
         included do
           @presentation_attribute = :title
+          @presentation_block = nil
         end
 
         class_methods do
           # Configure which attribute to use for string representation.
+          # Optionally accepts a block for custom formatting.
           #
           # @param attribute [Symbol] The attribute name to use for to_s
-          def presents_as(attribute)
+          # @yield Block evaluated in instance context for custom formatting
+          def presents_as(attribute, &block)
             @presentation_attribute = attribute
+            @presentation_block = block
           end
 
           # Get the configured presentation attribute.
@@ -48,13 +60,24 @@ module Superthread
           def presentation_attribute
             @presentation_attribute || :title
           end
+
+          # Get the configured presentation block.
+          #
+          # @return [Proc, nil] The block or nil
+          def presentation_block
+            @presentation_block
+          end
         end
 
-        # String representation using the configured attribute.
+        # String representation using the configured attribute or block.
         #
-        # @return [String] The string value of the presentation attribute
+        # @return [String] The string value
         def to_s
-          send(self.class.presentation_attribute).to_s
+          if self.class.presentation_block
+            instance_eval(&self.class.presentation_block).to_s
+          else
+            send(self.class.presentation_attribute).to_s
+          end
         end
       end
     end

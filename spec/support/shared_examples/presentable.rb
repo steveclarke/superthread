@@ -2,12 +2,21 @@
 
 # Shared examples for models that include Presentable concern.
 #
-# @example Usage in spec
+# @example Simple attribute
 #   RSpec.describe Superthread::Models::Card do
 #     it_behaves_like "presentable" do
 #       let(:model_class) { described_class }
 #       let(:presentation_attribute) { :title }
 #       let(:presentation_value) { "My Card Title" }
+#     end
+#   end
+#
+# @example With block for custom formatting
+#   RSpec.describe Superthread::Models::Checklist do
+#     it_behaves_like "presentable with block" do
+#       let(:model_class) { described_class }
+#       let(:test_data) { {"title" => "Tasks", "items" => [...]} }
+#       let(:expected_output) { "Tasks (1/2)" }
 #     end
 #   end
 #
@@ -26,6 +35,18 @@ RSpec.shared_examples "presentable" do
     it "returns empty string when presentation attribute is missing" do
       instance = model_class.from_response({})
       expect(instance.to_s).to eq("")
+    end
+  end
+end
+
+# Shared examples for models using Presentable with a custom block.
+# Use when the to_s output depends on computed values or custom formatting.
+#
+RSpec.shared_examples "presentable with block" do
+  describe "#to_s" do
+    it "returns the custom formatted value" do
+      instance = model_class.from_response(test_data)
+      expect(instance.to_s).to eq(expected_output)
     end
   end
 end

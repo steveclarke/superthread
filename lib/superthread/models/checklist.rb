@@ -13,7 +13,10 @@ module Superthread
     #   checklist.progress                 # => 66.7
     #
     class Checklist < Superthread::Model
+      include Concerns::Presentable
       include Concerns::Timestampable
+
+      presents_as(:title) { "#{title} (#{completed_count}/#{total_count})" }
 
       attribute :id, Shale::Type::String
       attribute :title, Shale::Type::String
@@ -54,13 +57,6 @@ module Superthread
       # @return [Boolean] True if all items checked
       def complete?
         total_count.positive? && completed_count == total_count
-      end
-
-      # String representation.
-      #
-      # @return [String] Title with progress
-      def to_s
-        "#{title} (#{completed_count}/#{total_count})"
       end
     end
   end

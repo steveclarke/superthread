@@ -1,7 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Checklist do
-  # Note: Checklist has custom to_s that shows progress, so no presentable shared example
+  it_behaves_like "presentable with block" do
+    let(:model_class) { described_class }
+    let(:test_data) do
+      {
+        "title" => "Tasks",
+        "items" => [
+          {"id" => "1", "checked" => true},
+          {"id" => "2", "checked" => false}
+        ]
+      }
+    end
+    let(:expected_output) { "Tasks (1/2)" }
+  end
 
   it_behaves_like "timestampable" do
     let(:model_class) { described_class }
@@ -142,12 +154,6 @@ RSpec.describe Superthread::Models::Checklist do
     it "returns false for empty checklist" do
       empty_checklist = described_class.from_response({"id" => "1"})
       expect(empty_checklist.complete?).to be false
-    end
-  end
-
-  describe "#to_s" do
-    it "returns title with progress" do
-      expect(checklist.to_s).to eq("Requirements (2/3)")
     end
   end
 

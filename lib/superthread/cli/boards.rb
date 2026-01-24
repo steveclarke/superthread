@@ -90,14 +90,14 @@ module Superthread
         end
       end
 
-      desc "list_create", "Create a list on a board"
+      desc "create-list", "Create a list on a board"
       option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :title, type: :string, required: true, desc: "List title"
       option :content, type: :string, desc: "List description"
       option :icon, type: :string, desc: "List icon"
       option :color, type: :string, desc: "List color"
-      def list_create
+      def create_list
         handle_error do
           list = client.boards.create_list(workspace_id,
             board_id: board_id, **symbolized_options(:title, :content, :icon, :color))
@@ -105,21 +105,21 @@ module Superthread
         end
       end
 
-      desc "list_update LIST_ID", "Update a list"
+      desc "update-list LIST_ID", "Update a list"
       option :title, type: :string, desc: "New title"
       option :content, type: :string, desc: "New description"
       option :icon, type: :string, desc: "New icon"
       option :color, type: :string, desc: "New color"
-      def list_update(list_id)
+      def update_list(list_id)
         handle_error do
           list = client.boards.update_list(workspace_id, list_id, **symbolized_options(:title, :content, :icon, :color))
           output_item list
         end
       end
 
-      desc "list_delete LIST_ID", "Delete a list"
+      desc "delete-list LIST_ID", "Delete a list"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
-      def list_delete(list_id)
+      def delete_list(list_id)
         handle_error do
           confirming("Delete list #{list_id}?") do
             client.boards.delete_list(workspace_id, list_id)

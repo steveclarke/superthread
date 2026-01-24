@@ -144,13 +144,13 @@ RSpec.describe "st boards", :cli do
     end
   end
 
-  describe "boards list_create" do
+  describe "boards create-list" do
     before do
       stub_api_post("test_workspace/lists", response: ApiFixtures::Boards::LIST_CREATE)
     end
 
     it "creates a list on a board" do
-      result = run_cli("boards", "list_create",
+      result = run_cli("boards", "create-list",
         "--board=10",
         "--title=Review")
 
@@ -160,7 +160,7 @@ RSpec.describe "st boards", :cli do
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("boards", "list_create",
+      json = cli_json("boards", "create-list",
         "--board=10",
         "--title=Review")
 
@@ -170,13 +170,13 @@ RSpec.describe "st boards", :cli do
     end
   end
 
-  describe "boards list_update LIST_ID" do
+  describe "boards update-list LIST_ID" do
     before do
       stub_api_patch("test_workspace/lists/100", response: ApiFixtures::Boards::LIST_UPDATE)
     end
 
     it "updates a list" do
-      result = run_cli("boards", "list_update", "100",
+      result = run_cli("boards", "update-list", "100",
         "--title=Backlog")
 
       expect(result[:exit_code]).to eq(0)
@@ -184,7 +184,7 @@ RSpec.describe "st boards", :cli do
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("boards", "list_update", "100",
+      json = cli_json("boards", "update-list", "100",
         "--title=Backlog")
 
       expect(json["id"]).to eq("100")
@@ -192,13 +192,13 @@ RSpec.describe "st boards", :cli do
     end
   end
 
-  describe "boards list_delete LIST_ID" do
+  describe "boards delete-list LIST_ID" do
     before do
       stub_api_delete("test_workspace/lists/103")
     end
 
     it "deletes a list with --force" do
-      result = run_cli("boards", "list_delete", "103", "--force")
+      result = run_cli("boards", "delete-list", "103", "--force")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("List 103 deleted")

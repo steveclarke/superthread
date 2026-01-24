@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Superthread::Models::Comment do
-  # Note: Comment has custom to_s that truncates content, so no presentable shared example
+  it_behaves_like "presentable with block" do
+    let(:model_class) { described_class }
+    let(:test_data) { {"content" => "Short content"} }
+    let(:expected_output) { "Short content" }
+  end
 
   it_behaves_like "timestampable" do
     let(:model_class) { described_class }
@@ -96,12 +100,7 @@ RSpec.describe Superthread::Models::Comment do
     end
   end
 
-  describe "#to_s" do
-    it "returns the content when short" do
-      short_comment = described_class.from_response({"id" => "1", "content" => "Short content"})
-      expect(short_comment.to_s).to eq("Short content")
-    end
-
+  describe "#to_s edge cases" do
     it "truncates long content" do
       long_content = "This is a very long comment that exceeds fifty characters and should be truncated"
       long_comment = described_class.from_response({"id" => "1", "content" => long_content})
