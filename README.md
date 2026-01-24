@@ -60,13 +60,13 @@ You can configure multiple Superthread accounts (e.g., personal and work):
 
 ```bash
 # Add another account
-suth account add work
+suth accounts add work
 
 # List all accounts
-suth account list
+suth accounts list
 
 # Switch active account
-suth account use work
+suth accounts use work
 
 # Use specific account for one command
 suth --account personal cards assigned me
@@ -122,6 +122,7 @@ The CLI is available as `suth`.
 ```
 -a, --account NAME    Use specific account for this command
 -w, --workspace ID    Workspace ID (or use config/env var)
+-y, --yes             Auto-confirm prompts (for scripts/agents)
 -v, --verbose         Detailed logging
 -q, --quiet           Minimal logging
 --json                Output in JSON format (default is table)
@@ -139,24 +140,25 @@ suth config set KEY VALUE                      # Set a config value
 suth config path                               # Show config file path
 
 # Accounts
-suth account list                              # List all configured accounts
-suth account show                              # Show current account details
-suth account use NAME                          # Switch to account
-suth account add NAME                          # Add new account (interactive)
-suth account remove NAME                       # Remove account
+suth accounts list                             # List all configured accounts
+suth accounts show                             # Show current account details
+suth accounts use NAME                         # Switch to account
+suth accounts add NAME                         # Add new account (interactive)
+suth accounts remove NAME                      # Remove account
 
 # Workspaces
 suth workspaces list                           # List available workspaces
-suth workspaces use WORKSPACE_ID               # Set default workspace
+suth workspaces use WORKSPACE                  # Set default workspace
 suth workspaces current                        # Show current workspace
 
-# Users
-suth users me                                  # Get current user
-suth users members                             # List workspace members
+# Current User & Members
+suth me                                        # Get current user info
+suth members list                              # List workspace members
 
 # Cards
-suth cards get CARD_ID                         # Get card details
-suth cards create --title "Task" --list "To Do" --board BOARD
+suth cards list -b BOARD                       # List cards on a board
+suth cards get CARD_ID [-o]                    # Get card details (--open to view in browser)
+suth cards create --title "Task" -l LIST -b BOARD
 suth cards update CARD_ID --title "New title"
 suth cards delete CARD_ID
 suth cards duplicate CARD_ID                   # Clone a card
@@ -169,10 +171,10 @@ suth cards unlink CARD_ID OTHER_ID             # Remove card relationship
 # Card Checklists
 suth cards add-checklist CARD_ID --title "Tasks"
 suth cards edit-checklist CARD_ID CHECKLIST_ID --title "New title"
-suth cards rm-checklist CARD_ID CHECKLIST_ID
+suth cards remove-checklist CARD_ID CHECKLIST_ID
 suth cards add-item CARD_ID CHECKLIST_ID --title "Item" [--checked]
 suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --title "New" [--checked]
-suth cards rm-item CARD_ID CHECKLIST_ID ITEM_ID
+suth cards remove-item CARD_ID CHECKLIST_ID ITEM_ID
 
 # Card Tags
 suth cards tags                                # List available tags
@@ -180,23 +182,23 @@ suth cards tag CARD_ID TAG1,TAG2               # Add tags to card
 suth cards untag CARD_ID TAG                   # Remove tag from card
 
 # Boards
-suth boards list --space SPACE                 # List boards in a space (--space required)
-suth boards get BOARD                          # Get board details
+suth boards list -s SPACE                      # List boards in a space
+suth boards get BOARD [-o]                     # Get board details
 suth boards lists BOARD                        # List columns/lists on a board
-suth boards create --title "Board" --space SPACE
+suth boards create --title "Board" -s SPACE
 suth boards update BOARD --title "New name"
 suth boards duplicate BOARD                    # Clone a board
 suth boards delete BOARD
 
 # Board Lists (Columns)
-suth boards list_create --board BOARD --title "Column"
-suth boards list_update LIST_ID --title "New name"
-suth boards list_delete LIST_ID
+suth boards create-list -b BOARD --title "Column"
+suth boards update-list LIST_ID --title "New name"
+suth boards delete-list LIST_ID
 
 # Projects (Epics)
 suth projects list                             # List all projects
-suth projects get PROJECT_ID
-suth projects create --title "Q1 Roadmap" --list LIST [--board BOARD]
+suth projects get PROJECT_ID [-o]              # Get project details
+suth projects create --title "Q1 Roadmap" -l LIST [-b BOARD]
 suth projects update PROJECT_ID --title "New title"
 suth projects delete PROJECT_ID
 suth projects add_card PROJECT_ID CARD_ID      # Link card to project
@@ -204,25 +206,25 @@ suth projects remove_card PROJECT_ID CARD_ID   # Remove card from project
 
 # Spaces
 suth spaces list                               # List all spaces
-suth spaces get SPACE
+suth spaces get SPACE [-o]                     # Get space details
 suth spaces create --title "Engineering"
 suth spaces update SPACE --title "New name"
 suth spaces delete SPACE
 suth spaces add_member SPACE USER [--role ROLE]
-suth spaces remove_member SPACE MEMBER_ID
+suth spaces remove_member SPACE USER
 
 # Pages
-suth pages list [--space SPACE]                # List pages
-suth pages get PAGE_ID
-suth pages create --space SPACE [--title "Wiki"]
+suth pages list [-s SPACE]                     # List pages
+suth pages get PAGE_ID [-o]                    # Get page details
+suth pages create -s SPACE [--title "Wiki"]
 suth pages update PAGE_ID --title "New title"
-suth pages duplicate PAGE_ID --space SPACE
+suth pages duplicate PAGE_ID -s SPACE
 suth pages archive PAGE_ID
 suth pages delete PAGE_ID
 
 # Comments
-suth comments get COMMENT_ID
-suth comments create --content "Looks good!" --card-id CARD
+suth comments get COMMENT_ID [-o]              # Get comment (opens parent card)
+suth comments create --content "Looks good!" --card_id CARD
 suth comments update COMMENT_ID --content "Updated"
 suth comments delete COMMENT_ID
 suth comments reply COMMENT_ID --content "Reply text"
@@ -232,16 +234,16 @@ suth comments delete_reply COMMENT_ID REPLY_ID
 
 # Notes
 suth notes list
-suth notes get NOTE_ID
-suth notes create --title "Meeting notes" [--transcript "..."] [--user-notes "..."]
+suth notes get NOTE_ID [-o]                    # Get note details
+suth notes create --title "Meeting notes" [--transcript "..."]
 suth notes delete NOTE_ID
 
 # Sprints
-suth sprints list --space SPACE
-suth sprints get SPRINT_ID --space SPACE
+suth sprints list -s SPACE
+suth sprints get SPRINT_ID -s SPACE
 
 # Search
-suth search query "bug fix" [--types card,page] [--space SPACE] [--grouped]
+suth search query "bug fix" [--types card,page] [-s SPACE] [--grouped]
 
 # Tags
 suth tags create --name "urgent" --color "#ff0000"
@@ -259,7 +261,8 @@ Common options have short aliases:
 | `--board` | `-b` | Board (ID or name) |
 | `--list` | `-l` | List (ID or name) |
 | `--owner` | `-o` | Owner (user ID, name, or email) |
-| `--force` | `-f` | Skip confirmation prompts |
+| `--open` | `-o` | Open in browser (on get commands) |
+| `--yes` | `-y` | Auto-confirm prompts |
 
 ### Tips
 
@@ -267,7 +270,8 @@ Common options have short aliases:
 - Use `-s SPACE` to help resolve ambiguous board/list names
 - Use `--json` for scripted output: `suth cards assigned me --json`
 - Use `me` as a user reference: `suth cards assigned me`
-- Destructive commands prompt for confirmation; use `-f` or `--force` to skip
+- Use `-o` to open any resource in your browser: `suth cards get CARD -o`
+- Use `-y` to skip confirmation prompts (for scripts/agents)
 - Priority levels: 1=Urgent, 2=High, 3=Medium, 4=Low
 
 ## Library Usage
