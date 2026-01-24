@@ -13,8 +13,7 @@ RSpec.describe Superthread::Models::Sprint do
       {
         time_created: :created_at,
         time_updated: :updated_at,
-        start_date: :start_time,
-        due_date: :due_time
+        start_date: :start_time
       }
     end
   end
@@ -22,15 +21,9 @@ RSpec.describe Superthread::Models::Sprint do
   let(:sprint_data) do
     {
       "id" => "sprint-123",
-      "type" => "sprint",
       "team_id" => "team-456",
-      "space_id" => "space-789",
       "title" => "Sprint 42",
-      "description" => "The meaning of sprints",
-      "status" => "active",
       "start_date" => 1_705_312_200,
-      "due_date" => 1_706_521_800,
-      "user_id" => "user-001",
       "time_created" => 1_705_312_200,
       "time_updated" => 1_705_398_600
     }
@@ -43,7 +36,6 @@ RSpec.describe Superthread::Models::Sprint do
       expect(sprint).to be_a(described_class)
       expect(sprint.id).to eq("sprint-123")
       expect(sprint.title).to eq("Sprint 42")
-      expect(sprint.status).to eq("active")
     end
   end
 
@@ -56,56 +48,15 @@ RSpec.describe Superthread::Models::Sprint do
     end
   end
 
-  describe "status predicates" do
-    describe "#active?" do
-      it "returns true when status is active" do
-        expect(sprint.active?).to be true
-      end
-
-      it "returns false when status is not active" do
-        complete_sprint = described_class.from_response(sprint_data.merge("status" => "complete"))
-        expect(complete_sprint.active?).to be false
-      end
-    end
-
-    describe "#complete?" do
-      it "returns true when status is complete" do
-        complete_sprint = described_class.from_response(sprint_data.merge("status" => "complete"))
-        expect(complete_sprint.complete?).to be true
-      end
-
-      it "returns false when status is not complete" do
-        expect(sprint.complete?).to be false
-      end
-    end
-
-    describe "#planned?" do
-      it "returns true when status is planned" do
-        planned_sprint = described_class.from_response(sprint_data.merge("status" => "planned"))
-        expect(planned_sprint.planned?).to be true
-      end
-
-      it "returns false when status is not planned" do
-        expect(sprint.planned?).to be false
-      end
-    end
-  end
-
   describe "date helpers" do
     it "converts start_date to Time" do
       expect(sprint.start_time).to be_a(Time)
       expect(sprint.start_time.year).to eq(2024)
     end
 
-    it "converts due_date to Time" do
-      expect(sprint.due_time).to be_a(Time)
-      expect(sprint.due_time.year).to eq(2024)
-    end
-
     it "returns nil for missing dates" do
       sprint_without_dates = described_class.from_response({"id" => "1"})
       expect(sprint_without_dates.start_time).to be_nil
-      expect(sprint_without_dates.due_time).to be_nil
     end
   end
 
@@ -140,7 +91,7 @@ RSpec.describe Superthread::Models::Sprint do
   describe "hash-like access" do
     it "supports bracket access" do
       expect(sprint[:title]).to eq("Sprint 42")
-      expect(sprint["status"]).to eq("active")
+      expect(sprint["team_id"]).to eq("team-456")
     end
 
     it "supports key? check" do

@@ -136,12 +136,7 @@ module Superthread
         when 3600..86_399 then "#{(diff / 3600).to_i}h ago"
         when 86_400..604_799 then "#{(diff / 86_400).to_i}d ago"
         else
-          # Include year if not current year
-          if time.year == Time.now.year
-            time.strftime("%b %d")
-          else
-            time.strftime("%b %d, %Y")
-          end
+          time.strftime("%Y-%m-%d")
         end
       end
 

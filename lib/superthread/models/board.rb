@@ -17,11 +17,8 @@ module Superthread
       include Concerns::Timestampable
 
       attribute :id, Shale::Type::String
-      attribute :type, Shale::Type::String
       attribute :team_id, Shale::Type::String
-      attribute :space_id, Shale::Type::String
       attribute :title, Shale::Type::String
-      attribute :description, Shale::Type::String
       attribute :user_id, Shale::Type::String
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer

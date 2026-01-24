@@ -200,27 +200,28 @@ module ApiFixtures
       boards: [
         {
           id: "10",
+          team_id: "team-1",
           title: "Sprint Board",
-          description: "Current sprint tasks",
-          space_id: "1",
-          time_created: 1705312200000,
+          user_id: "user-1",
+          time_created: 1705312200,
+          time_updated: 1705312200,
           lists: [
             {id: "100", title: "To Do", color: "gray", position: 0},
             {id: "101", title: "In Progress", color: "blue", position: 1}
           ]
         },
-        {id: "11", title: "Backlog", space_id: "1", time_created: 1705398600000, lists: []}
+        {id: "11", team_id: "team-1", title: "Backlog", user_id: "user-1", time_created: 1705398600, time_updated: 1705398600, lists: []}
       ]
     }.freeze
 
     GET = {
       board: {
         id: "10",
+        team_id: "team-1",
         title: "Sprint Board",
-        description: "Current sprint tasks",
-        space_id: "1",
-        time_created: 1705312200000,
-        time_updated: 1705398600000,
+        user_id: "user-1",
+        time_created: 1705312200,
+        time_updated: 1705398600,
         lists: [
           {id: "100", title: "To Do", color: "gray", position: 0},
           {id: "101", title: "In Progress", color: "blue", position: 1},
@@ -232,11 +233,11 @@ module ApiFixtures
     CREATE = {
       board: {
         id: "board-new-1",
+        team_id: "team-1",
         title: "New Board",
-        description: "A new board for testing",
-        space_id: "1",
-        time_created: 1705312200000,
-        time_updated: 1705312200000,
+        user_id: "user-1",
+        time_created: 1705312200,
+        time_updated: 1705312200,
         lists: []
       }
     }.freeze
@@ -244,11 +245,11 @@ module ApiFixtures
     UPDATE = {
       board: {
         id: "10",
+        team_id: "team-1",
         title: "Updated Sprint Board",
-        description: "Current sprint tasks",
-        space_id: "1",
-        time_created: 1705312200000,
-        time_updated: 1705399000000,
+        user_id: "user-1",
+        time_created: 1705312200,
+        time_updated: 1705399000,
         lists: [
           {id: "100", title: "To Do", color: "gray", position: 0},
           {id: "101", title: "In Progress", color: "blue", position: 1},
@@ -260,11 +261,11 @@ module ApiFixtures
     DUPLICATE = {
       board: {
         id: "board-dup-1",
+        team_id: "team-1",
         title: "Copy of Sprint Board",
-        description: "Current sprint tasks",
-        space_id: "1",
-        time_created: 1705312200000,
-        time_updated: 1705312200000,
+        user_id: "user-1",
+        time_created: 1705312200,
+        time_updated: 1705312200,
         lists: [
           {id: "200", title: "To Do", color: "gray", position: 0},
           {id: "201", title: "In Progress", color: "blue", position: 1},
@@ -297,9 +298,11 @@ module ApiFixtures
     DELETE = {
       board: {
         id: "board-to-delete",
+        team_id: "team-1",
         title: "Board to Delete",
-        space_id: "1",
-        time_created: 1705312200000,
+        user_id: "user-1",
+        time_created: 1705312200,
+        time_updated: 1705312200,
         lists: []
       }
     }.freeze
@@ -637,20 +640,19 @@ module ApiFixtures
   module Sprints
     LIST = {
       sprints: [
-        {id: "sprint-1", title: "Sprint 1", status: "active", start_date: 1705312200000, due_date: 1706521800000, time_created: 1705312200000},
-        {id: "sprint-2", title: "Sprint 2", status: "planned", start_date: 1706521800000, due_date: 1707731400000, time_created: 1705398600000}
+        {id: "sprint-1", team_id: "team-1", title: "Sprint 1", start_date: 1705312200, time_created: 1705312200, time_updated: 1705312200},
+        {id: "sprint-2", team_id: "team-1", title: "Sprint 2", start_date: 1706521800, time_created: 1705398600, time_updated: 1705398600}
       ]
     }.freeze
 
     GET = {
       sprint: {
         id: "sprint-1",
+        team_id: "team-1",
         title: "Sprint 1",
-        status: "active",
-        start_date: 1705312200000,
-        due_date: 1706521800000,
-        time_created: 1705312200000,
-        time_updated: 1705398600000
+        start_date: 1705312200,
+        time_created: 1705312200,
+        time_updated: 1705398600
       }
     }.freeze
   end

@@ -323,7 +323,7 @@ module Superthread
         when Superthread::Models::Tag
           %i[id name color total_cards]
         when Superthread::Models::Board
-          %i[id title description space_id time_created]
+          %i[id title time_created time_updated]
         when Superthread::Models::List
           %i[id title color position board_id]
         when Superthread::Models::User
@@ -333,7 +333,7 @@ module Superthread
         when Superthread::Models::Space
           %i[id title description time_created]
         when Superthread::Models::Sprint
-          %i[id title status start_date due_date]
+          %i[id title start_date time_created time_updated]
         when Superthread::Models::Comment
           %i[id content user_id time_created]
         when Superthread::Models::Page

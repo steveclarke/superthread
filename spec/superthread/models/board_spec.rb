@@ -24,11 +24,8 @@ RSpec.describe Superthread::Models::Board do
   let(:board_data) do
     {
       "id" => "board-123",
-      "type" => "board",
       "team_id" => "team-456",
-      "space_id" => "space-789",
       "title" => "Sprint Board",
-      "description" => "Board for sprint tasks",
       "user_id" => "user-001",
       "time_created" => 1_705_312_200,
       "time_updated" => 1_705_398_600,
@@ -119,7 +116,7 @@ RSpec.describe Superthread::Models::Board do
   describe "hash-like access" do
     it "supports bracket access" do
       expect(board[:title]).to eq("Sprint Board")
-      expect(board["space_id"]).to eq("space-789")
+      expect(board["team_id"]).to eq("team-456")
     end
 
     it "supports key? check" do

@@ -8,7 +8,7 @@ module Superthread
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
       def list
         sprints = client.sprints.list(workspace_id, space_id: space_id)
-        output_list sprints, columns: %i[id title status start_date due_date]
+        output_list sprints, columns: %i[id title start_date]
       end
 
       desc "get SPRINT_ID", "Get sprint details"
@@ -17,7 +17,7 @@ module Superthread
       def get(sprint_id)
         handle_error do
           sprint = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-          output_item sprint, fields: %i[id title status start_date due_date time_created time_updated]
+          output_item sprint, fields: %i[id title start_date time_created time_updated]
 
           open_in_browser(:sprint, sprint_id)
         end

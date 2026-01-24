@@ -66,13 +66,15 @@ module Superthread
       #
       # @param workspace_id [String] Workspace ID
       # @param board_id [String] Board ID to duplicate
+      # @param space_id [String] Destination space ID
       # @param title [String] Optional new title
-      # @param space_id [String] Optional destination space
+      # @param copy_cards [Boolean] Whether to copy cards (default: false)
+      # @param create_missing_tags [Boolean] Whether to create missing tags in target space (default: false)
       # @return [Superthread::Models::Board] Duplicated board
-      def duplicate(workspace_id, board_id, title: nil, space_id: nil)
+      def duplicate(workspace_id, board_id, space_id:, title: nil, copy_cards: nil, create_missing_tags: nil)
         ws = safe_id("workspace_id", workspace_id)
         board = safe_id("board_id", board_id)
-        body = compact_params(title: title, project_id: space_id)
+        body = compact_params(project_id: space_id, title: title, copy_cards: copy_cards, create_missing_tags: create_missing_tags)
         post_object("/#{ws}/boards/#{board}/copy", body: body,
           object_class: Models::Board, unwrap_key: :board)
       end

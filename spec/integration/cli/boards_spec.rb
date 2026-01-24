@@ -43,7 +43,7 @@ RSpec.describe "st boards", :cli do
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Sprint Board")
-      expect(result[:stdout]).to include("Current sprint tasks")
+      expect(result[:stdout]).to include("10")
     end
 
     it "outputs JSON with --json flag" do
@@ -65,7 +65,7 @@ RSpec.describe "st boards", :cli do
       result = run_cli("boards", "create",
         "--space=1",
         "--title=New Board",
-        "--content=A new board for testing")
+        "--description=A new board for testing")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("New Board")
@@ -76,11 +76,10 @@ RSpec.describe "st boards", :cli do
       json = cli_json("boards", "create",
         "--space=1",
         "--title=New Board",
-        "--content=A new board for testing")
+        "--description=A new board for testing")
 
       expect(json["id"]).to eq("board-new-1")
       expect(json["title"]).to eq("New Board")
-      expect(json["space_id"]).to eq("1")
     end
   end
 
@@ -127,6 +126,7 @@ RSpec.describe "st boards", :cli do
 
     it "duplicates a board" do
       result = run_cli("boards", "duplicate", "10",
+        "--space=1",
         "--title=Copy of Sprint Board")
 
       expect(result[:exit_code]).to eq(0)
@@ -136,6 +136,7 @@ RSpec.describe "st boards", :cli do
 
     it "outputs JSON with --json flag" do
       json = cli_json("boards", "duplicate", "10",
+        "--space=1",
         "--title=Copy of Sprint Board")
 
       expect(json["id"]).to eq("board-dup-1")

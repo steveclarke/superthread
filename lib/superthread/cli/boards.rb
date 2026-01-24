@@ -22,7 +22,7 @@ module Superthread
         handle_error do
           resolved_board_id = resolve_board(board_ref)
           board = client.boards.find(workspace_id, resolved_board_id)
-          output_item board, fields: %i[id title description space_id time_created time_updated]
+          output_item board, fields: %i[id title time_created time_updated]
 
           open_in_browser(:board, resolved_board_id)
         end
@@ -41,43 +41,52 @@ module Superthread
         end
       end
 
+      LAYOUTS = %w[board list timeline calendar].freeze
+      COLORS = %w[fog slate grey charcoal black red orange yellow green ocean blue purple pink].freeze
+
       desc "create", "Create a new board"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
       option :title, type: :string, required: true, desc: "Board title"
-      option :content, type: :string, desc: "Board description"
-      option :icon, type: :string, desc: "Board icon"
-      option :color, type: :string, desc: "Board color"
+      option :description, type: :string, desc: "Board description"
+      option :layout, type: :string, enum: LAYOUTS, desc: "Layout: #{LAYOUTS.join(", ")}"
+      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
+      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
       def create
         handle_error do
-          board = client.boards.create(workspace_id, space_id: space_id, **symbolized_options(:title, :content, :icon, :color))
-          output_item board
+          opts = symbolized_options(:title, :icon, :color, :layout)
+          opts[:content] = options[:description] if options[:description]
+          board = client.boards.create(workspace_id, space_id: space_id, **opts)
+          output_item board, fields: %i[id title time_created]
         end
       end
 
       desc "update BOARD", "Update a board"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :title, type: :string, desc: "New title"
-      option :content, type: :string, desc: "New description"
-      option :icon, type: :string, desc: "New icon"
-      option :color, type: :string, desc: "New color"
+      option :description, type: :string, desc: "New description"
+      option :layout, type: :string, enum: LAYOUTS, desc: "Layout: #{LAYOUTS.join(", ")}"
+      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
+      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       def update(board_ref)
         handle_error do
-          board = client.boards.update(workspace_id, resolve_board(board_ref),
-            **symbolized_options(:title, :content, :icon, :color, :archived))
-          output_item board
+          opts = symbolized_options(:title, :icon, :color, :layout, :archived)
+          opts[:content] = options[:description] if options[:description]
+          board = client.boards.update(workspace_id, resolve_board(board_ref), **opts)
+          output_item board, fields: %i[id title time_created time_updated]
         end
       end
 
       desc "duplicate BOARD", "Duplicate a board"
-      option :space, type: :string, aliases: "-s", desc: "Destination space (ID or name)"
+      option :space, type: :string, required: true, aliases: "-s", desc: "Destination space (ID or name)"
       option :title, type: :string, desc: "Title for the copy"
+      option :copy_cards, type: :boolean, default: false, desc: "Copy cards from source board"
+      option :create_missing_tags, type: :boolean, default: false, desc: "Create missing tags in target space"
       def duplicate(board_ref)
         handle_error do
-          opts = symbolized_options(:title)
-          opts[:space_id] = space_id if space_id
-          board = client.boards.duplicate(workspace_id, resolve_board(board_ref), **opts)
-          output_item board
+          opts = symbolized_options(:title, :copy_cards, :create_missing_tags)
+          board = client.boards.duplicate(workspace_id, resolve_board(board_ref), space_id: space_id, **opts)
+          output_item board, fields: %i[id title time_created]
         end
       end
 
@@ -97,26 +106,29 @@ module Superthread
       option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :title, type: :string, required: true, desc: "List title"
-      option :content, type: :string, desc: "List description"
-      option :icon, type: :string, desc: "List icon"
-      option :color, type: :string, desc: "List color"
+      option :description, type: :string, desc: "List description"
+      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
+      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
       def create_list
         handle_error do
-          list = client.boards.create_list(workspace_id,
-            board_id: board_id, **symbolized_options(:title, :content, :icon, :color))
+          opts = symbolized_options(:title, :icon, :color)
+          opts[:content] = options[:description] if options[:description]
+          list = client.boards.create_list(workspace_id, board_id: board_id, **opts)
           output_item list, fields: %i[id title color board_id]
         end
       end
 
       desc "update-list LIST_ID", "Update a list"
       option :title, type: :string, desc: "New title"
-      option :content, type: :string, desc: "New description"
-      option :icon, type: :string, desc: "New icon"
-      option :color, type: :string, desc: "New color"
+      option :description, type: :string, desc: "New description"
+      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
+      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
       def update_list(list_id)
         handle_error do
-          list = client.boards.update_list(workspace_id, list_id, **symbolized_options(:title, :content, :icon, :color))
-          output_item list
+          opts = symbolized_options(:title, :icon, :color)
+          opts[:content] = options[:description] if options[:description]
+          list = client.boards.update_list(workspace_id, list_id, **opts)
+          output_item list, fields: %i[id title color board_id]
         end
       end
 

@@ -54,7 +54,6 @@ RSpec.describe "st sprints", :cli do
 
       expect(json["id"]).to eq("sprint-1")
       expect(json["title"]).to eq("Sprint 1")
-      expect(json["status"]).to eq("active")
     end
   end
 end
