@@ -5,31 +5,31 @@ module Superthread
     # CLI commands for card operations.
     class Cards < Base
       # Kebab-case aliases for commands
-      map 'add-checklist' => :add_checklist,
-          'edit-checklist' => :edit_checklist,
-          'rm-checklist' => :rm_checklist,
-          'add-item' => :add_item,
-          'edit-item' => :edit_item,
-          'rm-item' => :rm_item
+      map "add-checklist" => :add_checklist,
+        "edit-checklist" => :edit_checklist,
+        "rm-checklist" => :rm_checklist,
+        "add-item" => :add_item,
+        "edit-item" => :edit_item,
+        "rm-item" => :rm_item
 
-      desc 'get CARD_ID', 'Get card details'
-      option :raw, type: :boolean, desc: 'Show raw content without markdown rendering'
+      desc "get CARD_ID", "Get card details"
+      option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
 
           if json_output?
             output_item card, fields: %i[id title content status priority list_title board_title
-                                         owner_id start_date due_date time_created time_updated]
+              owner_id start_date due_date time_created time_updated]
           else
             # Output metadata fields
             output_item card, fields: %i[id title status priority list_title board_title
-                                         owner_id start_date due_date time_created time_updated]
+              owner_id start_date due_date time_created time_updated]
 
             # Render content separately with markdown formatting
             if card.content && !card.content.empty?
-              puts ''
-              Ui.section 'Content'
+              puts ""
+              Ui.section "Content"
               if options[:raw]
                 puts card.content
               else
@@ -40,23 +40,23 @@ module Superthread
         end
       end
 
-      desc 'create', 'Create a new card'
-      option :title, type: :string, required: true, desc: 'Card title'
-      option :list, type: :string, required: true, aliases: '-l', desc: 'List (ID or name, requires --board)'
-      option :board, type: :string, aliases: '-b', desc: 'Board (ID or name, required unless --sprint)'
-      option :space, type: :string, aliases: '-s', desc: 'Space (ID or name) - helps resolve board by name'
-      option :sprint, type: :string, desc: 'Sprint (ID, required unless --board)'
-      option :content, type: :string, desc: 'Card content (HTML)'
-      option :project, type: :string, desc: 'Project (ID)'
-      option :start_date, type: :numeric, desc: 'Start date (Unix timestamp)'
-      option :due_date, type: :numeric, desc: 'Due date (Unix timestamp)'
-      option :priority, type: :numeric, desc: 'Priority level (1=urgent, 4=low)'
-      option :parent_card, type: :string, desc: 'Parent card ID'
-      option :epic, type: :string, desc: 'Epic ID'
-      option :owner, type: :string, aliases: '-o', desc: 'Owner (user ID, name, or email)'
+      desc "create", "Create a new card"
+      option :title, type: :string, required: true, desc: "Card title"
+      option :list, type: :string, required: true, aliases: "-l", desc: "List (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :sprint, type: :string, desc: "Sprint (ID, required unless --board)"
+      option :content, type: :string, desc: "Card content (HTML)"
+      option :project, type: :string, desc: "Project (ID)"
+      option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
+      option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
+      option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
+      option :parent_card, type: :string, desc: "Parent card ID"
+      option :epic, type: :string, desc: "Epic ID"
+      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
       def create
         handle_error do
-          raise Thor::Error, 'Either --board or --sprint is required' unless options[:board] || options[:sprint]
+          raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
 
           opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
           opts[:list_id] = resolve_list(options[:list])
@@ -71,13 +71,13 @@ module Superthread
         end
       end
 
-      desc 'update CARD_ID', 'Update a card'
-      option :title, type: :string, desc: 'New title'
-      option :list, type: :string, aliases: '-l', desc: 'Move to list (ID or name, requires --board)'
-      option :board, type: :string, aliases: '-b', desc: 'Move to board (ID or name)'
-      option :space, type: :string, aliases: '-s', desc: 'Space (ID or name) - helps resolve board by name'
-      option :priority, type: :numeric, desc: 'Priority level (1=urgent, 4=low)'
-      option :archived, type: :boolean, desc: 'Archive/unarchive'
+      desc "update CARD_ID", "Update a card"
+      option :title, type: :string, desc: "New title"
+      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Move to board (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
+      option :archived, type: :boolean, desc: "Archive/unarchive"
       def update(card_id)
         handle_error do
           opts = symbolized_options(:title, :priority, :archived)
@@ -88,8 +88,8 @@ module Superthread
         end
       end
 
-      desc 'delete CARD_ID', 'Delete a card'
-      option :force, type: :boolean, aliases: '-f', desc: 'Skip confirmation'
+      desc "delete CARD_ID", "Delete a card"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(card_id)
         handle_error do
           confirming("Delete card #{card_id}?") do
@@ -99,8 +99,8 @@ module Superthread
         end
       end
 
-      desc 'duplicate CARD_ID', 'Duplicate a card'
-      option :title, type: :string, desc: 'Title for the copy'
+      desc "duplicate CARD_ID", "Duplicate a card"
+      option :title, type: :string, desc: "Title for the copy"
       def duplicate(card_id)
         handle_error do
           card = client.cards.duplicate(workspace_id, card_id, **symbolized_options(:title))
@@ -108,11 +108,11 @@ module Superthread
         end
       end
 
-      desc 'assigned USER', 'Get cards assigned to a user'
-      option :board, type: :string, aliases: '-b', desc: 'Filter by board (ID or name)'
-      option :space, type: :string, aliases: '-s', desc: 'Space (ID or name) - helps resolve board by name'
-      option :project, type: :string, desc: 'Filter by project (ID)'
-      option :archived, type: :boolean, desc: 'Include archived'
+      desc "assigned USER", "Get cards assigned to a user"
+      option :board, type: :string, aliases: "-b", desc: "Filter by board (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :project, type: :string, desc: "Filter by project (ID)"
+      option :archived, type: :boolean, desc: "Include archived"
       def assigned(user_ref)
         handle_error do
           opts = symbolized_options(:archived)
@@ -124,8 +124,8 @@ module Superthread
         end
       end
 
-      desc 'assign CARD_ID USER', 'Assign a user to a card'
-      option :role, type: :string, default: 'member', desc: 'Member role'
+      desc "assign CARD_ID USER", "Assign a user to a card"
+      option :role, type: :string, default: "member", desc: "Member role"
       def assign(card_id, user_ref)
         handle_error do
           user_id = resolve_user(user_ref)
@@ -134,7 +134,7 @@ module Superthread
         end
       end
 
-      desc 'unassign CARD_ID USER', 'Unassign a user from a card'
+      desc "unassign CARD_ID USER", "Unassign a user from a card"
       def unassign(card_id, user_ref)
         handle_error do
           user_id = resolve_user(user_ref)
@@ -143,9 +143,9 @@ module Superthread
         end
       end
 
-      desc 'link CARD_ID RELATED_CARD_ID', 'Link two cards'
+      desc "link CARD_ID RELATED_CARD_ID", "Link two cards"
       option :type, type: :string, required: true, enum: %w[blocks blocked_by related duplicates],
-                    desc: 'Relationship type'
+        desc: "Relationship type"
       def link(card_id, related_card_id)
         handle_error do
           client.cards.add_related(
@@ -157,7 +157,7 @@ module Superthread
         end
       end
 
-      desc 'unlink CARD_ID LINKED_CARD_ID', 'Remove card relationship'
+      desc "unlink CARD_ID LINKED_CARD_ID", "Remove card relationship"
       def unlink(card_id, linked_card_id)
         handle_error do
           client.cards.remove_related(workspace_id, card_id, linked_card_id)
@@ -165,8 +165,8 @@ module Superthread
         end
       end
 
-      desc 'add-checklist CARD_ID', 'Create a checklist on a card'
-      option :title, type: :string, required: true, desc: 'Checklist title'
+      desc "add-checklist CARD_ID", "Create a checklist on a card"
+      option :title, type: :string, required: true, desc: "Checklist title"
       def add_checklist(card_id)
         handle_error do
           checklist = client.cards.create_checklist(workspace_id, card_id, title: options[:title])
@@ -174,8 +174,8 @@ module Superthread
         end
       end
 
-      desc 'edit-checklist CARD_ID CHECKLIST_ID', 'Update a checklist'
-      option :title, type: :string, required: true, desc: 'New checklist title'
+      desc "edit-checklist CARD_ID CHECKLIST_ID", "Update a checklist"
+      option :title, type: :string, required: true, desc: "New checklist title"
       def edit_checklist(card_id, checklist_id)
         handle_error do
           checklist = client.cards.update_checklist(
@@ -186,8 +186,8 @@ module Superthread
         end
       end
 
-      desc 'rm-checklist CARD_ID CHECKLIST_ID', 'Delete a checklist'
-      option :force, type: :boolean, aliases: '-f', desc: 'Skip confirmation'
+      desc "rm-checklist CARD_ID CHECKLIST_ID", "Delete a checklist"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def rm_checklist(card_id, checklist_id)
         handle_error do
           confirming("Delete checklist #{checklist_id}?") do
@@ -197,9 +197,9 @@ module Superthread
         end
       end
 
-      desc 'add-item CARD_ID CHECKLIST_ID', 'Add item to a checklist'
-      option :title, type: :string, required: true, desc: 'Item title'
-      option :checked, type: :boolean, default: false, desc: 'Create as checked'
+      desc "add-item CARD_ID CHECKLIST_ID", "Add item to a checklist"
+      option :title, type: :string, required: true, desc: "Item title"
+      option :checked, type: :boolean, default: false, desc: "Create as checked"
       def add_item(card_id, checklist_id)
         handle_error do
           item = client.cards.add_checklist_item(
@@ -211,9 +211,9 @@ module Superthread
         end
       end
 
-      desc 'edit-item CARD_ID CHECKLIST_ID ITEM_ID', 'Update a checklist item'
-      option :title, type: :string, desc: 'New item title'
-      option :checked, type: :boolean, desc: 'Mark as checked/unchecked'
+      desc "edit-item CARD_ID CHECKLIST_ID ITEM_ID", "Update a checklist item"
+      option :title, type: :string, desc: "New item title"
+      option :checked, type: :boolean, desc: "Mark as checked/unchecked"
       def edit_item(card_id, checklist_id, item_id)
         handle_error do
           opts = symbolized_options(:title, :checked)
@@ -225,8 +225,8 @@ module Superthread
         end
       end
 
-      desc 'rm-item CARD_ID CHECKLIST_ID ITEM_ID', 'Delete a checklist item'
-      option :force, type: :boolean, aliases: '-f', desc: 'Skip confirmation'
+      desc "rm-item CARD_ID CHECKLIST_ID ITEM_ID", "Delete a checklist item"
+      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def rm_item(card_id, checklist_id, item_id)
         handle_error do
           confirming("Delete checklist item #{item_id}?") do
@@ -236,9 +236,9 @@ module Superthread
         end
       end
 
-      desc 'tags', 'Get available tags'
-      option :project, type: :string, desc: 'Filter by project (ID)'
-      option :all, type: :boolean, desc: 'Get all tags'
+      desc "tags", "Get available tags"
+      option :project, type: :string, desc: "Filter by project (ID)"
+      option :all, type: :boolean, desc: "Get all tags"
       def tags
         handle_error do
           opts = symbolized_options(:all)
@@ -248,16 +248,16 @@ module Superthread
         end
       end
 
-      desc 'tag CARD_ID TAGS', 'Add tags to card (comma-separated IDs or names)'
+      desc "tag CARD_ID TAGS", "Add tags to card (comma-separated IDs or names)"
       def tag(card_id, tag_refs)
         handle_error do
-          ids = tag_refs.split(',').map { |ref| resolve_tag(ref.strip) }
+          ids = tag_refs.split(",").map { |ref| resolve_tag(ref.strip) }
           client.cards.add_tags(workspace_id, card_id, tag_ids: ids)
           Ui.success "Added #{ids.count} tag(s) to card #{card_id}"
         end
       end
 
-      desc 'untag CARD_ID TAG', 'Remove tag from card'
+      desc "untag CARD_ID TAG", "Remove tag from card"
       def untag(card_id, tag_ref)
         handle_error do
           tag_id = resolve_tag(tag_ref)
