@@ -87,6 +87,7 @@ RSpec.describe "st cards", :cli do
 
   describe "cards delete CARD_ID" do
     before do
+      stub_api_get("test_workspace/cards/card-to-delete", response: ApiFixtures::Cards::DELETE)
       stub_api_delete("test_workspace/cards/card-to-delete")
     end
 
@@ -94,7 +95,7 @@ RSpec.describe "st cards", :cli do
       result = run_cli("cards", "delete", "card-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Card card-to-delete deleted")
+      expect(result[:stdout]).to include("Card 'Card to Delete' deleted")
     end
   end
 
@@ -271,14 +272,15 @@ RSpec.describe "st cards", :cli do
 
   describe "cards remove-checklist CARD_ID CHECKLIST_ID" do
     before do
-      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1")
+      stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::WITH_CHECKLIST)
+      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete")
     end
 
     it "deletes a checklist with --force" do
-      result = run_cli("cards", "remove-checklist", "card-123", "checklist-1", "--force")
+      result = run_cli("cards", "remove-checklist", "card-123", "checklist-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Deleted checklist checklist-1")
+      expect(result[:stdout]).to include("Checklist 'Checklist to Delete' deleted")
     end
   end
 
@@ -309,14 +311,15 @@ RSpec.describe "st cards", :cli do
 
   describe "cards remove-item CARD_ID CHECKLIST_ID ITEM_ID" do
     before do
-      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1/items/item-1")
+      stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::WITH_CHECKLIST)
+      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete/items/item-to-delete")
     end
 
     it "deletes a checklist item with --force" do
-      result = run_cli("cards", "remove-item", "card-123", "checklist-1", "item-1", "--force")
+      result = run_cli("cards", "remove-item", "card-123", "checklist-to-delete", "item-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Deleted checklist item item-1")
+      expect(result[:stdout]).to include("Checklist item 'Item to Delete' deleted")
     end
   end
 

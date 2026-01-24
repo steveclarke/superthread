@@ -147,6 +147,7 @@ RSpec.describe "st pages", :cli do
 
   describe "pages delete PAGE_ID" do
     before do
+      stub_api_get("test_workspace/pages/page-to-delete", response: ApiFixtures::Pages::DELETE)
       stub_api_delete("test_workspace/pages/page-to-delete")
     end
 
@@ -154,7 +155,7 @@ RSpec.describe "st pages", :cli do
       result = run_cli("pages", "delete", "page-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Page page-to-delete deleted")
+      expect(result[:stdout]).to include("Page 'Page to Delete' deleted")
     end
   end
 end

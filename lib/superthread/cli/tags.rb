@@ -28,12 +28,22 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(tag_ref)
         handle_error do
-          tag_id = resolve_tag(tag_ref)
-          confirming("Delete tag #{tag_ref}?") do
-            client.tags.destroy(workspace_id, tag_id)
-            output_success "Tag #{tag_ref} deleted"
+          tag = find_tag(tag_ref)
+          confirming("Delete tag '#{tag.name}' (#{tag.id})?") do
+            client.tags.destroy(workspace_id, tag.id)
+            output_success "Tag '#{tag.name}' deleted"
           end
         end
+      end
+
+      private
+
+      # Find tag by ID or name, returning the full tag object.
+      def find_tag(ref)
+        tags = client.cards.tags(workspace_id, all: true)
+        tag = tags.find { |t| t.id == ref || t.name&.downcase == ref.downcase }
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags." unless tag
+        tag
       end
     end
   end

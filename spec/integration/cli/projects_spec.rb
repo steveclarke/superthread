@@ -99,6 +99,7 @@ RSpec.describe "st projects", :cli do
 
   describe "projects delete PROJECT_ID" do
     before do
+      stub_api_get("test_workspace/epics/proj-to-delete", response: ApiFixtures::Projects::DELETE)
       stub_api_delete("test_workspace/epics/proj-to-delete")
     end
 
@@ -106,7 +107,7 @@ RSpec.describe "st projects", :cli do
       result = run_cli("projects", "delete", "proj-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Project proj-to-delete deleted")
+      expect(result[:stdout]).to include("Project 'Project to Delete' deleted")
     end
   end
 

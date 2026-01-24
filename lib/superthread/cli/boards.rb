@@ -82,10 +82,10 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(board_ref)
         handle_error do
-          resolved = resolve_board(board_ref)
-          confirming("Delete board #{board_ref}?") do
-            client.boards.destroy(workspace_id, resolved)
-            Ui.success "Board #{board_ref} deleted"
+          board = client.boards.find(workspace_id, resolve_board(board_ref))
+          confirming("Delete board '#{board.title}' (#{board.id})?") do
+            client.boards.destroy(workspace_id, board.id)
+            output_success "Board '#{board.title}' deleted"
           end
         end
       end

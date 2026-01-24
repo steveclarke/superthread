@@ -77,6 +77,7 @@ RSpec.describe "st comments", :cli do
 
   describe "comments delete COMMENT_ID" do
     before do
+      stub_api_get("test_workspace/comments/comment-to-delete", response: ApiFixtures::Comments::DELETE)
       stub_api_delete("test_workspace/comments/comment-to-delete")
     end
 
@@ -153,6 +154,7 @@ RSpec.describe "st comments", :cli do
 
   describe "comments delete_reply COMMENT_ID REPLY_ID" do
     before do
+      stub_api_get("test_workspace/comments/reply-to-delete", response: ApiFixtures::Comments::REPLY_DELETE)
       stub_api_delete("test_workspace/comments/comment-1/comments/reply-to-delete")
     end
 

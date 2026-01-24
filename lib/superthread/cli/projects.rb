@@ -52,13 +52,14 @@ module Superthread
         output_item project
       end
 
-      desc "delete PROJECT_ID", "Delete a project"
+      desc "delete PROJECT", "Delete a project"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
-      def delete(project_id)
+      def delete(project_ref)
         handle_error do
-          confirming("Delete project #{project_id}?") do
-            client.projects.destroy(workspace_id, project_id)
-            output_success "Project #{project_id} deleted"
+          project = client.projects.find(workspace_id, project_ref)
+          confirming("Delete project '#{project.title}' (#{project.id})?") do
+            client.projects.destroy(workspace_id, project.id)
+            output_success "Project '#{project.title}' deleted"
           end
         end
       end

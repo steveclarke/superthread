@@ -96,6 +96,7 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces delete SPACE_ID" do
     before do
+      stub_api_get("test_workspace/projects/space-to-delete", response: ApiFixtures::Spaces::DELETE)
       stub_api_delete("test_workspace/projects/space-to-delete")
     end
 
@@ -103,7 +104,7 @@ RSpec.describe "st spaces", :cli do
       result = run_cli("spaces", "delete", "space-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Space space-to-delete deleted")
+      expect(result[:stdout]).to include("Space 'Space to Delete' deleted")
     end
   end
 

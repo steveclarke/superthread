@@ -31,9 +31,11 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(comment_id)
         handle_error do
-          confirming("Delete comment #{comment_id}?") do
-            client.comments.destroy(workspace_id, comment_id)
-            output_success "Comment #{comment_id} deleted"
+          comment = client.comments.find(workspace_id, comment_id)
+          preview = truncate_content(comment.content)
+          confirming("Delete comment '#{preview}' (#{comment.id})?") do
+            client.comments.destroy(workspace_id, comment.id)
+            output_success "Comment #{comment.id} deleted"
           end
         end
       end
@@ -64,9 +66,11 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete_reply(comment_id, reply_id)
         handle_error do
-          confirming("Delete reply #{reply_id}?") do
-            client.comments.delete_reply(workspace_id, comment_id, reply_id)
-            output_success "Reply #{reply_id} deleted"
+          reply = client.comments.find(workspace_id, reply_id)
+          preview = truncate_content(reply.content)
+          confirming("Delete reply '#{preview}' (#{reply.id})?") do
+            client.comments.delete_reply(workspace_id, comment_id, reply.id)
+            output_success "Reply #{reply.id} deleted"
           end
         end
       end

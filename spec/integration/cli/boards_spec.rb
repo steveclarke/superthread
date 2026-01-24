@@ -108,6 +108,7 @@ RSpec.describe "st boards", :cli do
 
   describe "boards delete BOARD" do
     before do
+      stub_api_get("test_workspace/boards/board-to-delete", response: ApiFixtures::Boards::DELETE)
       stub_api_delete("test_workspace/boards/board-to-delete")
     end
 
@@ -115,7 +116,7 @@ RSpec.describe "st boards", :cli do
       result = run_cli("boards", "delete", "board-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Board board-to-delete deleted")
+      expect(result[:stdout]).to include("Board 'Board to Delete' deleted")
     end
   end
 

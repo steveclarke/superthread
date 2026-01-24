@@ -84,6 +84,40 @@ module ApiFixtures
       }
     }.freeze
 
+    # Used for delete confirmation
+    DELETE = {
+      card: {
+        id: "card-to-delete",
+        title: "Card to Delete",
+        status: "open",
+        priority: 3,
+        board_id: "10",
+        list_id: "100",
+        list_title: "To Do",
+        time_created: 1705312200000,
+        checklists: []
+      }
+    }.freeze
+
+    # Card with checklist for remove_checklist/remove_item tests
+    WITH_CHECKLIST = {
+      card: {
+        id: "card-123",
+        title: "Card with Checklist",
+        status: "started",
+        checklists: [
+          {
+            id: "checklist-to-delete",
+            title: "Checklist to Delete",
+            card_id: "card-123",
+            items: [
+              {id: "item-to-delete", title: "Item to Delete", checked: false}
+            ]
+          }
+        ]
+      }
+    }.freeze
+
     ASSIGNED = {
       cards: [
         {id: "card-123", title: "Implement feature X", status: "started", priority: 2, list_title: "In Progress"},
@@ -150,6 +184,14 @@ module ApiFixtures
         time_created: 1705312200000,
         time_updated: 1705485000000
       }
+    }.freeze
+
+    # Tag list for delete confirmation (fetched via client.cards.tags)
+    LIST_WITH_DELETE_TAG = {
+      tags: [
+        {id: "tag-1", name: "backend", color: "blue", total_cards: 15},
+        {id: "tag-to-delete", name: "Tag to Delete", color: "red", total_cards: 0}
+      ]
     }.freeze
   end
 
@@ -250,6 +292,17 @@ module ApiFixtures
         position: 0
       }
     }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      board: {
+        id: "board-to-delete",
+        title: "Board to Delete",
+        space_id: "1",
+        time_created: 1705312200000,
+        lists: []
+      }
+    }.freeze
   end
 
   module Users
@@ -308,6 +361,15 @@ module ApiFixtures
         description: "Engineering team space",
         time_created: 1705312200000,
         time_updated: 1705485000000
+      }
+    }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      project: {
+        id: "space-to-delete",
+        title: "Space to Delete",
+        time_created: 1705312200000
       }
     }.freeze
 
@@ -371,6 +433,16 @@ module ApiFixtures
         time_updated: 1705485000000
       }
     }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      epic: {
+        id: "proj-to-delete",
+        title: "Project to Delete",
+        status: "planned",
+        time_created: 1705312200000
+      }
+    }.freeze
   end
 
   module Comments
@@ -431,6 +503,27 @@ module ApiFixtures
         time_updated: 1705485000000
       }
     }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      comment: {
+        id: "comment-to-delete",
+        content: "<p>Comment to delete</p>",
+        user_id: "user-1",
+        card_id: "card-123",
+        time_created: 1705312200000
+      }
+    }.freeze
+
+    # Used for delete_reply confirmation
+    REPLY_DELETE = {
+      comment: {
+        id: "reply-to-delete",
+        content: "<p>Reply to delete</p>",
+        user_id: "user-1",
+        time_created: 1705312200000
+      }
+    }.freeze
   end
 
   module Notes
@@ -458,6 +551,15 @@ module ApiFixtures
         title: "New Note",
         transcript: "Meeting transcript content",
         time_created: 1705398600000
+      }
+    }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      note: {
+        id: "note-to-delete",
+        title: "Note to Delete",
+        time_created: 1705312200000
       }
     }.freeze
   end
@@ -518,6 +620,16 @@ module ApiFixtures
         archived: true,
         time_created: 1705312200000,
         time_updated: 1705485000000
+      }
+    }.freeze
+
+    # Used for delete confirmation
+    DELETE = {
+      page: {
+        id: "page-to-delete",
+        title: "Page to Delete",
+        space_id: "1",
+        time_created: 1705312200000
       }
     }.freeze
   end

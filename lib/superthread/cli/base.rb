@@ -390,6 +390,22 @@ module Superthread
         end
       end
 
+      # Truncate content for display in confirmation prompts.
+      # Strips HTML tags and truncates to max_length characters.
+      #
+      # @param content [String] Content to truncate (may contain HTML)
+      # @param max_length [Integer] Maximum length (default: 50)
+      # @return [String] Truncated plain text
+      def truncate_content(content, max_length: 50)
+        return "" if content.nil? || content.empty?
+
+        # Strip HTML tags and normalize whitespace
+        plain = content.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
+        return plain if plain.length <= max_length
+
+        "#{plain[0, max_length]}..."
+      end
+
       def say_info(message)
         say message, :cyan unless options[:quiet]
       end

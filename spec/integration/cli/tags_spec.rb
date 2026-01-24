@@ -53,6 +53,10 @@ RSpec.describe "st tags", :cli do
 
   describe "tags delete TAG" do
     before do
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST_WITH_DELETE_TAG.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_delete("test_workspace/tags/tag-to-delete")
     end
 
@@ -60,7 +64,7 @@ RSpec.describe "st tags", :cli do
       result = run_cli("tags", "delete", "tag-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Tag tag-to-delete deleted")
+      expect(result[:stdout]).to include("Tag 'Tag to Delete' deleted")
     end
   end
 end

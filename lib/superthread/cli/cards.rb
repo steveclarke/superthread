@@ -108,13 +108,14 @@ module Superthread
         end
       end
 
-      desc "delete CARD_ID", "Delete a card"
+      desc "delete CARD", "Delete a card"
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
-      def delete(card_id)
+      def delete(card_ref)
         handle_error do
-          confirming("Delete card #{card_id}?") do
-            client.cards.destroy(workspace_id, card_id)
-            Ui.success "Card #{card_id} deleted"
+          card = client.cards.find(workspace_id, card_ref)
+          confirming("Delete card '#{card.title}' (#{card.id})?") do
+            client.cards.destroy(workspace_id, card.id)
+            output_success "Card '#{card.title}' deleted"
           end
         end
       end
@@ -210,9 +211,12 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove_checklist(card_id, checklist_id)
         handle_error do
-          confirming("Delete checklist #{checklist_id}?") do
+          card = client.cards.find(workspace_id, card_id)
+          checklist = card.checklists&.find { |c| c.id == checklist_id }
+          checklist_name = checklist&.title || checklist_id
+          confirming("Delete checklist '#{checklist_name}' (#{checklist_id})?") do
             client.cards.delete_checklist(workspace_id, card_id, checklist_id)
-            Ui.success "Deleted checklist #{checklist_id}"
+            output_success "Checklist '#{checklist_name}' deleted"
           end
         end
       end
@@ -249,9 +253,13 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove_item(card_id, checklist_id, item_id)
         handle_error do
-          confirming("Delete checklist item #{item_id}?") do
+          card = client.cards.find(workspace_id, card_id)
+          checklist = card.checklists&.find { |c| c.id == checklist_id }
+          item = checklist&.items&.find { |i| i.id == item_id }
+          item_name = item&.title || item_id
+          confirming("Delete checklist item '#{item_name}' (#{item_id})?") do
             client.cards.delete_checklist_item(workspace_id, card_id, checklist_id, item_id)
-            Ui.success "Deleted checklist item #{item_id}"
+            output_success "Checklist item '#{item_name}' deleted"
           end
         end
       end

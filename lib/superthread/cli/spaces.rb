@@ -40,10 +40,10 @@ module Superthread
       option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(space_ref)
         handle_error do
-          resolved = resolve_space(space_ref)
-          confirming("Delete space #{space_ref}?") do
-            client.spaces.destroy(workspace_id, resolved)
-            output_success "Space #{space_ref} deleted"
+          space = client.spaces.find(workspace_id, resolve_space(space_ref))
+          confirming("Delete space '#{space.title}' (#{space.id})?") do
+            client.spaces.destroy(workspace_id, space.id)
+            output_success "Space '#{space.title}' deleted"
           end
         end
       end
