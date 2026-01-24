@@ -8,7 +8,7 @@ module Superthread
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
-          output_item card, fields: %i[id title status priority list_title board_title
+          output_item card, fields: %i[id title content status priority list_title board_title
             owner_id start_date due_date time_created time_updated]
         end
       end
