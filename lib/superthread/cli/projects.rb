@@ -58,7 +58,6 @@ module Superthread
       end
 
       desc "delete PROJECT", "Delete a project"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(project_ref)
         handle_error do
           project = client.projects.find(workspace_id, project_ref)

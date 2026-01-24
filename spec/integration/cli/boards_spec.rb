@@ -112,8 +112,8 @@ RSpec.describe "st boards", :cli do
       stub_api_delete("test_workspace/boards/board-to-delete")
     end
 
-    it "deletes a board with --force" do
-      result = run_cli("boards", "delete", "board-to-delete", "--force")
+    it "deletes a board with -y" do
+      result = run_cli("boards", "delete", "board-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Board 'Board to Delete' deleted")
@@ -198,8 +198,8 @@ RSpec.describe "st boards", :cli do
       stub_api_delete("test_workspace/lists/103")
     end
 
-    it "deletes a list with --force" do
-      result = run_cli("boards", "delete-list", "103", "--force")
+    it "deletes a list with -y" do
+      result = run_cli("boards", "delete-list", "103", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("List 103 deleted")

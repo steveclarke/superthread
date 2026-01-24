@@ -71,7 +71,6 @@ module Superthread
       end
 
       desc "delete PAGE", "Delete a page permanently"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(page_ref)
         handle_error do
           page = client.pages.find(workspace_id, page_ref)

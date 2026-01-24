@@ -112,7 +112,6 @@ module Superthread
       end
 
       desc "delete CARD", "Delete a card"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(card_ref)
         handle_error do
           card = client.cards.find(workspace_id, card_ref)
@@ -211,7 +210,6 @@ module Superthread
       end
 
       desc "remove-checklist CARD_ID CHECKLIST_ID", "Delete a checklist"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove_checklist(card_id, checklist_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
@@ -253,7 +251,6 @@ module Superthread
       end
 
       desc "remove-item CARD_ID CHECKLIST_ID ITEM_ID", "Delete a checklist item"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove_item(card_id, checklist_id, item_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)

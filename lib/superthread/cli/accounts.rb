@@ -119,7 +119,6 @@ module Superthread
       end
 
       desc "remove NAME", "Remove an account"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def remove(name)
         unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"

@@ -100,8 +100,8 @@ RSpec.describe "st spaces", :cli do
       stub_api_delete("test_workspace/projects/space-to-delete")
     end
 
-    it "deletes a space with --force" do
-      result = run_cli("spaces", "delete", "space-to-delete", "--force")
+    it "deletes a space with -y" do
+      result = run_cli("spaces", "delete", "space-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Space 'Space to Delete' deleted")

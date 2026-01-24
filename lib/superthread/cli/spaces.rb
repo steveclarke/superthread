@@ -43,7 +43,6 @@ module Superthread
       end
 
       desc "delete SPACE", "Delete a space"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(space_ref)
         handle_error do
           space = client.spaces.find(workspace_id, resolve_space(space_ref))

@@ -25,7 +25,6 @@ module Superthread
       end
 
       desc "delete TAG", "Delete a tag"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(tag_ref)
         handle_error do
           tag = find_tag(tag_ref)

@@ -103,8 +103,8 @@ RSpec.describe "st projects", :cli do
       stub_api_delete("test_workspace/epics/proj-to-delete")
     end
 
-    it "deletes a project with --force" do
-      result = run_cli("projects", "delete", "proj-to-delete", "--force")
+    it "deletes a project with -y" do
+      result = run_cli("projects", "delete", "proj-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Project 'Project to Delete' deleted")

@@ -40,7 +40,6 @@ module Superthread
       end
 
       desc "delete COMMENT_ID", "Delete a comment"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(comment_id)
         handle_error do
           comment = client.comments.find(workspace_id, comment_id)
@@ -75,7 +74,6 @@ module Superthread
       end
 
       desc "delete_reply COMMENT_ID REPLY_ID", "Delete a reply"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete_reply(comment_id, reply_id)
         handle_error do
           reply = client.comments.find(workspace_id, reply_id)

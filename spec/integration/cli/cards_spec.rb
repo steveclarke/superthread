@@ -91,8 +91,8 @@ RSpec.describe "st cards", :cli do
       stub_api_delete("test_workspace/cards/card-to-delete")
     end
 
-    it "deletes a card with --force" do
-      result = run_cli("cards", "delete", "card-to-delete", "--force")
+    it "deletes a card with -y" do
+      result = run_cli("cards", "delete", "card-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Card 'Card to Delete' deleted")
@@ -276,8 +276,8 @@ RSpec.describe "st cards", :cli do
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete")
     end
 
-    it "deletes a checklist with --force" do
-      result = run_cli("cards", "remove-checklist", "card-123", "checklist-to-delete", "--force")
+    it "deletes a checklist with -y" do
+      result = run_cli("cards", "remove-checklist", "card-123", "checklist-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Checklist 'Checklist to Delete' deleted")
@@ -315,8 +315,8 @@ RSpec.describe "st cards", :cli do
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete/items/item-to-delete")
     end
 
-    it "deletes a checklist item with --force" do
-      result = run_cli("cards", "remove-item", "card-123", "checklist-to-delete", "item-to-delete", "--force")
+    it "deletes a checklist item with -y" do
+      result = run_cli("cards", "remove-item", "card-123", "checklist-to-delete", "item-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Checklist item 'Item to Delete' deleted")

@@ -83,7 +83,6 @@ module Superthread
 
       desc "delete BOARD", "Delete a board"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete(board_ref)
         handle_error do
           board = client.boards.find(workspace_id, resolve_board(board_ref))
@@ -122,7 +121,6 @@ module Superthread
       end
 
       desc "delete-list LIST_ID", "Delete a list"
-      option :force, type: :boolean, aliases: "-f", desc: "Skip confirmation"
       def delete_list(list_id)
         handle_error do
           confirming("Delete list #{list_id}?") do
