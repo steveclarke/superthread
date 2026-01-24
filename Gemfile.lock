@@ -34,6 +34,7 @@ GEM
       net-http (~> 0.5)
     gum (0.3.1)
     gum (0.3.1-arm64-darwin)
+    gum (0.3.1-x86_64-linux)
     hashdiff (1.2.1)
     io-console (0.8.2)
     irb (1.16.0)
@@ -140,6 +141,7 @@ GEM
 PLATFORMS
   arm64-darwin-25
   ruby
+  x86_64-linux
 
 DEPENDENCIES
   bump
@@ -168,6 +170,7 @@ CHECKSUMS
   faraday-net_http (3.4.2) sha256=f147758260d3526939bf57ecf911682f94926a3666502e24c69992765875906c
   gum (0.3.1) sha256=9af7cfd806c03a51b77eb61505d597ea9ba615920a7cf290e882bc400ec7fb75
   gum (0.3.1-arm64-darwin) sha256=dcdbe620625290a94db99975ac7015d0c8ba5fd40c875b1f14d5d1bce508543d
+  gum (0.3.1-x86_64-linux) sha256=f6666deb7c957229770ea051f847e4cfa012812bfe2a3e2fdb3b48f168cef68e
   hashdiff (1.2.1) sha256=9c079dbc513dfc8833ab59c0c2d8f230fa28499cc5efb4b8dd276cf931457cd1
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
   irb (1.16.0) sha256=2abe56c9ac947cdcb2f150572904ba798c1e93c890c256f8429981a7675b0806
