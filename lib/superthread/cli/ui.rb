@@ -83,7 +83,8 @@ module Superthread
         puts "#{label} #{value}"
       end
 
-      # Display a styled table.
+      # Display a styled table using gum.
+      # Note: Requires a TTY. For non-interactive output, use Formatter.table instead.
       #
       # @param rows [Array<Array>] Table rows (array of arrays)
       # @param columns [Array<String>] Column headers

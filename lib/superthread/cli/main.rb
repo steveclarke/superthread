@@ -8,6 +8,11 @@ module Superthread
         puts "superthread #{Superthread::VERSION}"
       end
 
+      desc "setup", "Interactive setup wizard"
+      def setup
+        Superthread::Cli::Setup.execute
+      end
+
       desc "config SUBCOMMAND", "Manage configuration"
       subcommand "config", Superthread::Cli::Config
 
