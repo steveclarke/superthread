@@ -85,17 +85,17 @@ module Superthread
       end
 
       # Removes a member from a space.
-      # API: DELETE /:workspace/projects/:space/members/:member
+      # API: DELETE /:workspace/projects/:space/members/:user_id
       #
       # @param workspace_id [String] Workspace ID
       # @param space_id [String] Space ID
-      # @param member_id [String] Member ID to remove
+      # @param user_id [String] User ID to remove
       # @return [Superthread::Object] Success response
-      def remove_member(workspace_id, space_id, member_id)
+      def remove_member(workspace_id, space_id, user_id)
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        member = safe_id("member_id", member_id)
-        http_delete("/#{ws}/projects/#{space}/members/#{member}")
+        user = safe_id("user_id", user_id)
+        http_delete("/#{ws}/projects/#{space}/members/#{user}")
         success_response
       end
     end

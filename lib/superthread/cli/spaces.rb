@@ -52,11 +52,14 @@ module Superthread
         output_success "Added #{user_ref} to space #{space_ref}"
       end
 
-      desc "remove_member SPACE MEMBER_ID", "Remove a member from a space"
-      def remove_member(space_ref, member_id)
-        space_resolved = resolve_space(space_ref)
-        client.spaces.remove_member(workspace_id, space_resolved, member_id)
-        output_success "Removed #{member_id} from space #{space_ref}"
+      desc "remove_member SPACE USER", "Remove a member from a space"
+      def remove_member(space_ref, user_ref)
+        handle_error do
+          space_resolved = resolve_space(space_ref)
+          user_resolved = resolve_user(user_ref)
+          client.spaces.remove_member(workspace_id, space_resolved, user_resolved)
+          output_success "Removed #{user_ref} from space #{space_ref}"
+        end
       end
     end
   end
