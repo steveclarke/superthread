@@ -4,13 +4,16 @@ require "spec_helper"
 
 RSpec.describe "st users", :cli do
   before do
-    # Set up test configuration
     ENV["SUPERTHREAD_API_KEY"] = "test_key"
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
   describe "users me" do
-    it "displays current user info", vcr: {cassette_name: "cli/users_me"} do
+    before do
+      stub_api_get("users/me", response: ApiFixtures::Users::ME)
+    end
+
+    it "displays current user info" do
       result = run_cli("users", "me")
 
       expect(result[:exit_code]).to eq(0)
@@ -20,7 +23,7 @@ RSpec.describe "st users", :cli do
       expect(result[:stdout]).to include("test@example.com")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/users_me"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("users", "me")
 
       expect(json).to have_key("display_name")
@@ -30,7 +33,11 @@ RSpec.describe "st users", :cli do
   end
 
   describe "users members" do
-    it "lists workspace members", vcr: {cassette_name: "cli/users_members"} do
+    before do
+      stub_api_get("teams/test_workspace/members", response: ApiFixtures::Users::MEMBERS)
+    end
+
+    it "lists workspace members" do
       result = run_cli("users", "members")
 
       expect(result[:exit_code]).to eq(0)
@@ -40,7 +47,7 @@ RSpec.describe "st users", :cli do
       expect(result[:stdout]).to include("member")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/users_members"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("users", "members")
 
       expect(json).to be_an(Array)

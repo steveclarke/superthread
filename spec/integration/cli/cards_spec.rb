@@ -9,7 +9,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards get CARD_ID" do
-    it "displays card details", vcr: {cassette_name: "cli/cards_get"} do
+    before do
+      stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::GET)
+    end
+
+    it "displays card details" do
       result = run_cli("cards", "get", "card-123")
 
       expect(result[:exit_code]).to eq(0)
@@ -18,7 +22,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("In Progress")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_get"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "get", "card-123")
 
       expect(json["id"]).to eq("card-123")
@@ -31,7 +35,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards create" do
-    it "creates a new card", vcr: {cassette_name: "cli/cards_create"} do
+    before do
+      stub_api_post("test_workspace/cards", response: ApiFixtures::Cards::CREATE)
+    end
+
+    it "creates a new card" do
       result = run_cli("cards", "create",
         "--title=New card from CLI",
         "--list=101",
@@ -42,7 +50,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("card-new-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "create",
         "--title=New card from CLI",
         "--list=101",
@@ -55,7 +63,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards update CARD_ID" do
-    it "updates card attributes", vcr: {cassette_name: "cli/cards_update"} do
+    before do
+      stub_api_patch("test_workspace/cards/card-123", response: ApiFixtures::Cards::UPDATE)
+    end
+
+    it "updates card attributes" do
       result = run_cli("cards", "update", "card-123",
         "--title=Updated card title",
         "--priority=1")
@@ -64,7 +76,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("Updated card title")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_update"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "update", "card-123",
         "--title=Updated card title",
         "--priority=1")
@@ -75,7 +87,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards delete CARD_ID" do
-    it "deletes a card with --force", vcr: {cassette_name: "cli/cards_delete"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-to-delete")
+    end
+
+    it "deletes a card with --force" do
       result = run_cli("cards", "delete", "card-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
@@ -84,7 +100,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards duplicate CARD_ID" do
-    it "duplicates a card", vcr: {cassette_name: "cli/cards_duplicate"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/copy", response: ApiFixtures::Cards::DUPLICATE)
+    end
+
+    it "duplicates a card" do
       result = run_cli("cards", "duplicate", "card-123",
         "--title=Copy of Implement feature X")
 
@@ -93,7 +113,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("card-dup-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_duplicate"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "duplicate", "card-123",
         "--title=Copy of Implement feature X")
 
@@ -103,7 +123,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards assigned USER" do
-    it "lists cards assigned to user", vcr: {cassette_name: "cli/cards_assigned"} do
+    before do
+      stub_api_post("test_workspace/views/preview", response: ApiFixtures::Cards::ASSIGNED)
+    end
+
+    it "lists cards assigned to user" do
       result = run_cli("cards", "assigned", "u123abc")
 
       expect(result[:exit_code]).to eq(0)
@@ -111,7 +135,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("Fix bug Y")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_assigned"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "assigned", "u123abc")
 
       expect(json).to be_an(Array)
@@ -121,7 +145,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards add_member CARD_ID USER" do
-    it "adds a member to a card", vcr: {cassette_name: "cli/cards_add_member"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/members", response: ApiFixtures::SUCCESS)
+    end
+
+    it "adds a member to a card" do
       result = run_cli("cards", "add_member", "card-123", "u456def")
 
       expect(result[:exit_code]).to eq(0)
@@ -130,7 +158,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards remove_member CARD_ID USER" do
-    it "removes a member from a card", vcr: {cassette_name: "cli/cards_remove_member"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-123/members/u456def")
+    end
+
+    it "removes a member from a card" do
       result = run_cli("cards", "remove_member", "card-123", "u456def")
 
       expect(result[:exit_code]).to eq(0)
@@ -139,7 +171,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards add_related CARD_ID RELATED_CARD_ID" do
-    it "links two cards", vcr: {cassette_name: "cli/cards_add_related"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/linked_cards", response: ApiFixtures::SUCCESS)
+    end
+
+    it "links two cards" do
       result = run_cli("cards", "add_related", "card-123", "card-456", "--type=blocks")
 
       expect(result[:exit_code]).to eq(0)
@@ -148,7 +184,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards remove_related CARD_ID LINKED_CARD_ID" do
-    it "removes card relationship", vcr: {cassette_name: "cli/cards_remove_related"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-123/linked_cards/card-456")
+    end
+
+    it "removes card relationship" do
       result = run_cli("cards", "remove_related", "card-123", "card-456")
 
       expect(result[:exit_code]).to eq(0)
@@ -157,7 +197,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards checklist_create CARD_ID" do
-    it "creates a checklist on a card", vcr: {cassette_name: "cli/cards_checklist_create"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/checklists", response: ApiFixtures::Cards::CHECKLIST_CREATE)
+    end
+
+    it "creates a checklist on a card" do
       result = run_cli("cards", "checklist_create", "card-123",
         "--title=Implementation Tasks")
 
@@ -166,7 +210,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("checklist-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_checklist_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "checklist_create", "card-123",
         "--title=Implementation Tasks")
 
@@ -177,7 +221,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards checklist_add_item CARD_ID CHECKLIST_ID" do
-    it "adds item to checklist", vcr: {cassette_name: "cli/cards_checklist_add_item"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/checklists/checklist-1/items", response: ApiFixtures::Cards::CHECKLIST_ITEM_CREATE)
+    end
+
+    it "adds item to checklist" do
       result = run_cli("cards", "checklist_add_item", "card-123", "checklist-1",
         "--title=Write unit tests")
 
@@ -186,7 +234,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("item-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_checklist_add_item"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "checklist_add_item", "card-123", "checklist-1",
         "--title=Write unit tests")
 
@@ -197,7 +245,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards tags" do
-    it "lists available tags", vcr: {cassette_name: "cli/cards_tags"} do
+    before do
+      stub_api_get("test_workspace/tags", response: ApiFixtures::Tags::LIST)
+    end
+
+    it "lists available tags" do
       result = run_cli("cards", "tags")
 
       expect(result[:exit_code]).to eq(0)
@@ -206,7 +258,7 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("bug")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/cards_tags"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("cards", "tags")
 
       expect(json).to be_an(Array)
@@ -218,7 +270,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards add_tags CARD_ID TAGS" do
-    it "adds tags to a card", vcr: {cassette_name: "cli/cards_add_tags"} do
+    before do
+      stub_api_post("test_workspace/cards/card-123/tags", response: ApiFixtures::SUCCESS)
+    end
+
+    it "adds tags to a card" do
       result = run_cli("cards", "add_tags", "card-123", "tag-2,tag-3")
 
       expect(result[:exit_code]).to eq(0)
@@ -227,7 +283,11 @@ RSpec.describe "st cards", :cli do
   end
 
   describe "cards remove_tag CARD_ID TAG" do
-    it "removes a tag from a card", vcr: {cassette_name: "cli/cards_remove_tag"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-123/tags/tag-1")
+    end
+
+    it "removes a tag from a card" do
       result = run_cli("cards", "remove_tag", "card-123", "tag-1")
 
       expect(result[:exit_code]).to eq(0)

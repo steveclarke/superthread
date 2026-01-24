@@ -1,0 +1,578 @@
+# frozen_string_literal: true
+
+# API response fixtures for WebMock stubs.
+# Extracted from VCR cassettes to maintain identical test behavior.
+#
+module ApiFixtures
+  # Generic success response
+  SUCCESS = {success: true}.freeze
+
+  module Cards
+    GET = {
+      card: {
+        id: "card-123",
+        title: "Implement feature X",
+        status: "started",
+        priority: 2,
+        board_id: "10",
+        board_title: "Sprint Board",
+        list_id: "101",
+        list_title: "In Progress",
+        time_created: 1705312200000,
+        time_updated: 1705398600000,
+        is_watching: true,
+        members: [{user_id: "u123abc", role: "assignee"}],
+        tags: [{id: "tag-1", name: "backend", color: "blue"}],
+        checklists: []
+      }
+    }.freeze
+
+    CREATE = {
+      card: {
+        id: "card-new-1",
+        title: "New card from CLI",
+        status: "not_started",
+        priority: 3,
+        board_id: "10",
+        board_title: "Sprint Board",
+        list_id: "101",
+        list_title: "In Progress",
+        time_created: 1705312200000,
+        time_updated: 1705312200000,
+        is_watching: false,
+        members: [],
+        tags: [],
+        checklists: []
+      }
+    }.freeze
+
+    UPDATE = {
+      card: {
+        id: "card-123",
+        title: "Updated card title",
+        status: "started",
+        priority: 1,
+        board_id: "10",
+        board_title: "Sprint Board",
+        list_id: "101",
+        list_title: "In Progress",
+        time_created: 1705312200000,
+        time_updated: 1705399000000,
+        is_watching: true,
+        members: [{user_id: "u123abc", role: "assignee"}],
+        tags: [{id: "tag-1", name: "backend", color: "blue"}],
+        checklists: []
+      }
+    }.freeze
+
+    DUPLICATE = {
+      card: {
+        id: "card-dup-1",
+        title: "Copy of Implement feature X",
+        status: "started",
+        priority: 2,
+        board_id: "10",
+        board_title: "Sprint Board",
+        list_id: "101",
+        list_title: "In Progress",
+        time_created: 1705312200000,
+        time_updated: 1705312200000,
+        is_watching: false,
+        members: [],
+        tags: [{id: "tag-1", name: "backend", color: "blue"}],
+        checklists: []
+      }
+    }.freeze
+
+    ASSIGNED = {
+      cards: [
+        {id: "card-123", title: "Implement feature X", status: "started", priority: 2, list_title: "In Progress"},
+        {id: "card-456", title: "Fix bug Y", status: "open", priority: 1, list_title: "To Do"}
+      ]
+    }.freeze
+
+    CHECKLIST_CREATE = {
+      id: "checklist-1",
+      title: "Implementation Tasks",
+      card_id: "card-123",
+      time_created: 1705312200000,
+      items: []
+    }.freeze
+
+    CHECKLIST_ITEM_CREATE = {
+      id: "item-1",
+      title: "Write unit tests",
+      checked: false,
+      checklist_id: "checklist-1",
+      position: 0
+    }.freeze
+
+    CHECKLIST_ITEM_UPDATE = {
+      id: "item-1",
+      title: "Updated item",
+      checked: true,
+      checklist_id: "checklist-1",
+      position: 0
+    }.freeze
+
+    CHECKLIST_UPDATE = {
+      id: "checklist-1",
+      title: "Updated checklist",
+      card_id: "card-123",
+      time_created: 1705312200000,
+      items: []
+    }.freeze
+  end
+
+  module Tags
+    LIST = {
+      tags: [
+        {id: "tag-1", name: "backend", color: "blue", total_cards: 15},
+        {id: "tag-2", name: "frontend", color: "green", total_cards: 22},
+        {id: "tag-3", name: "bug", color: "red", total_cards: 8}
+      ]
+    }.freeze
+
+    CREATE = {
+      tag: {
+        id: "tag-new-1",
+        name: "urgent",
+        color: "#ff0000",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    UPDATE = {
+      tag: {
+        id: "tag-1",
+        name: "critical",
+        color: "#ff5500",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+  end
+
+  module Boards
+    LIST = {
+      boards: [
+        {
+          id: "10",
+          title: "Sprint Board",
+          description: "Current sprint tasks",
+          space_id: "1",
+          time_created: 1705312200000,
+          lists: [
+            {id: "100", title: "To Do", color: "gray", position: 0},
+            {id: "101", title: "In Progress", color: "blue", position: 1}
+          ]
+        },
+        {id: "11", title: "Backlog", space_id: "1", time_created: 1705398600000, lists: []}
+      ]
+    }.freeze
+
+    GET = {
+      board: {
+        id: "10",
+        title: "Sprint Board",
+        description: "Current sprint tasks",
+        space_id: "1",
+        time_created: 1705312200000,
+        time_updated: 1705398600000,
+        lists: [
+          {id: "100", title: "To Do", color: "gray", position: 0},
+          {id: "101", title: "In Progress", color: "blue", position: 1},
+          {id: "102", title: "Done", color: "green", position: 2}
+        ]
+      }
+    }.freeze
+
+    CREATE = {
+      board: {
+        id: "board-new-1",
+        title: "New Board",
+        description: "A new board for testing",
+        space_id: "1",
+        time_created: 1705312200000,
+        time_updated: 1705312200000,
+        lists: []
+      }
+    }.freeze
+
+    UPDATE = {
+      board: {
+        id: "10",
+        title: "Updated Sprint Board",
+        description: "Current sprint tasks",
+        space_id: "1",
+        time_created: 1705312200000,
+        time_updated: 1705399000000,
+        lists: [
+          {id: "100", title: "To Do", color: "gray", position: 0},
+          {id: "101", title: "In Progress", color: "blue", position: 1},
+          {id: "102", title: "Done", color: "green", position: 2}
+        ]
+      }
+    }.freeze
+
+    DUPLICATE = {
+      board: {
+        id: "board-dup-1",
+        title: "Copy of Sprint Board",
+        description: "Current sprint tasks",
+        space_id: "1",
+        time_created: 1705312200000,
+        time_updated: 1705312200000,
+        lists: [
+          {id: "200", title: "To Do", color: "gray", position: 0},
+          {id: "201", title: "In Progress", color: "blue", position: 1},
+          {id: "202", title: "Done", color: "green", position: 2}
+        ]
+      }
+    }.freeze
+
+    LIST_CREATE = {
+      list: {
+        id: "103",
+        title: "Review",
+        color: "purple",
+        board_id: "10",
+        position: 3
+      }
+    }.freeze
+
+    LIST_UPDATE = {
+      list: {
+        id: "100",
+        title: "Backlog",
+        color: "gray",
+        board_id: "10",
+        position: 0
+      }
+    }.freeze
+  end
+
+  module Users
+    ME = {
+      user: {
+        user_id: "u123abc",
+        display_name: "Test User",
+        email: "test@example.com",
+        role: "admin",
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+
+    MEMBERS = {
+      members: [
+        {user_id: "u123abc", display_name: "Test User", email: "test@example.com", role: "owner"},
+        {user_id: "u456def", display_name: "Another User", email: "another@example.com", role: "member"}
+      ]
+    }.freeze
+  end
+
+  module Spaces
+    LIST = {
+      projects: [
+        {id: "1", title: "Engineering", description: "Engineering team space", time_created: 1705312200000},
+        {id: "2", title: "Design", description: "Design team space", time_created: 1705398600000}
+      ]
+    }.freeze
+
+    GET = {
+      project: {
+        id: "1",
+        title: "Engineering",
+        description: "Engineering team space",
+        icon: "code",
+        time_created: 1705312200000,
+        time_updated: 1705398600000,
+        members: [{user_id: "u123abc", role: "admin"}]
+      }
+    }.freeze
+
+    CREATE = {
+      project: {
+        id: "space-new-1",
+        title: "Marketing",
+        description: "Marketing team space",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    UPDATE = {
+      project: {
+        id: "1",
+        title: "Engineering Team",
+        description: "Engineering team space",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+
+    ADD_MEMBER = {
+      member: {
+        id: "member-new-1",
+        user_id: "user-123",
+        space_id: "1",
+        role: "member",
+        time_created: 1705312200000
+      }
+    }.freeze
+
+    ADD_MEMBER_ROLE = {
+      member: {
+        id: "member-new-2",
+        user_id: "user-123",
+        space_id: "1",
+        role: "admin",
+        time_created: 1705312200000
+      }
+    }.freeze
+  end
+
+  module Projects
+    LIST = {
+      epics: [
+        {id: "proj-1", title: "Q1 Roadmap", status: "in_progress", time_created: 1705312200000},
+        {id: "proj-2", title: "Mobile App", status: "planned", time_created: 1705398600000}
+      ]
+    }.freeze
+
+    GET = {
+      epic: {
+        id: "proj-1",
+        title: "Q1 Roadmap",
+        status: "in_progress",
+        start_date: 1705312200000,
+        due_date: 1713174600000,
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+
+    CREATE = {
+      epic: {
+        id: "proj-new-1",
+        title: "New Project",
+        status: "planned",
+        list_id: "100",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    UPDATE = {
+      epic: {
+        id: "proj-1",
+        title: "Updated Roadmap",
+        status: "in_progress",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+  end
+
+  module Comments
+    GET = {
+      comment: {
+        id: "comment-1",
+        content: "<p>This is a test comment</p>",
+        user_id: "user-1",
+        card_id: "card-123",
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+
+    CREATE = {
+      comment: {
+        id: "comment-new-1",
+        content: "<p>New comment content</p>",
+        user_id: "user-1",
+        card_id: "card-123",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    UPDATE = {
+      comment: {
+        id: "comment-1",
+        content: "<p>Updated content</p>",
+        user_id: "user-1",
+        card_id: "card-123",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+
+    REPLIES = {
+      comments: [
+        {id: "reply-1", content: "<p>Reply 1</p>", user_id: "user-1", time_created: 1705312200000},
+        {id: "reply-2", content: "<p>Reply 2</p>", user_id: "user-2", time_created: 1705398600000}
+      ]
+    }.freeze
+
+    REPLY_CREATE = {
+      comment: {
+        id: "reply-1",
+        content: "<p>This is a reply</p>",
+        user_id: "user-1",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    REPLY_UPDATE = {
+      comment: {
+        id: "reply-1",
+        content: "<p>Updated reply</p>",
+        user_id: "user-1",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+  end
+
+  module Notes
+    LIST = {
+      notes: [
+        {id: "note-1", title: "Meeting Notes", time_created: 1705312200000},
+        {id: "note-2", title: "Standup Summary", time_created: 1705398600000}
+      ]
+    }.freeze
+
+    GET = {
+      note: {
+        id: "note-1",
+        title: "Meeting Notes",
+        content: "Discussion points from the team meeting",
+        transcript: "Full transcript here",
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+
+    CREATE = {
+      note: {
+        id: "note-new-1",
+        title: "New Note",
+        transcript: "Meeting transcript content",
+        time_created: 1705398600000
+      }
+    }.freeze
+  end
+
+  module Pages
+    LIST = {
+      pages: [
+        {id: "page-1", title: "Getting Started", space_id: "1", time_created: 1705312200000},
+        {id: "page-2", title: "API Documentation", space_id: "1", time_created: 1705398600000}
+      ]
+    }.freeze
+
+    GET = {
+      page: {
+        id: "page-1",
+        title: "Getting Started",
+        space_id: "1",
+        content: "Welcome to the getting started guide",
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+
+    CREATE = {
+      page: {
+        id: "page-new-1",
+        title: "New Page",
+        space_id: "1",
+        content: "Page content here",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    UPDATE = {
+      page: {
+        id: "page-1",
+        title: "Updated Page Title",
+        space_id: "1",
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+
+    DUPLICATE = {
+      page: {
+        id: "page-dup-1",
+        title: "Copy of Getting Started",
+        space_id: "1",
+        time_created: 1705398600000
+      }
+    }.freeze
+
+    ARCHIVE = {
+      page: {
+        id: "page-1",
+        title: "Getting Started",
+        space_id: "1",
+        archived: true,
+        time_created: 1705312200000,
+        time_updated: 1705485000000
+      }
+    }.freeze
+  end
+
+  module Sprints
+    LIST = {
+      sprints: [
+        {id: "sprint-1", title: "Sprint 1", status: "active", start_date: 1705312200000, due_date: 1706521800000, time_created: 1705312200000},
+        {id: "sprint-2", title: "Sprint 2", status: "planned", start_date: 1706521800000, due_date: 1707731400000, time_created: 1705398600000}
+      ]
+    }.freeze
+
+    GET = {
+      sprint: {
+        id: "sprint-1",
+        title: "Sprint 1",
+        status: "active",
+        start_date: 1705312200000,
+        due_date: 1706521800000,
+        time_created: 1705312200000,
+        time_updated: 1705398600000
+      }
+    }.freeze
+  end
+
+  module Search
+    RESULTS = {
+      results: [
+        {id: "card-auth", title: "Auth Module", type: "card", space_id: "1"},
+        {id: "page-login", title: "Login Flow", type: "page", space_id: "1"}
+      ]
+    }.freeze
+
+    RESULTS_TYPED = {
+      results: [
+        {id: "card-auth", title: "Auth Module", type: "card", space_id: "1"}
+      ]
+    }.freeze
+  end
+
+  module Workspaces
+    LIST = {
+      user: {
+        id: "user-1",
+        name: "Test User",
+        email: "test@example.com",
+        teams: [
+          {id: "ws-123", team_name: "My Team", role: "admin"},
+          {id: "ws-456", team_name: "Other Team", role: "member"}
+        ]
+      }
+    }.freeze
+  end
+
+  module Errors
+    NOT_FOUND = {error: "Card not found"}.freeze
+  end
+end

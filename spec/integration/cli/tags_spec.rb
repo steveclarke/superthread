@@ -9,7 +9,11 @@ RSpec.describe "st tags", :cli do
   end
 
   describe "tags create" do
-    it "creates a new tag", vcr: {cassette_name: "cli/tags_create"} do
+    before do
+      stub_api_post("test_workspace/tags", response: ApiFixtures::Tags::CREATE)
+    end
+
+    it "creates a new tag" do
       result = run_cli("tags", "create", "--name=urgent", "--color=#ff0000")
 
       expect(result[:exit_code]).to eq(0)
@@ -17,7 +21,7 @@ RSpec.describe "st tags", :cli do
       expect(result[:stdout]).to include("tag-new-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/tags_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("tags", "create", "--name=urgent", "--color=#ff0000")
 
       expect(json["id"]).to eq("tag-new-1")
@@ -27,14 +31,18 @@ RSpec.describe "st tags", :cli do
   end
 
   describe "tags update TAG" do
-    it "updates a tag", vcr: {cassette_name: "cli/tags_update"} do
+    before do
+      stub_api_patch("test_workspace/tags/tag-1", response: ApiFixtures::Tags::UPDATE)
+    end
+
+    it "updates a tag" do
       result = run_cli("tags", "update", "tag-1", "--name=critical", "--color=#ff5500")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("critical")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/tags_update"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("tags", "update", "tag-1", "--name=critical", "--color=#ff5500")
 
       expect(json["id"]).to eq("tag-1")
@@ -44,7 +52,11 @@ RSpec.describe "st tags", :cli do
   end
 
   describe "tags delete TAG" do
-    it "deletes a tag", vcr: {cassette_name: "cli/tags_delete"} do
+    before do
+      stub_api_delete("test_workspace/tags/tag-to-delete")
+    end
+
+    it "deletes a tag" do
       result = run_cli("tags", "delete", "tag-to-delete")
 
       expect(result[:exit_code]).to eq(0)

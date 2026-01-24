@@ -197,7 +197,7 @@ module Superthread
 
         # Render with glamour
         Glamour.render(markdown, width: width, style: "auto")
-      rescue => e
+      rescue
         # Fall back to plain text if rendering fails
         content
       end

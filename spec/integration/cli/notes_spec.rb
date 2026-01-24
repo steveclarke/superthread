@@ -9,7 +9,11 @@ RSpec.describe "st notes", :cli do
   end
 
   describe "notes list" do
-    it "lists all notes", vcr: {cassette_name: "cli/notes_list"} do
+    before do
+      stub_api_get("test_workspace/notes", response: ApiFixtures::Notes::LIST)
+    end
+
+    it "lists all notes" do
       result = run_cli("notes", "list")
 
       expect(result[:exit_code]).to eq(0)
@@ -17,7 +21,7 @@ RSpec.describe "st notes", :cli do
       expect(result[:stdout]).to include("Standup Summary")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/notes_list"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("notes", "list")
 
       expect(json).to be_an(Array)
@@ -27,7 +31,11 @@ RSpec.describe "st notes", :cli do
   end
 
   describe "notes get NOTE_ID" do
-    it "displays note details", vcr: {cassette_name: "cli/notes_get"} do
+    before do
+      stub_api_get("test_workspace/notes/note-1", response: ApiFixtures::Notes::GET)
+    end
+
+    it "displays note details" do
       result = run_cli("notes", "get", "note-1")
 
       expect(result[:exit_code]).to eq(0)
@@ -35,7 +43,7 @@ RSpec.describe "st notes", :cli do
       expect(result[:stdout]).to include("note-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/notes_get"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("notes", "get", "note-1")
 
       expect(json["id"]).to eq("note-1")
@@ -44,7 +52,11 @@ RSpec.describe "st notes", :cli do
   end
 
   describe "notes create" do
-    it "creates a new note", vcr: {cassette_name: "cli/notes_create"} do
+    before do
+      stub_api_post("test_workspace/notes", response: ApiFixtures::Notes::CREATE)
+    end
+
+    it "creates a new note" do
       result = run_cli("notes", "create",
         "--title=New Note",
         "--transcript=Meeting transcript content")
@@ -54,7 +66,7 @@ RSpec.describe "st notes", :cli do
       expect(result[:stdout]).to include("note-new-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/notes_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("notes", "create",
         "--title=New Note",
         "--transcript=Meeting transcript content")
@@ -65,7 +77,11 @@ RSpec.describe "st notes", :cli do
   end
 
   describe "notes delete NOTE_ID" do
-    it "deletes a note", vcr: {cassette_name: "cli/notes_delete"} do
+    before do
+      stub_api_delete("test_workspace/notes/note-to-delete")
+    end
+
+    it "deletes a note" do
       result = run_cli("notes", "delete", "note-to-delete")
 
       expect(result[:exit_code]).to eq(0)

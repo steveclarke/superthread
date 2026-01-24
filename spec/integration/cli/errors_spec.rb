@@ -9,7 +9,9 @@ RSpec.describe "CLI error handling", :cli do
   end
 
   describe "404 Not Found" do
-    it "displays friendly error message", vcr: {cassette_name: "cli/not_found"} do
+    it "displays friendly error message" do
+      stub_api_error(:get, "test_workspace/cards/nonexistent", status: 404, error: "Card not found")
+
       result = run_cli("cards", "get", "nonexistent")
 
       expect(result[:exit_code]).to eq(1)

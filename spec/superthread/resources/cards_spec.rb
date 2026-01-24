@@ -1,10 +1,19 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Superthread::Resources::Cards do
+  include StubHelpers
+
   let(:client) { Superthread::Client.new(api_key: "test_key") }
 
   describe "#update_checklist_item" do
-    it "updates a checklist item", vcr: {cassette_name: "resources/cards_update_checklist_item"} do
+    before do
+      stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",
+        response: ApiFixtures::Cards::CHECKLIST_ITEM_UPDATE)
+    end
+
+    it "updates a checklist item" do
       result = client.cards.update_checklist_item(
         "test_workspace",
         "card-123",
@@ -21,7 +30,11 @@ RSpec.describe Superthread::Resources::Cards do
   end
 
   describe "#delete_checklist_item" do
-    it "deletes a checklist item", vcr: {cassette_name: "resources/cards_delete_checklist_item"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1/items/item-1")
+    end
+
+    it "deletes a checklist item" do
       result = client.cards.delete_checklist_item(
         "test_workspace",
         "card-123",
@@ -35,7 +48,12 @@ RSpec.describe Superthread::Resources::Cards do
   end
 
   describe "#update_checklist" do
-    it "updates a checklist title", vcr: {cassette_name: "resources/cards_update_checklist"} do
+    before do
+      stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1",
+        response: ApiFixtures::Cards::CHECKLIST_UPDATE)
+    end
+
+    it "updates a checklist title" do
       result = client.cards.update_checklist(
         "test_workspace",
         "card-123",
@@ -49,7 +67,11 @@ RSpec.describe Superthread::Resources::Cards do
   end
 
   describe "#delete_checklist" do
-    it "deletes a checklist", vcr: {cassette_name: "resources/cards_delete_checklist"} do
+    before do
+      stub_api_delete("test_workspace/cards/card-123/checklists/checklist-1")
+    end
+
+    it "deletes a checklist" do
       result = client.cards.delete_checklist(
         "test_workspace",
         "card-123",

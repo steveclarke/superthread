@@ -9,7 +9,11 @@ RSpec.describe "st workspaces", :cli do
   end
 
   describe "workspaces list" do
-    it "lists available workspaces", vcr: {cassette_name: "cli/workspaces_list"} do
+    before do
+      stub_api_get("users/me", response: ApiFixtures::Workspaces::LIST)
+    end
+
+    it "lists available workspaces" do
       result = run_cli("workspaces", "list")
 
       expect(result[:exit_code]).to eq(0)

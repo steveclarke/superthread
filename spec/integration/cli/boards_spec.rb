@@ -9,7 +9,14 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards list --space" do
-    it "lists boards in a space", vcr: {cassette_name: "cli/boards_list"} do
+    before do
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/boards")
+        .with(query: hash_including(project_id: "1"))
+        .to_return(status: 200, body: ApiFixtures::Boards::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
+    end
+
+    it "lists boards in a space" do
       result = run_cli("boards", "list", "--space=1")
 
       expect(result[:exit_code]).to eq(0)
@@ -17,7 +24,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("Backlog")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_list"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "list", "--space=1")
 
       expect(json).to be_an(Array)
@@ -27,7 +34,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards get BOARD" do
-    it "displays board details", vcr: {cassette_name: "cli/boards_get"} do
+    before do
+      stub_api_get("test_workspace/boards/10", response: ApiFixtures::Boards::GET)
+    end
+
+    it "displays board details" do
       result = run_cli("boards", "get", "10")
 
       expect(result[:exit_code]).to eq(0)
@@ -35,7 +46,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("Current sprint tasks")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_get"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "get", "10")
 
       expect(json["id"]).to eq("10")
@@ -46,7 +57,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards create" do
-    it "creates a new board", vcr: {cassette_name: "cli/boards_create"} do
+    before do
+      stub_api_post("test_workspace/boards", response: ApiFixtures::Boards::CREATE)
+    end
+
+    it "creates a new board" do
       result = run_cli("boards", "create",
         "--space=1",
         "--title=New Board",
@@ -57,7 +72,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("board-new-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "create",
         "--space=1",
         "--title=New Board",
@@ -70,7 +85,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards update BOARD" do
-    it "updates board attributes", vcr: {cassette_name: "cli/boards_update"} do
+    before do
+      stub_api_patch("test_workspace/boards/10", response: ApiFixtures::Boards::UPDATE)
+    end
+
+    it "updates board attributes" do
       result = run_cli("boards", "update", "10",
         "--title=Updated Sprint Board")
 
@@ -78,7 +97,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("Updated Sprint Board")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_update"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "update", "10",
         "--title=Updated Sprint Board")
 
@@ -88,7 +107,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards delete BOARD" do
-    it "deletes a board with --force", vcr: {cassette_name: "cli/boards_delete"} do
+    before do
+      stub_api_delete("test_workspace/boards/board-to-delete")
+    end
+
+    it "deletes a board with --force" do
       result = run_cli("boards", "delete", "board-to-delete", "--force")
 
       expect(result[:exit_code]).to eq(0)
@@ -97,7 +120,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards duplicate BOARD" do
-    it "duplicates a board", vcr: {cassette_name: "cli/boards_duplicate"} do
+    before do
+      stub_api_post("test_workspace/boards/10/copy", response: ApiFixtures::Boards::DUPLICATE)
+    end
+
+    it "duplicates a board" do
       result = run_cli("boards", "duplicate", "10",
         "--title=Copy of Sprint Board")
 
@@ -106,7 +133,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("board-dup-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_duplicate"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "duplicate", "10",
         "--title=Copy of Sprint Board")
 
@@ -118,7 +145,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards list_create" do
-    it "creates a list on a board", vcr: {cassette_name: "cli/boards_list_create"} do
+    before do
+      stub_api_post("test_workspace/lists", response: ApiFixtures::Boards::LIST_CREATE)
+    end
+
+    it "creates a list on a board" do
       result = run_cli("boards", "list_create",
         "--board=10",
         "--title=Review")
@@ -128,7 +159,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("103")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_list_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "list_create",
         "--board=10",
         "--title=Review")
@@ -140,7 +171,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards list_update LIST_ID" do
-    it "updates a list", vcr: {cassette_name: "cli/boards_list_update"} do
+    before do
+      stub_api_patch("test_workspace/lists/100", response: ApiFixtures::Boards::LIST_UPDATE)
+    end
+
+    it "updates a list" do
       result = run_cli("boards", "list_update", "100",
         "--title=Backlog")
 
@@ -148,7 +183,7 @@ RSpec.describe "st boards", :cli do
       expect(result[:stdout]).to include("Backlog")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/boards_list_update"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("boards", "list_update", "100",
         "--title=Backlog")
 
@@ -158,7 +193,11 @@ RSpec.describe "st boards", :cli do
   end
 
   describe "boards list_delete LIST_ID" do
-    it "deletes a list with --force", vcr: {cassette_name: "cli/boards_list_delete"} do
+    before do
+      stub_api_delete("test_workspace/lists/103")
+    end
+
+    it "deletes a list with --force" do
       result = run_cli("boards", "list_delete", "103", "--force")
 
       expect(result[:exit_code]).to eq(0)

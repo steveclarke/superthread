@@ -9,7 +9,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments get COMMENT_ID" do
-    it "displays comment details", vcr: {cassette_name: "cli/comments_get"} do
+    before do
+      stub_api_get("test_workspace/comments/comment-1", response: ApiFixtures::Comments::GET)
+    end
+
+    it "displays comment details" do
       result = run_cli("comments", "get", "comment-1")
 
       expect(result[:exit_code]).to eq(0)
@@ -17,7 +21,7 @@ RSpec.describe "st comments", :cli do
       expect(result[:stdout]).to include("This is a test comment")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_get"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "get", "comment-1")
 
       expect(json["id"]).to eq("comment-1")
@@ -27,7 +31,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments create" do
-    it "creates a comment on a card", vcr: {cassette_name: "cli/comments_create"} do
+    before do
+      stub_api_post("test_workspace/comments", response: ApiFixtures::Comments::CREATE)
+    end
+
+    it "creates a comment on a card" do
       result = run_cli("comments", "create",
         "--content=New comment content",
         "--card_id=card-123")
@@ -36,7 +44,7 @@ RSpec.describe "st comments", :cli do
       expect(result[:stdout]).to include("comment-new-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_create"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "create",
         "--content=New comment content",
         "--card_id=card-123")
@@ -48,14 +56,18 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments update COMMENT_ID" do
-    it "updates comment content", vcr: {cassette_name: "cli/comments_update"} do
+    before do
+      stub_api_patch("test_workspace/comments/comment-1", response: ApiFixtures::Comments::UPDATE)
+    end
+
+    it "updates comment content" do
       result = run_cli("comments", "update", "comment-1", "--content=Updated content")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("comment-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_update"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "update", "comment-1", "--content=Updated content")
 
       expect(json["id"]).to eq("comment-1")
@@ -64,7 +76,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments delete COMMENT_ID" do
-    it "deletes a comment", vcr: {cassette_name: "cli/comments_delete"} do
+    before do
+      stub_api_delete("test_workspace/comments/comment-to-delete")
+    end
+
+    it "deletes a comment" do
       result = run_cli("comments", "delete", "comment-to-delete")
 
       expect(result[:exit_code]).to eq(0)
@@ -73,14 +89,18 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments reply COMMENT_ID" do
-    it "replies to a comment", vcr: {cassette_name: "cli/comments_reply"} do
+    before do
+      stub_api_post("test_workspace/comments/comment-1/comments", response: ApiFixtures::Comments::REPLY_CREATE)
+    end
+
+    it "replies to a comment" do
       result = run_cli("comments", "reply", "comment-1", "--content=This is a reply")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("reply-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_reply"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "reply", "comment-1", "--content=This is a reply")
 
       expect(json["id"]).to eq("reply-1")
@@ -89,7 +109,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments replies COMMENT_ID" do
-    it "lists replies to a comment", vcr: {cassette_name: "cli/comments_replies"} do
+    before do
+      stub_api_get("test_workspace/comments/comment-1/comments", response: ApiFixtures::Comments::REPLIES)
+    end
+
+    it "lists replies to a comment" do
       result = run_cli("comments", "replies", "comment-1")
 
       expect(result[:exit_code]).to eq(0)
@@ -97,7 +121,7 @@ RSpec.describe "st comments", :cli do
       expect(result[:stdout]).to include("Reply 2")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_replies"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "replies", "comment-1")
 
       expect(json).to be_an(Array)
@@ -106,7 +130,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments update_reply COMMENT_ID REPLY_ID" do
-    it "updates a reply", vcr: {cassette_name: "cli/comments_update_reply"} do
+    before do
+      stub_api_patch("test_workspace/comments/comment-1/comments/reply-1", response: ApiFixtures::Comments::REPLY_UPDATE)
+    end
+
+    it "updates a reply" do
       result = run_cli("comments", "update_reply", "comment-1", "reply-1",
         "--content=Updated reply")
 
@@ -114,7 +142,7 @@ RSpec.describe "st comments", :cli do
       expect(result[:stdout]).to include("reply-1")
     end
 
-    it "outputs JSON with --json flag", vcr: {cassette_name: "cli/comments_update_reply"} do
+    it "outputs JSON with --json flag" do
       json = cli_json("comments", "update_reply", "comment-1", "reply-1",
         "--content=Updated reply")
 
@@ -124,7 +152,11 @@ RSpec.describe "st comments", :cli do
   end
 
   describe "comments delete_reply COMMENT_ID REPLY_ID" do
-    it "deletes a reply", vcr: {cassette_name: "cli/comments_delete_reply"} do
+    before do
+      stub_api_delete("test_workspace/comments/comment-1/comments/reply-to-delete")
+    end
+
+    it "deletes a reply" do
       result = run_cli("comments", "delete_reply", "comment-1", "reply-to-delete")
 
       expect(result[:exit_code]).to eq(0)
