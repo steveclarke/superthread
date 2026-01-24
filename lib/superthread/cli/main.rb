@@ -77,6 +77,9 @@ module Superthread
 
       desc "tags SUBCOMMAND", "Tag management commands"
       subcommand "tags", Superthread::Cli::Tags
+
+      desc "completion SHELL", "Generate shell completion scripts"
+      subcommand "completion", Superthread::Cli::Completion
     end
   end
 end
