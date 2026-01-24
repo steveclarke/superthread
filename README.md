@@ -4,6 +4,14 @@ Ruby gem and CLI for [Superthread](https://superthread.com) project management.
 
 ## Installation
 
+### Homebrew (recommended)
+
+```bash
+brew install steveclarke/tap/superthread
+```
+
+### RubyGems
+
 ```bash
 gem install superthread
 ```
@@ -52,7 +60,7 @@ suth config init
 
 ## CLI Usage
 
-The CLI is available as `suth` (or `superthread`).
+The CLI is available as `suth`.
 
 ### Global Options
 
