@@ -2,6 +2,15 @@
 
 Ruby gem and CLI for [Superthread](https://superthread.com) project management.
 
+> [!WARNING]
+> **Pre-Release Software**
+>
+> This is a community-maintained project and is **not officially affiliated with or endorsed by Superthread**. It is a work in progress and not yet production-ready.
+>
+> We built this to provide comprehensive CLI and library access to the Superthread API for our own workflows. While we use it daily, it may have bugs, breaking changes, or incomplete features.
+>
+> **Use at your own risk.** Test thoroughly in non-critical environments before relying on it for important workflows. Issues and pull requests are welcome, but support is limited.
+
 ## Installation
 
 ### Homebrew (recommended)
@@ -32,9 +41,6 @@ Create `~/.config/superthread/config.yaml`:
 # API key (required) - get from Superthread settings
 api_key: stp_xxxxxxxxxxxx
 
-# Default workspace ID (optional)
-workspace: ws_abc123
-
 # Output format: json or table
 format: json
 
@@ -44,7 +50,28 @@ workspaces:
   work: ws_def456
 ```
 
-Initialize with defaults:
+### Quick Setup
+
+Run the interactive setup wizard:
+
+```bash
+suth setup
+```
+
+The wizard will:
+1. Prompt for your API key (from Superthread Settings → API)
+2. Validate and fetch your workspaces
+3. Let you select a default workspace
+4. Save configuration
+
+After setup, try:
+```bash
+suth spaces list
+suth boards list -s SPACE
+suth cards assigned me
+```
+
+Or initialize a blank config file manually:
 
 ```bash
 suth config init
@@ -68,80 +95,144 @@ The CLI is available as `suth`.
 -w, --workspace ID    Workspace ID (or use config/env var)
 -v, --verbose         Detailed logging
 -q, --quiet           Minimal logging
---format FORMAT       Output format: json (default) or table
+--json                Output in JSON format (default is table)
 ```
 
 ### Commands
 
 ```bash
+# Setup & Configuration
+suth version                                   # Show version
+suth setup                                     # Interactive setup wizard
+suth config init                               # Create default config file
+suth config show                               # Show current configuration
+suth config set KEY VALUE                      # Set a config value
+suth config path                               # Show config file path
+
+# Workspaces
+suth workspaces list                           # List available workspaces
+suth workspaces use WORKSPACE_ID               # Set default workspace
+suth workspaces current                        # Show current workspace
+
 # Users
-suth users me                              # Get current user
-suth users members                         # List workspace members
+suth users me                                  # Get current user
+suth users members                             # List workspace members
 
 # Cards
-suth cards list --board-id brd_xxx         # List cards on a board
-suth cards get CARD_ID                     # Get card details
-suth cards create --title "Task" --list-id lst_xxx
+suth cards get CARD_ID                         # Get card details
+suth cards create --title "Task" --list "To Do" --board BOARD
 suth cards update CARD_ID --title "New title"
 suth cards delete CARD_ID
-suth cards assigned                        # Cards assigned to you
-suth cards add-member CARD_ID --user-id usr_xxx
-suth cards remove-member CARD_ID --user-id usr_xxx
+suth cards duplicate CARD_ID                   # Clone a card
+suth cards assigned USER                       # Cards assigned to user
+suth cards assign CARD_ID USER                 # Assign user to card
+suth cards unassign CARD_ID USER               # Unassign user from card
+suth cards link CARD_ID OTHER_ID --type blocks # Link cards (blocks, blocked_by, related, duplicates)
+suth cards unlink CARD_ID OTHER_ID             # Remove card relationship
+
+# Card Checklists
+suth cards add-checklist CARD_ID --title "Tasks"
+suth cards edit-checklist CARD_ID CHECKLIST_ID --title "New title"
+suth cards rm-checklist CARD_ID CHECKLIST_ID
+suth cards add-item CARD_ID CHECKLIST_ID --title "Item" [--checked]
+suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --title "New" [--checked]
+suth cards rm-item CARD_ID CHECKLIST_ID ITEM_ID
+
+# Card Tags
+suth cards tags                                # List available tags
+suth cards tag CARD_ID TAG1,TAG2               # Add tags to card
+suth cards untag CARD_ID TAG                   # Remove tag from card
 
 # Boards
-suth boards list                           # List all boards
-suth boards get BOARD_ID                   # Get board details
-suth boards create --name "Sprint Board" --space-id spc_xxx
-suth boards update BOARD_ID --name "New name"
-suth boards delete BOARD_ID
-suth boards lists BOARD_ID                 # Get board lists/columns
+suth boards list --space SPACE                 # List boards in a space (--space required)
+suth boards get BOARD                          # Get board details
+suth boards lists BOARD                        # List columns/lists on a board
+suth boards create --title "Board" --space SPACE
+suth boards update BOARD --title "New name"
+suth boards duplicate BOARD                    # Clone a board
+suth boards delete BOARD
+
+# Board Lists (Columns)
+suth boards list_create --board BOARD --title "Column"
+suth boards list_update LIST_ID --title "New name"
+suth boards list_delete LIST_ID
 
 # Projects (Epics)
-suth projects list                         # List all projects
+suth projects list                             # List all projects
 suth projects get PROJECT_ID
-suth projects create --name "Q1 Roadmap" --space-id spc_xxx
-suth projects add-card PROJECT_ID --card-id crd_xxx
-suth projects remove-card PROJECT_ID --card-id crd_xxx
+suth projects create --title "Q1 Roadmap" --list LIST [--board BOARD]
+suth projects update PROJECT_ID --title "New title"
+suth projects delete PROJECT_ID
+suth projects add_card PROJECT_ID CARD_ID      # Link card to project
+suth projects remove_card PROJECT_ID CARD_ID   # Remove card from project
 
 # Spaces
-suth spaces list                           # List all spaces
-suth spaces get SPACE_ID
-suth spaces create --name "Engineering"
-suth spaces add-member SPACE_ID --user-id usr_xxx
-suth spaces remove-member SPACE_ID --user-id usr_xxx
+suth spaces list                               # List all spaces
+suth spaces get SPACE
+suth spaces create --title "Engineering"
+suth spaces update SPACE --title "New name"
+suth spaces delete SPACE
+suth spaces add_member SPACE USER [--role ROLE]
+suth spaces remove_member SPACE MEMBER_ID
 
 # Pages
-suth pages list --space-id spc_xxx         # List pages in a space
+suth pages list [--space SPACE]                # List pages
 suth pages get PAGE_ID
-suth pages create --title "Wiki" --space-id spc_xxx
+suth pages create --space SPACE [--title "Wiki"]
+suth pages update PAGE_ID --title "New title"
+suth pages duplicate PAGE_ID --space SPACE
 suth pages archive PAGE_ID
 suth pages delete PAGE_ID
 
 # Comments
 suth comments get COMMENT_ID
-suth comments create --card-id crd_xxx --content "Looks good!"
-suth comments update COMMENT_ID --content "Updated comment"
+suth comments create --content "Looks good!" --card-id CARD
+suth comments update COMMENT_ID --content "Updated"
 suth comments delete COMMENT_ID
-suth comments replies COMMENT_ID           # Get replies to a comment
+suth comments reply COMMENT_ID --content "Reply text"
+suth comments replies COMMENT_ID               # Get replies to a comment
+suth comments update_reply COMMENT_ID REPLY_ID --content "New"
+suth comments delete_reply COMMENT_ID REPLY_ID
 
 # Notes
-suth notes list --space-id spc_xxx
+suth notes list
 suth notes get NOTE_ID
-suth notes create --title "Meeting notes" --space-id spc_xxx
+suth notes create --title "Meeting notes" [--transcript "..."] [--user-notes "..."]
 suth notes delete NOTE_ID
 
 # Sprints
-suth sprints list --space-id spc_xxx
-suth sprints get SPRINT_ID --space-id spc_xxx
+suth sprints list --space SPACE
+suth sprints get SPRINT_ID --space SPACE
 
 # Search
-suth search query "bug fix" --types card,page
+suth search query "bug fix" [--types card,page] [--space SPACE] [--grouped]
 
 # Tags
 suth tags create --name "urgent" --color "#ff0000"
-suth tags update TAG_ID --name "critical"
-suth tags delete TAG_ID
+suth tags update TAG --name "critical"
+suth tags delete TAG
 ```
+
+### Option Aliases
+
+Common options have short aliases:
+
+| Long | Short | Description |
+|------|-------|-------------|
+| `--space` | `-s` | Space (ID or name) |
+| `--board` | `-b` | Board (ID or name) |
+| `--list` | `-l` | List (ID or name) |
+| `--owner` | `-o` | Owner (user ID, name, or email) |
+| `--force` | `-f` | Skip confirmation prompts |
+
+### Tips
+
+- Most commands accept **names or IDs** for spaces, boards, lists, users, and tags
+- Use `-s SPACE` to help resolve ambiguous board/list names
+- Use `--json` for scripted output: `suth cards assigned me --json`
+- Use `me` as a user reference: `suth cards assigned me`
+- Destructive commands prompt for confirmation; use `-f` or `--force` to skip
+- Priority levels: 1=Urgent, 2=High, 3=Medium, 4=Low
 
 ## Library Usage
 
@@ -159,12 +250,11 @@ end
 client = Superthread::Client.new
 
 # Users
-me = client.users.me(workspace_id)
+me = client.users.me                           # No workspace_id needed
 members = client.users.members(workspace_id)
 
 # Cards
-cards = client.cards.list(workspace_id, board_id: "brd_xxx")
-card = client.cards.get(workspace_id, "crd_xxx")
+card = client.cards.find(workspace_id, "crd_xxx")
 card = client.cards.create(workspace_id,
   title: "New task",
   list_id: "lst_xxx",
@@ -172,17 +262,18 @@ card = client.cards.create(workspace_id,
 )
 client.cards.update(workspace_id, "crd_xxx", title: "Updated title")
 client.cards.delete(workspace_id, "crd_xxx")
+cards = client.cards.assigned(workspace_id, user_id: "usr_xxx")
 
 # Boards
-boards = client.boards.list(workspace_id)
+boards = client.boards.list(workspace_id, space_id: "spc_xxx")
 board = client.boards.create(workspace_id,
-  name: "Sprint Board",
+  title: "Sprint Board",
   space_id: "spc_xxx"
 )
 
 # Projects
 projects = client.projects.list(workspace_id)
-client.projects.add_card(workspace_id, "prj_xxx", card_id: "crd_xxx")
+client.projects.add_card(workspace_id, "prj_xxx", "crd_xxx")
 
 # Search
 results = client.search.query(workspace_id,
