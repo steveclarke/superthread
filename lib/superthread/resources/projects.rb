@@ -7,12 +7,23 @@ module Superthread
       # Lists all roadmap projects (epics) in a workspace.
       # API: GET /:workspace/epics
       #
+      # Note: The API returns epics nested within lists (status columns).
+      # This method flattens them into a single collection.
+      #
       # @param workspace_id [String] Workspace ID
       # @return [Superthread::Objects::Collection<Project>] List of projects
       def list(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
-        get_collection("/#{ws}/epics",
-          item_class: Models::Project, items_key: :epics)
+        data = http_get("/#{ws}/epics")
+
+        # Epics are nested inside each list - flatten them
+        epics = (data[:lists] || []).flat_map { |list| list[:epics] || [] }
+
+        Superthread::Objects::Collection.from_response(
+          {epics: epics},
+          key: :epics,
+          item_class: Models::Project
+        )
       end
 
       # Gets a specific project.

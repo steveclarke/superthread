@@ -398,11 +398,28 @@ module ApiFixtures
   end
 
   module Projects
+    # API returns epics nested inside lists (status columns)
     LIST = {
-      epics: [
-        {id: "proj-1", title: "Q1 Roadmap", status: "in_progress", time_created: 1705312200000},
-        {id: "proj-2", title: "Mobile App", status: "planned", time_created: 1705398600000}
-      ]
+      list_order: ["1", "2"],
+      lists: [
+        {
+          id: "1",
+          title: "In Progress",
+          behavior: "started",
+          epics: [
+            {id: "proj-1", title: "Q1 Roadmap", type: "epic", time_created: 1705312200000}
+          ]
+        },
+        {
+          id: "2",
+          title: "Planned",
+          behavior: "committed",
+          epics: [
+            {id: "proj-2", title: "Mobile App", type: "epic", time_created: 1705398600000}
+          ]
+        }
+      ],
+      time_updated: 0
     }.freeze
 
     GET = {
