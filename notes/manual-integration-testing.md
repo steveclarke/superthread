@@ -1327,7 +1327,7 @@ suth spaces delete "Test Space" --skip-confirm
 | 13 | `comments create` | Uses `--card_id` instead of `--card` (inconsistent with other commands) | Low | Open |
 | 14 | `comments reply` | Wrong API endpoint: uses `/comments` instead of `/children` - returns 404 | High | Fixed |
 | 15 | `comments replies` | Wrong API endpoint + wrong key (`comments` → `child_comments`) | High | Fixed |
-| 16 | Feature: comments | Port `{{@Username}}` mention syntax and HTML formatting from MCP server | Medium | Open |
+| 16 | Feature: comments, checklists | Port `{{@Username}}` mention syntax and HTML formatting from MCP server (applies to comments, replies, and checklist item titles) | Medium | Open |
 | 17 | `pages get/create` | Shows "Space id: -" but API doesn't return space_id - either remove field or populate it | Medium | Open |
 | 18 | `pages list` | Returns empty without `-s` filter even when pages exist | Medium | Open |
 | 19 | `projects list` | Returns empty even when projects exist (similar to pages issue) | Medium | Open |
