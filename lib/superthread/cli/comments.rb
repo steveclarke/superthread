@@ -24,10 +24,13 @@ module Superthread
 
       desc "create", "Create a comment"
       option :content, type: :string, required: true, desc: "Comment content (HTML)"
-      option :card_id, type: :string, desc: "Card ID (required unless page_id)"
-      option :page_id, type: :string, desc: "Page ID (required unless card_id)"
+      option :card, type: :string, aliases: "-c", desc: "Card ID (required unless --page)"
+      option :page, type: :string, aliases: "-p", desc: "Page ID (required unless --card)"
       def create
-        comment = client.comments.create(workspace_id, **symbolized_options(:content, :card_id, :page_id))
+        opts = symbolized_options(:content)
+        opts[:card_id] = options[:card] if options[:card]
+        opts[:page_id] = options[:page] if options[:page]
+        comment = client.comments.create(workspace_id, **opts)
         output_item comment
       end
 

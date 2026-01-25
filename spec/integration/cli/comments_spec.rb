@@ -38,7 +38,7 @@ RSpec.describe "st comments", :cli do
     it "creates a comment on a card" do
       result = run_cli("comments", "create",
         "--content=New comment content",
-        "--card_id=card-123")
+        "--card=card-123")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("comment-new-1")
@@ -47,7 +47,7 @@ RSpec.describe "st comments", :cli do
     it "outputs JSON with --json flag" do
       json = cli_json("comments", "create",
         "--content=New comment content",
-        "--card_id=card-123")
+        "--card=card-123")
 
       expect(json["id"]).to eq("comment-new-1")
       expect(json["content"]).to include("New comment content")

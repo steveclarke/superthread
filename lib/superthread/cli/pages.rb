@@ -12,7 +12,7 @@ module Superthread
         opts = symbolized_options(:archived, :updated_recently)
         opts[:space_id] = space_id if options[:space]
         pages = client.pages.list(workspace_id, **opts)
-        output_list pages, columns: %i[id title space_id]
+        output_list pages, columns: %i[id title]
       end
 
       desc "get PAGE_ID", "Get page details"
@@ -20,7 +20,7 @@ module Superthread
       def get(page_id)
         handle_error do
           page = client.pages.find(workspace_id, page_id)
-          output_item page, fields: %i[id title space_id time_created time_updated]
+          output_item page, fields: %i[id title time_created time_updated]
 
           open_in_browser(:page, page_id)
         end
