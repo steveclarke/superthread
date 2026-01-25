@@ -174,25 +174,29 @@ module Superthread
         end
       end
 
-      desc "link CARD_ID RELATED_CARD_ID", "Link two cards"
+      desc "link", "Link two cards"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :related, type: :string, required: true, aliases: "-r", desc: "Related card ID"
       option :type, type: :string, required: true, enum: %w[blocks blocked_by related duplicates],
         desc: "Relationship type"
-      def link(card_id, related_card_id)
+      def link
         handle_error do
           client.cards.add_related(
-            workspace_id, card_id,
-            related_card_id: related_card_id,
+            workspace_id, options[:card],
+            related_card_id: options[:related],
             relation_type: options[:type]
           )
-          Ui.success "Linked #{card_id} -> #{related_card_id} (#{options[:type]})"
+          Ui.success "Linked #{options[:card]} -> #{options[:related]} (#{options[:type]})"
         end
       end
 
-      desc "unlink CARD_ID LINKED_CARD_ID", "Remove card relationship"
-      def unlink(card_id, linked_card_id)
+      desc "unlink", "Remove card relationship"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :related, type: :string, required: true, aliases: "-r", desc: "Related card ID"
+      def unlink
         handle_error do
-          client.cards.remove_related(workspace_id, card_id, linked_card_id)
-          Ui.success "Unlinked #{card_id} from #{linked_card_id}"
+          client.cards.remove_related(workspace_id, options[:card], options[:related])
+          Ui.success "Unlinked #{options[:card]} from #{options[:related]}"
         end
       end
 
@@ -205,38 +209,44 @@ module Superthread
         end
       end
 
-      desc "edit-checklist CARD_ID CHECKLIST_ID", "Update a checklist"
+      desc "edit-checklist", "Update a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :checklist, type: :string, required: true, desc: "Checklist ID"
       option :title, type: :string, required: true, desc: "New checklist title"
-      def edit_checklist(card_id, checklist_id)
+      def edit_checklist
         handle_error do
           checklist = client.cards.update_checklist(
-            workspace_id, card_id, checklist_id,
+            workspace_id, options[:card], options[:checklist],
             title: options[:title]
           )
           output_item checklist, fields: %i[id title card_id time_created]
         end
       end
 
-      desc "remove-checklist CARD_ID CHECKLIST_ID", "Delete a checklist"
-      def remove_checklist(card_id, checklist_id)
+      desc "remove-checklist", "Delete a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      def remove_checklist
         handle_error do
-          card = client.cards.find(workspace_id, card_id)
-          checklist = card.checklists&.find { |c| c.id == checklist_id }
-          checklist_name = checklist&.title || checklist_id
-          confirming("Delete checklist '#{checklist_name}' (#{checklist_id})?") do
-            client.cards.delete_checklist(workspace_id, card_id, checklist_id)
+          card = client.cards.find(workspace_id, options[:card])
+          checklist = card.checklists&.find { |c| c.id == options[:checklist] }
+          checklist_name = checklist&.title || options[:checklist]
+          confirming("Delete checklist '#{checklist_name}' (#{options[:checklist]})?") do
+            client.cards.delete_checklist(workspace_id, options[:card], options[:checklist])
             output_success "Checklist '#{checklist_name}' deleted"
           end
         end
       end
 
-      desc "add-item CARD_ID CHECKLIST_ID", "Add item to a checklist"
+      desc "add-item", "Add item to a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :checklist, type: :string, required: true, desc: "Checklist ID"
       option :title, type: :string, required: true, desc: "Item title"
       option :checked, type: :boolean, default: false, desc: "Create as checked"
-      def add_item(card_id, checklist_id)
+      def add_item
         handle_error do
           item = client.cards.add_checklist_item(
-            workspace_id, card_id, checklist_id,
+            workspace_id, options[:card], options[:checklist],
             title: options[:title],
             checked: options[:checked]
           )
@@ -244,29 +254,35 @@ module Superthread
         end
       end
 
-      desc "edit-item CARD_ID CHECKLIST_ID ITEM_ID", "Update a checklist item"
+      desc "edit-item", "Update a checklist item"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :item, type: :string, required: true, desc: "Item ID"
       option :title, type: :string, desc: "New item title"
       option :checked, type: :boolean, desc: "Mark as checked/unchecked"
-      def edit_item(card_id, checklist_id, item_id)
+      def edit_item
         handle_error do
           opts = symbolized_options(:title, :checked)
           item = client.cards.update_checklist_item(
-            workspace_id, card_id, checklist_id, item_id,
+            workspace_id, options[:card], options[:checklist], options[:item],
             **opts
           )
           output_item item, fields: %i[id title checked checklist_id]
         end
       end
 
-      desc "remove-item CARD_ID CHECKLIST_ID ITEM_ID", "Delete a checklist item"
-      def remove_item(card_id, checklist_id, item_id)
+      desc "remove-item", "Delete a checklist item"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :item, type: :string, required: true, desc: "Item ID"
+      def remove_item
         handle_error do
-          card = client.cards.find(workspace_id, card_id)
-          checklist = card.checklists&.find { |c| c.id == checklist_id }
-          item = checklist&.items&.find { |i| i.id == item_id }
-          item_name = item&.title || item_id
-          confirming("Delete checklist item '#{item_name}' (#{item_id})?") do
-            client.cards.delete_checklist_item(workspace_id, card_id, checklist_id, item_id)
+          card = client.cards.find(workspace_id, options[:card])
+          checklist = card.checklists&.find { |c| c.id == options[:checklist] }
+          item = checklist&.items&.find { |i| i.id == options[:item] }
+          item_name = item&.title || options[:item]
+          confirming("Delete checklist item '#{item_name}' (#{options[:item]})?") do
+            client.cards.delete_checklist_item(workspace_id, options[:card], options[:checklist], options[:item])
             output_success "Checklist item '#{item_name}' deleted"
           end
         end

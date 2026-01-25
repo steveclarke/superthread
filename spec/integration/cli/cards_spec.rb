@@ -171,26 +171,26 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards link CARD_ID RELATED_CARD_ID" do
+  describe "cards link" do
     before do
       stub_api_post("test_workspace/cards/card-123/linked_cards", response: ApiFixtures::SUCCESS)
     end
 
     it "links two cards" do
-      result = run_cli("cards", "link", "card-123", "card-456", "--type=blocks")
+      result = run_cli("cards", "link", "--card=card-123", "--related=card-456", "--type=blocks")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Linked card-123 -> card-456 (blocks)")
     end
   end
 
-  describe "cards unlink CARD_ID LINKED_CARD_ID" do
+  describe "cards unlink" do
     before do
       stub_api_delete("test_workspace/cards/card-123/linked_cards/card-456")
     end
 
     it "unlinks cards" do
-      result = run_cli("cards", "unlink", "card-123", "card-456")
+      result = run_cli("cards", "unlink", "--card=card-123", "--related=card-456")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Unlinked card-123 from card-456")
@@ -221,15 +221,15 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards add-item CARD_ID CHECKLIST_ID" do
+  describe "cards add-item" do
     before do
       stub_api_post("test_workspace/cards/card-123/checklists/checklist-1/items",
         response: ApiFixtures::Cards::CHECKLIST_ITEM_CREATE)
     end
 
     it "adds item to checklist" do
-      result = run_cli("cards", "add-item", "card-123", "checklist-1",
-        "--title=Write unit tests")
+      result = run_cli("cards", "add-item",
+        "--card=card-123", "--checklist=checklist-1", "--title=Write unit tests")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Write unit tests")
@@ -237,8 +237,8 @@ RSpec.describe "st cards", :cli do
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("cards", "add-item", "card-123", "checklist-1",
-        "--title=Write unit tests")
+      json = cli_json("cards", "add-item",
+        "--card=card-123", "--checklist=checklist-1", "--title=Write unit tests")
 
       expect(json["id"]).to eq("item-1")
       expect(json["title"]).to eq("Write unit tests")
@@ -246,15 +246,15 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards edit-checklist CARD_ID CHECKLIST_ID" do
+  describe "cards edit-checklist" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1",
         response: ApiFixtures::Cards::CHECKLIST_UPDATE)
     end
 
     it "updates a checklist title" do
-      result = run_cli("cards", "edit-checklist", "card-123", "checklist-1",
-        "--title=Updated checklist")
+      result = run_cli("cards", "edit-checklist",
+        "--card=card-123", "--checklist=checklist-1", "--title=Updated checklist")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Updated checklist")
@@ -262,8 +262,8 @@ RSpec.describe "st cards", :cli do
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("cards", "edit-checklist", "card-123", "checklist-1",
-        "--title=Updated checklist")
+      json = cli_json("cards", "edit-checklist",
+        "--card=card-123", "--checklist=checklist-1", "--title=Updated checklist")
 
       expect(json["id"]).to eq("checklist-1")
       expect(json["title"]).to eq("Updated checklist")
@@ -271,28 +271,30 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards remove-checklist CARD_ID CHECKLIST_ID" do
+  describe "cards remove-checklist" do
     before do
       stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::WITH_CHECKLIST)
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete")
     end
 
     it "deletes a checklist with -y" do
-      result = run_cli("cards", "remove-checklist", "card-123", "checklist-to-delete", "-y")
+      result = run_cli("cards", "remove-checklist",
+        "--card=card-123", "--checklist=checklist-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Checklist 'Checklist to Delete' deleted")
     end
   end
 
-  describe "cards edit-item CARD_ID CHECKLIST_ID ITEM_ID" do
+  describe "cards edit-item" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",
         response: ApiFixtures::Cards::CHECKLIST_ITEM_UPDATE)
     end
 
     it "updates a checklist item" do
-      result = run_cli("cards", "edit-item", "card-123", "checklist-1", "item-1",
+      result = run_cli("cards", "edit-item",
+        "--card=card-123", "--checklist=checklist-1", "--item=item-1",
         "--title=Updated item", "--checked")
 
       expect(result[:exit_code]).to eq(0)
@@ -301,7 +303,8 @@ RSpec.describe "st cards", :cli do
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("cards", "edit-item", "card-123", "checklist-1", "item-1",
+      json = cli_json("cards", "edit-item",
+        "--card=card-123", "--checklist=checklist-1", "--item=item-1",
         "--title=Updated item", "--checked")
 
       expect(json["id"]).to eq("item-1")
@@ -310,14 +313,15 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards remove-item CARD_ID CHECKLIST_ID ITEM_ID" do
+  describe "cards remove-item" do
     before do
       stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::WITH_CHECKLIST)
       stub_api_delete("test_workspace/cards/card-123/checklists/checklist-to-delete/items/item-to-delete")
     end
 
     it "deletes a checklist item with -y" do
-      result = run_cli("cards", "remove-item", "card-123", "checklist-to-delete", "item-to-delete", "-y")
+      result = run_cli("cards", "remove-item",
+        "--card=card-123", "--checklist=checklist-to-delete", "--item=item-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Checklist item 'Item to Delete' deleted")

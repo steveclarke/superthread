@@ -4,6 +4,10 @@ module Superthread
   module Cli
     # CLI commands for comment operations.
     class Comments < Base
+      # Kebab-case aliases for commands
+      map "update-reply" => :update_reply,
+        "delete-reply" => :delete_reply
+
       desc "get COMMENT_ID", "Get comment details"
       option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       def get(comment_id)
@@ -67,22 +71,26 @@ module Superthread
         output_list comments, columns: %i[id content user_id time_created]
       end
 
-      desc "update_reply COMMENT_ID REPLY_ID", "Update a reply"
+      desc "update-reply", "Update a reply"
+      option :comment, type: :string, required: true, desc: "Parent comment ID"
+      option :reply, type: :string, required: true, desc: "Reply ID"
       option :content, type: :string, desc: "New content"
       option :status, type: :string, enum: %w[resolved open orphaned], desc: "Status"
-      def update_reply(comment_id, reply_id)
-        comment = client.comments.update_reply(workspace_id, comment_id, reply_id,
+      def update_reply
+        comment = client.comments.update_reply(workspace_id, options[:comment], options[:reply],
                                                **symbolized_options(:content, :status))
         output_item comment
       end
 
-      desc "delete_reply COMMENT_ID REPLY_ID", "Delete a reply"
-      def delete_reply(comment_id, reply_id)
+      desc "delete-reply", "Delete a reply"
+      option :comment, type: :string, required: true, desc: "Parent comment ID"
+      option :reply, type: :string, required: true, desc: "Reply ID"
+      def delete_reply
         handle_error do
-          reply = client.comments.find(workspace_id, reply_id)
+          reply = client.comments.find(workspace_id, options[:reply])
           preview = truncate_content(reply.content)
           confirming("Delete reply '#{preview}' (#{reply.id})?") do
-            client.comments.delete_reply(workspace_id, comment_id, reply.id)
+            client.comments.delete_reply(workspace_id, options[:comment], reply.id)
             output_success "Reply #{reply.id} deleted"
           end
         end

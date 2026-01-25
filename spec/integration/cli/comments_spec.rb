@@ -130,36 +130,37 @@ RSpec.describe "st comments", :cli do
     end
   end
 
-  describe "comments update_reply COMMENT_ID REPLY_ID" do
+  describe "comments update-reply" do
     before do
       stub_api_patch("test_workspace/comments/comment-1/children/reply-1", response: ApiFixtures::Comments::REPLY_UPDATE)
     end
 
     it "updates a reply" do
-      result = run_cli("comments", "update_reply", "comment-1", "reply-1",
-        "--content=Updated reply")
+      result = run_cli("comments", "update-reply",
+        "--comment=comment-1", "--reply=reply-1", "--content=Updated reply")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("reply-1")
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("comments", "update_reply", "comment-1", "reply-1",
-        "--content=Updated reply")
+      json = cli_json("comments", "update-reply",
+        "--comment=comment-1", "--reply=reply-1", "--content=Updated reply")
 
       expect(json["id"]).to eq("reply-1")
       expect(json["content"]).to include("Updated reply")
     end
   end
 
-  describe "comments delete_reply COMMENT_ID REPLY_ID" do
+  describe "comments delete-reply" do
     before do
       stub_api_get("test_workspace/comments/reply-to-delete", response: ApiFixtures::Comments::REPLY_DELETE)
       stub_api_delete("test_workspace/comments/comment-1/children/reply-to-delete")
     end
 
     it "deletes a reply with -y" do
-      result = run_cli("comments", "delete_reply", "comment-1", "reply-to-delete", "-y")
+      result = run_cli("comments", "delete-reply",
+        "--comment=comment-1", "--reply=reply-to-delete", "-y")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Reply reply-to-delete deleted")
