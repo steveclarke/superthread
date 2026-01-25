@@ -165,16 +165,16 @@ suth cards duplicate CARD_ID                   # Clone a card
 suth cards assigned USER                       # Cards assigned to user
 suth cards assign CARD_ID USER                 # Assign user to card
 suth cards unassign CARD_ID USER               # Unassign user from card
-suth cards link CARD_ID OTHER_ID --type blocks # Link cards (blocks, blocked_by, related, duplicates)
-suth cards unlink CARD_ID OTHER_ID             # Remove card relationship
+suth cards link --card CARD --related OTHER --type blocks  # Link cards
+suth cards unlink --card CARD --related OTHER  # Remove card relationship
 
 # Card Checklists
 suth cards add-checklist CARD_ID --title "Tasks"
-suth cards edit-checklist CARD_ID CHECKLIST_ID --title "New title"
-suth cards remove-checklist CARD_ID CHECKLIST_ID
-suth cards add-item CARD_ID CHECKLIST_ID --title "Item" [--checked]
-suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --title "New" [--checked]
-suth cards remove-item CARD_ID CHECKLIST_ID ITEM_ID
+suth cards edit-checklist --card CARD --checklist CL --title "New title"
+suth cards remove-checklist --card CARD --checklist CL
+suth cards add-item --card CARD --checklist CL --title "Item" [--checked]
+suth cards edit-item --card CARD --checklist CL --item ITEM --title "New"
+suth cards remove-item --card CARD --checklist CL --item ITEM
 
 # Card Tags
 suth cards tags                                # List available tags
@@ -224,13 +224,13 @@ suth pages delete PAGE_ID
 
 # Comments
 suth comments get COMMENT_ID [-o]              # Get comment (opens parent card)
-suth comments create --content "Looks good!" --card_id CARD
+suth comments create --content "Looks good!" --card CARD
 suth comments update COMMENT_ID --content "Updated"
 suth comments delete COMMENT_ID
 suth comments reply COMMENT_ID --content "Reply text"
 suth comments replies COMMENT_ID               # Get replies to a comment
-suth comments update_reply COMMENT_ID REPLY_ID --content "New"
-suth comments delete_reply COMMENT_ID REPLY_ID
+suth comments update-reply --comment COMMENT --reply REPLY --content "New"
+suth comments delete-reply --comment COMMENT --reply REPLY
 
 # Notes
 suth notes list
@@ -290,6 +290,8 @@ Common options have short aliases:
 | `--space` | `-s` | Space (ID or name) |
 | `--board` | `-b` | Board (ID or name) |
 | `--list` | `-l` | List (ID or name) |
+| `--card` | `-c` | Card ID |
+| `--related` | `-r` | Related card ID |
 | `--owner` | `-o` | Owner (user ID, name, or email) |
 | `--open` | `-o` | Open in browser (on get commands) |
 | `--yes` | `-y` | Skip confirmation prompts |
