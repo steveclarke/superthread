@@ -20,7 +20,7 @@ module Superthread
       attribute :team_id, Shale::Type::String
       attribute :title, Shale::Type::String
       attribute :description, Shale::Type::String
-      attribute :icon, Shale::Type::String
+      attribute :icon, Shale::Type::Value
       attribute :user_id, Shale::Type::String
       attribute :time_created, Shale::Type::Integer
       attribute :time_updated, Shale::Type::Integer
