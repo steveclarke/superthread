@@ -61,7 +61,7 @@ module Superthread
       end
 
       # Replies to a comment.
-      # API: POST /:workspace/comments/:comment/comments
+      # API: POST /:workspace/comments/:comment/children
       #
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Parent comment ID
@@ -72,12 +72,12 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         body = compact_params(content: content, **params)
-        post_object("/#{ws}/comments/#{comment}/comments", body: body,
+        post_object("/#{ws}/comments/#{comment}/children", body: body,
           object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Gets replies to a comment.
-      # API: GET /:workspace/comments/:comment/comments
+      # API: GET /:workspace/comments/:comment/children
       #
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Comment ID
@@ -85,12 +85,12 @@ module Superthread
       def replies(workspace_id, comment_id)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
-        get_collection("/#{ws}/comments/#{comment}/comments",
-          item_class: Models::Comment, items_key: :comments)
+        get_collection("/#{ws}/comments/#{comment}/children",
+          item_class: Models::Comment, items_key: :child_comments)
       end
 
       # Updates a reply.
-      # API: PATCH /:workspace/comments/:comment/comments/:reply
+      # API: PATCH /:workspace/comments/:comment/children/:reply
       #
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Parent comment ID
@@ -101,12 +101,12 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         reply = safe_id("reply_id", reply_id)
-        patch_object("/#{ws}/comments/#{comment}/comments/#{reply}", body: compact_params(**params),
+        patch_object("/#{ws}/comments/#{comment}/children/#{reply}", body: compact_params(**params),
           object_class: Models::Comment, unwrap_key: :comment)
       end
 
       # Deletes a reply.
-      # API: DELETE /:workspace/comments/:comment/comments/:reply
+      # API: DELETE /:workspace/comments/:comment/children/:reply
       #
       # @param workspace_id [String] Workspace ID
       # @param comment_id [String] Parent comment ID
@@ -116,7 +116,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         reply = safe_id("reply_id", reply_id)
-        http_delete("/#{ws}/comments/#{comment}/comments/#{reply}")
+        http_delete("/#{ws}/comments/#{comment}/children/#{reply}")
         success_response
       end
     end

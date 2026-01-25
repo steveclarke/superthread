@@ -102,11 +102,12 @@ RSpec.describe "st cards", :cli do
   describe "cards duplicate CARD_ID" do
     before do
       stub_api_post("test_workspace/cards/card-123/copy", response: ApiFixtures::Cards::DUPLICATE)
+      stub_api_get("test_workspace/boards/board-1", response: ApiFixtures::Boards::GET)
     end
 
     it "duplicates a card" do
       result = run_cli("cards", "duplicate", "card-123",
-        "--title=Copy of Implement feature X")
+        "--title=Copy of Implement feature X", "--project=project-1", "-b", "board-1", "-l", "list-1")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("Copy of Implement feature X")
@@ -115,7 +116,7 @@ RSpec.describe "st cards", :cli do
 
     it "outputs JSON with --json flag" do
       json = cli_json("cards", "duplicate", "card-123",
-        "--title=Copy of Implement feature X")
+        "--title=Copy of Implement feature X", "--project=project-1", "-b", "board-1", "-l", "list-1")
 
       expect(json["id"]).to eq("card-dup-1")
       expect(json["title"]).to eq("Copy of Implement feature X")

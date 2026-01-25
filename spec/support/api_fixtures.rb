@@ -482,7 +482,7 @@ module ApiFixtures
     }.freeze
 
     REPLIES = {
-      comments: [
+      child_comments: [
         {id: "reply-1", content: "<p>Reply 1</p>", user_id: "user-1", time_created: 1705312200000},
         {id: "reply-2", content: "<p>Reply 2</p>", user_id: "user-2", time_created: 1705398600000}
       ]

@@ -124,9 +124,17 @@ module Superthread
 
       desc "duplicate CARD_ID", "Duplicate a card"
       option :title, type: :string, desc: "Title for the copy"
+      option :project, type: :string, required: true, desc: "Project/space ID (required)"
+      option :board, type: :string, required: true, aliases: "-b", desc: "Destination board (ID or name)"
+      option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       def duplicate(card_id)
         handle_error do
-          card = client.cards.duplicate(workspace_id, card_id, **symbolized_options(:title))
+          opts = symbolized_options(:title)
+          opts[:project_id] = options[:project]
+          opts[:board_id] = board_id
+          opts[:list_id] = resolve_list(options[:list])
+          card = client.cards.duplicate(workspace_id, card_id, **opts)
           output_item card
         end
       end

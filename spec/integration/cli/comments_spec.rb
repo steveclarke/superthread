@@ -91,7 +91,7 @@ RSpec.describe "st comments", :cli do
 
   describe "comments reply COMMENT_ID" do
     before do
-      stub_api_post("test_workspace/comments/comment-1/comments", response: ApiFixtures::Comments::REPLY_CREATE)
+      stub_api_post("test_workspace/comments/comment-1/children", response: ApiFixtures::Comments::REPLY_CREATE)
     end
 
     it "replies to a comment" do
@@ -111,7 +111,7 @@ RSpec.describe "st comments", :cli do
 
   describe "comments replies COMMENT_ID" do
     before do
-      stub_api_get("test_workspace/comments/comment-1/comments", response: ApiFixtures::Comments::REPLIES)
+      stub_api_get("test_workspace/comments/comment-1/children", response: ApiFixtures::Comments::REPLIES)
     end
 
     it "lists replies to a comment" do
@@ -132,7 +132,7 @@ RSpec.describe "st comments", :cli do
 
   describe "comments update_reply COMMENT_ID REPLY_ID" do
     before do
-      stub_api_patch("test_workspace/comments/comment-1/comments/reply-1", response: ApiFixtures::Comments::REPLY_UPDATE)
+      stub_api_patch("test_workspace/comments/comment-1/children/reply-1", response: ApiFixtures::Comments::REPLY_UPDATE)
     end
 
     it "updates a reply" do
@@ -155,7 +155,7 @@ RSpec.describe "st comments", :cli do
   describe "comments delete_reply COMMENT_ID REPLY_ID" do
     before do
       stub_api_get("test_workspace/comments/reply-to-delete", response: ApiFixtures::Comments::REPLY_DELETE)
-      stub_api_delete("test_workspace/comments/comment-1/comments/reply-to-delete")
+      stub_api_delete("test_workspace/comments/comment-1/children/reply-to-delete")
     end
 
     it "deletes a reply with -y" do

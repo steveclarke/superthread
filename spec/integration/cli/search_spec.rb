@@ -11,7 +11,7 @@ RSpec.describe "st search", :cli do
   describe "search query SEARCH_TERM" do
     before do
       stub_request(:get, "https://api.superthread.com/v1/test_workspace/search")
-        .with(query: hash_including(q: "authentication"))
+        .with(query: hash_including(query: "authentication"))
         .to_return(status: 200, body: ApiFixtures::Search::RESULTS.to_json,
           headers: {"Content-Type" => "application/json"})
     end
@@ -36,7 +36,7 @@ RSpec.describe "st search", :cli do
   describe "search query with type filter" do
     before do
       stub_request(:get, "https://api.superthread.com/v1/test_workspace/search")
-        .with(query: hash_including(q: "authentication"))
+        .with(query: hash_including(query: "authentication"))
         .to_return(status: 200, body: ApiFixtures::Search::RESULTS_TYPED.to_json,
           headers: {"Content-Type" => "application/json"})
     end
