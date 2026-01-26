@@ -78,6 +78,9 @@ module Superthread
       desc "tags SUBCOMMAND", "Tag management commands"
       subcommand "tags", Superthread::Cli::Tags
 
+      desc "activity", "Show recent activity across workspace"
+      subcommand "activity", Superthread::Cli::Activity
+
       desc "completion SHELL", "Generate shell completion scripts"
       subcommand "completion", Superthread::Cli::Completion
     end
