@@ -187,4 +187,85 @@ RSpec.describe Superthread::Models::Card do
       expect(card).not_to eq(card2)
     end
   end
+
+  describe "card relationships" do
+    describe "#parent" do
+      it "returns nil when no parent_card" do
+        expect(card.parent).to be_nil
+      end
+
+      it "returns CardRef when parent_card exists" do
+        card_with_parent = described_class.from_response(
+          card_data.merge("parent_card" => {"id" => "parent-1", "title" => "Parent Task"})
+        )
+        expect(card_with_parent.parent).to be_a(Superthread::Models::CardRef)
+        expect(card_with_parent.parent.id).to eq("parent-1")
+        expect(card_with_parent.parent.title).to eq("Parent Task")
+        expect(card_with_parent.parent.to_s).to eq("Parent Task (parent-1)")
+      end
+    end
+
+    describe "#children" do
+      it "returns empty array when no child_cards" do
+        expect(card.children).to eq([])
+      end
+
+      it "returns array of CardRef when child_cards exist" do
+        card_with_children = described_class.from_response(
+          card_data.merge("child_cards" => [
+            {"id" => "child-1", "title" => "Subtask 1"},
+            {"id" => "child-2", "title" => "Subtask 2"}
+          ])
+        )
+        expect(card_with_children.children).to be_an(Array)
+        expect(card_with_children.children.size).to eq(2)
+        expect(card_with_children.children.first).to be_a(Superthread::Models::CardRef)
+        expect(card_with_children.children.first.title).to eq("Subtask 1")
+      end
+
+      it "handles API format with card_id instead of id" do
+        card_with_children = described_class.from_response(
+          card_data.merge("child_cards" => [
+            {"card_id" => "child-1", "title" => "Subtask 1", "board_id" => "18"}
+          ])
+        )
+        expect(card_with_children.children.first.id).to eq("child-1")
+      end
+    end
+
+    describe "#links" do
+      it "returns empty array when no linked_cards" do
+        expect(card.links).to eq([])
+      end
+
+      it "returns array of LinkedCardRef when linked_cards exist" do
+        card_with_links = described_class.from_response(
+          card_data.merge("linked_cards" => [
+            {"id" => "link-1", "title" => "Blocking Task", "linked_card_type" => "blocks"},
+            {"id" => "link-2", "title" => "Related Task", "linked_card_type" => "related"}
+          ])
+        )
+        expect(card_with_links.links).to be_an(Array)
+        expect(card_with_links.links.size).to eq(2)
+        expect(card_with_links.links.first).to be_a(Superthread::Models::LinkedCardRef)
+        expect(card_with_links.links.first.relationship).to eq("blocks")
+      end
+    end
+
+    describe "#links_by_type" do
+      it "groups links by relationship type" do
+        card_with_links = described_class.from_response(
+          card_data.merge("linked_cards" => [
+            {"id" => "link-1", "title" => "Blocking Task 1", "linked_card_type" => "blocks"},
+            {"id" => "link-2", "title" => "Blocking Task 2", "linked_card_type" => "blocks"},
+            {"id" => "link-3", "title" => "Related Task", "linked_card_type" => "related"}
+          ])
+        )
+        grouped = card_with_links.links_by_type
+        expect(grouped.keys).to contain_exactly("blocks", "related")
+        expect(grouped["blocks"].size).to eq(2)
+        expect(grouped["related"].size).to eq(1)
+      end
+    end
+  end
 end

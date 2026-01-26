@@ -104,6 +104,37 @@ module Superthread
       def priority_name
         {4 => "urgent", 3 => "high", 2 => "medium", 1 => "low"}[priority]
       end
+
+      # Returns the parent card as a CardRef, or nil if none.
+      #
+      # @return [CardRef, nil] Parent card reference
+      def parent
+        return nil if parent_card.nil? || parent_card.empty?
+        CardRef.new(parent_card)
+      end
+
+      # Returns child cards as an array of CardRef objects.
+      #
+      # @return [Array<CardRef>] Child card references
+      def children
+        return [] if child_cards.nil? || !child_cards.is_a?(Array)
+        child_cards.map { |c| CardRef.new(c) }
+      end
+
+      # Returns linked cards as an array of LinkedCardRef objects.
+      #
+      # @return [Array<LinkedCardRef>] Linked card references
+      def links
+        return [] if linked_cards.nil? || !linked_cards.is_a?(Array)
+        linked_cards.map { |c| LinkedCardRef.new(c) }
+      end
+
+      # Returns linked cards grouped by relationship type.
+      #
+      # @return [Hash<String, Array<LinkedCardRef>>] Links grouped by type
+      def links_by_type
+        links.group_by(&:relationship)
+      end
     end
 
     # Represents a linked card with relationship type.
@@ -122,6 +153,49 @@ module Superthread
       # @return [String] Relationship type (blocks, blocked_by, related, duplicates)
       def relationship
         linked_card_type
+      end
+    end
+
+    # Lightweight reference to a card (id + title only).
+    # Used for parent/child relationships to avoid circular model references.
+    #
+    # @example
+    #   ref = card.parent
+    #   ref.id     # => "abc123"
+    #   ref.title  # => "Parent Task"
+    #   ref.to_s   # => "Parent Task (abc123)"
+    #
+    class CardRef
+      attr_reader :id, :title
+
+      def initialize(data)
+        # API returns card_id for child/linked cards, id for parent
+        @id = data["card_id"] || data[:card_id] || data["id"] || data[:id]
+        @title = data["title"] || data[:title]
+      end
+
+      def to_s
+        "#{title} (#{id})"
+      end
+    end
+
+    # Lightweight reference to a linked card with relationship type.
+    #
+    # @example
+    #   ref = card.links.first
+    #   ref.relationship  # => "blocks"
+    #   ref.to_s          # => "blocks: Task Name (abc123)"
+    #
+    class LinkedCardRef < CardRef
+      attr_reader :relationship
+
+      def initialize(data)
+        super
+        @relationship = data["linked_card_type"] || data[:linked_card_type]
+      end
+
+      def to_s
+        "#{title} (#{id})"
       end
     end
   end

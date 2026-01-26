@@ -37,7 +37,8 @@ module Superthread
 
           if json_output?
             fields = %i[id title status priority list_title board_title
-              members start_date due_date time_created time_updated]
+              members start_date due_date time_created time_updated
+              parent_card child_cards linked_cards]
             fields.insert(2, :content) unless options[:no_content]
             output_item card, fields: fields
           else
@@ -46,6 +47,9 @@ module Superthread
               fields: %i[id title priority list_title board_title
                 members start_date due_date time_created time_updated],
               labels: {list_title: "List", board_title: "Board"}
+
+            # Output card relationships
+            output_card_relationships(card)
 
             # Render content separately with markdown formatting
             if !options[:no_content] && card.content && !card.content.empty?
@@ -315,6 +319,32 @@ module Superthread
           tag_id = resolve_tag(tag_ref)
           client.cards.remove_tag(workspace_id, card_id, tag_id)
           Ui.success "Removed tag #{tag_ref} from card #{card_id}"
+        end
+      end
+
+      private
+
+      # Output card relationships (parent, children, links) in human-readable format.
+      def output_card_relationships(card)
+        has_relationships = card.parent || card.children.any? || card.links.any?
+        return unless has_relationships
+
+        puts ""
+        Ui.section "Relationships"
+
+        Ui.kv("Parent", card.parent.to_s) if card.parent
+
+        if card.children.any?
+          Ui.kv("Children", "")
+          card.children.each { |child| puts "  #{child}" }
+        end
+
+        if card.links.any?
+          card.links_by_type.each do |type, links|
+            label = type.tr("_", " ").capitalize
+            Ui.kv(label, "")
+            links.each { |link| puts "  #{link}" }
+          end
         end
       end
     end
