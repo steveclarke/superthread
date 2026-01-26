@@ -2,13 +2,21 @@
 
 module Superthread
   module Cli
+    # Main entry point for the Superthread CLI.
+    # Registers all subcommands and provides top-level commands like version and setup.
     class Main < Base
       desc "version", "Show version"
+      # Displays the current version of the Superthread CLI.
+      #
+      # @return [void]
       def version
         puts "superthread #{Superthread::VERSION}"
       end
 
       desc "setup", "Interactive setup wizard"
+      # Runs the interactive setup wizard to configure accounts and workspaces.
+      #
+      # @return [void]
       def setup
         Superthread::Cli::Setup.execute
       end
@@ -17,6 +25,9 @@ module Superthread
       subcommand "config", Superthread::Cli::Config
 
       desc "me", "Show current user account info"
+      # Displays information about the currently authenticated user.
+      #
+      # @return [void]
       def me
         handle_error do
           user = client.users.me

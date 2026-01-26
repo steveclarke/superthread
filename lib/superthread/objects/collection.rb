@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Superthread
+  # Container classes for API response wrappers.
   module Objects
     # Represents a collection of objects returned from list endpoints.
     # Wraps arrays with additional metadata and convenience methods.
@@ -11,21 +12,20 @@ module Superthread
     #   cards.count        # => 5
     #   cards.empty?       # => false
     #   cards.to_a         # => [#<Superthread::Models::Card ...>, ...]
-    #
     class Collection
       include Enumerable
 
-      # @return [Array<Superthread::Object>] The items in the collection
+      # @return [Array<Superthread::Object, Superthread::Model>] the items in the collection
       attr_reader :items
 
-      # @return [Hash] Raw response data
+      # @return [Hash{Symbol => Object}] raw response data
       attr_reader :data
 
       # Creates a new collection from API response data.
       #
-      # @param data [Hash] The raw API response
-      # @param key [Symbol, String] The key containing the items array
-      # @param item_class [Class] The class to use for items (optional, auto-detected)
+      # @param data [Hash{Symbol => Object}] the raw API response
+      # @param key [Symbol, String, nil] the key containing the items array (auto-detected if nil)
+      # @param item_class [Class, nil] the class to use for items (auto-detected if nil)
       def initialize(data, key: nil, item_class: nil)
         @data = data.is_a?(Hash) ? data.transform_keys(&:to_sym) : {}
         @item_class = item_class
@@ -35,12 +35,12 @@ module Superthread
         @items = items_data.map { |item| wrap_item(item) }
       end
 
-      # Factory method for constructing collections from API responses.
+      # Constructs a collection from an API response.
       #
-      # @param data [Hash, Array] The API response
-      # @param key [Symbol, String, nil] The key containing items (auto-detected if nil)
-      # @param item_class [Class, nil] The class for items
-      # @return [Superthread::Objects::Collection]
+      # @param data [Hash{Symbol => Object}, Array<Hash>] the API response
+      # @param key [Symbol, String, nil] the key containing items (auto-detected if nil)
+      # @param item_class [Class, nil] the class for items (auto-detected if nil)
+      # @return [Superthread::Objects::Collection] the constructed collection
       def self.from_response(data, key: nil, item_class: nil)
         # If the response is already an array, wrap it
         if data.is_a?(Array)
@@ -50,83 +50,92 @@ module Superthread
         end
       end
 
-      # Iterate over items.
+      # Iterates over items in the collection.
       #
-      # @yield [item] Each item in the collection
+      # @param block [Proc] receives each item in the collection
+      # @yieldparam item [Superthread::Object, Superthread::Model] an item
+      # @return [Enumerator] if no block given
       def each(&block)
         @items.each(&block)
       end
 
-      # Number of items.
+      # Returns the number of items in the collection.
       #
-      # @return [Integer] Item count
+      # @return [Integer] item count
       def count
         @items.count
       end
       alias_method :size, :count
       alias_method :length, :count
 
-      # Check if empty.
+      # Checks if the collection is empty.
       #
-      # @return [Boolean] True if no items
+      # @return [Boolean] true if no items
       def empty?
         @items.empty?
       end
 
-      # First item.
+      # Returns the first item.
       #
-      # @return [Superthread::Object, nil] First item or nil
+      # @return [Superthread::Object, Superthread::Model, nil] first item or nil if empty
       def first
         @items.first
       end
 
-      # Last item.
+      # Returns the last item.
       #
-      # @return [Superthread::Object, nil] Last item or nil
+      # @return [Superthread::Object, Superthread::Model, nil] last item or nil if empty
       def last
         @items.last
       end
 
-      # Access by index.
+      # Accesses an item by index.
       #
-      # @param index [Integer] The index
-      # @return [Superthread::Object, nil] Item at index
+      # @param index [Integer] the zero-based index
+      # @return [Superthread::Object, Superthread::Model, nil] item at index or nil if out of bounds
       def [](index)
         @items[index]
       end
 
-      # Convert to array.
+      # Converts the collection to an array.
       #
-      # @return [Array<Superthread::Object>] Array of items
+      # @return [Array<Superthread::Object, Superthread::Model>] copy of items array
       def to_a
         @items.dup
       end
       alias_method :to_ary, :to_a
 
-      # Convert to array of hashes.
+      # Converts the collection to an array of hashes.
       #
-      # @return [Array<Hash>] Array of hash representations
+      # @return [Array<Hash{Symbol => Object}>] array of hash representations
       def to_h
         @items.map(&:to_h)
       end
 
-      # Get raw response metadata (everything except items).
+      # Returns raw response metadata (everything except items).
       #
-      # @return [Hash] Metadata
+      # @return [Hash{Symbol => Object}] metadata from the API response
       def metadata
         @data.except(*items_keys)
       end
 
       private
 
-      # Common keys that contain item arrays
+      # Common keys that contain item arrays in API responses.
       ITEMS_KEYS = %i[items cards boards lists users projects spaces sprints
         pages notes comments tags members results data].freeze
 
+      # Returns the list of common item keys.
+      #
+      # @return [Array<Symbol>] keys that typically contain item arrays
       def items_keys
         ITEMS_KEYS
       end
 
+      # Extracts items array from the response data.
+      #
+      # @param key [Symbol, String, nil] the key to extract, or nil to auto-detect
+      # @return [Array<Hash>] the extracted items array
       def extract_items(key)
         if key
           @data[key.to_sym] || []
@@ -140,6 +149,10 @@ module Superthread
         end
       end
 
+      # Wraps a hash item in the appropriate object class.
+      #
+      # @param item [Hash, Object] the item to wrap
+      # @return [Superthread::Object, Superthread::Model] the wrapped item
       def wrap_item(item)
         return item unless item.is_a?(Hash)
 
@@ -154,6 +167,10 @@ module Superthread
         end
       end
 
+      # Checks if a class is a Shale model.
+      #
+      # @param klass [Class] the class to check
+      # @return [Boolean] true if the class is a Shale model
       def shale_model?(klass)
         klass.respond_to?(:shale_model?) && klass.shale_model?
       end

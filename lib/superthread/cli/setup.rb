@@ -4,10 +4,19 @@ require "fileutils"
 
 module Superthread
   module Cli
-    # Interactive setup wizard for first-time configuration.
+    # Interactive setup wizard for first-time CLI configuration.
+    #
+    # Guides users through API key entry, workspace selection, and account setup.
+    # Handles both new installations and reconfiguration of existing accounts.
     module Setup
       module_function
 
+      # Run the interactive setup wizard.
+      #
+      # Walks the user through account naming, API key entry, workspace selection,
+      # and saves the configuration to disk.
+      #
+      # @return [void]
       def execute
         Ui.header "Superthread CLI Setup"
         Ui.blank
@@ -51,6 +60,10 @@ module Superthread
         Ui.muted "To switch accounts:     suth account use <name>"
       end
 
+      # Prompt for an account name, offering to add new or reconfigure existing.
+      #
+      # @param config [Superthread::Configuration] the current configuration instance
+      # @return [String, nil] the chosen account name, or nil if cancelled
       def prompt_account_name(config)
         Ui.section "Step 1: Account"
 
@@ -84,6 +97,10 @@ module Superthread
         end
       end
 
+      # Prompt user to enter a name for a new account.
+      #
+      # @param suggestion [String, nil] a suggested default name if available
+      # @return [String, nil] the entered account name, or nil if empty
       def prompt_new_account_name(suggestion)
         prompt = if suggestion
           "Account name (default: #{suggestion}):"
@@ -103,6 +120,10 @@ module Superthread
         name
       end
 
+      # Prompt user to select an existing account to reconfigure.
+      #
+      # @param existing [Array<String>] list of existing account names
+      # @return [String, nil] the selected account name, or nil if cancelled
       def prompt_existing_account(existing)
         if existing.length == 1
           name = existing.first
@@ -116,6 +137,9 @@ module Superthread
         choice
       end
 
+      # Prompt user to enter their Superthread API key.
+      #
+      # @return [String, nil] the entered API key, or nil if empty
       def prompt_api_key
         Ui.section "Step 2: API Key"
         Ui.muted "Get your API key from Superthread Settings > API"
@@ -131,6 +155,10 @@ module Superthread
         api_key.strip
       end
 
+      # Validate API key and fetch available workspaces from the server.
+      #
+      # @param api_key [String] the API key to authenticate with
+      # @return [Array<Hash{Symbol => String}>, nil] list of workspace hashes, or nil on error
       def fetch_workspaces(api_key)
         Ui.section "Step 3: Connecting..."
 
@@ -155,6 +183,12 @@ module Superthread
         nil
       end
 
+      # Prompt user to select a workspace from the available options.
+      #
+      # Auto-selects if only one workspace is available.
+      #
+      # @param workspaces [Array<Hash{Symbol => String}>] list of workspace hashes with :id and :name
+      # @return [Hash{Symbol => String}, nil] the selected workspace, or nil if cancelled
       def select_workspace(workspaces)
         Ui.section "Step 4: Select Workspace"
         Ui.blank
@@ -174,6 +208,13 @@ module Superthread
         workspaces.find { |ws| selected.include?(ws[:id]) }
       end
 
+      # Save the account configuration and workspace selection to disk.
+      #
+      # @param config [Superthread::Configuration] the configuration instance to update
+      # @param account_name [String] the name for this account
+      # @param api_key [String] the API key to store
+      # @param workspace [Hash{Symbol => String}] the selected workspace with :id and :name
+      # @return [void]
       def save_account(config, account_name, api_key, workspace)
         Ui.section "Step 5: Saving Configuration"
 
@@ -192,6 +233,10 @@ module Superthread
         Ui.muted "Set '#{account_name}' as current account"
       end
 
+      # Extract team/workspace information from a user object.
+      #
+      # @param user [User] the authenticated user object containing team memberships
+      # @return [Array<Hash{Symbol => String}>] list of workspace hashes with :id, :name, and :role
       def extract_teams(user)
         return [] unless user.teams
 

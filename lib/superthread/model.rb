@@ -24,7 +24,6 @@ module Superthread
   #   card.priority       # => 1
   #   card.priority_name  # => "urgent"
   #   card.to_h           # => { id: "123", title: "My Card", ... }
-  #
   class Model < Shale::Mapper
     class << self
       # Check if this is a Shale-based model.
@@ -158,12 +157,13 @@ module Superthread
 
     protected
 
-    # Helper to convert Unix timestamp to Time.
+    # Converts Unix timestamp to Time.
+    #
     # Use in helper methods for timestamp fields.
-    # Note: API returns timestamps in seconds, not milliseconds.
     #
     # @param ts [Integer, nil] Unix timestamp in seconds
     # @return [Time, nil] Time object or nil
+    # @note API returns timestamps in seconds, not milliseconds.
     def ms_to_time(ts)
       ts && ts != 0 && Time.at(ts)
     end

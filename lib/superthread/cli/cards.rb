@@ -2,7 +2,10 @@
 
 module Superthread
   module Cli
-    # CLI commands for card operations.
+    # CLI commands for managing Superthread cards.
+    #
+    # Provides subcommands for listing, creating, updating, and deleting cards,
+    # as well as managing card assignments, relationships, checklists, and tags.
     class Cards < Base
       # Kebab-case aliases for commands
       map "add-checklist" => :add_checklist,
@@ -17,6 +20,9 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :list, type: :string, aliases: "-l", desc: "Filter by list (ID or name)"
       option :archived, type: :boolean, desc: "Include archived"
+      # List all cards on a specified board with optional filtering.
+      #
+      # @return [void]
       def list
         handle_error do
           opts = symbolized_options(:archived)
@@ -31,6 +37,10 @@ module Superthread
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       option :no_content, type: :boolean, desc: "Hide content, show only metadata"
       option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
+      # Display detailed information about a specific card.
+      #
+      # @param card_id [String] the unique identifier of the card to retrieve
+      # @return [void]
       def get(card_id)
         handle_error do
           card = client.cards.find(workspace_id, card_id)
@@ -81,6 +91,10 @@ module Superthread
       option :parent_card, type: :string, desc: "Parent card ID"
       option :epic, type: :string, desc: "Epic ID"
       option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
+      # Create a new card on a board or sprint.
+      #
+      # @return [void]
+      # @raise [Thor::Error] if neither --board nor --sprint is provided
       def create
         handle_error do
           raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
@@ -105,6 +119,10 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
       option :archived, type: :boolean, desc: "Archive/unarchive"
+      # Update an existing card's properties.
+      #
+      # @param card_id [String] the unique identifier of the card to update
+      # @return [void]
       def update(card_id)
         handle_error do
           opts = symbolized_options(:title, :priority, :archived)
@@ -116,6 +134,10 @@ module Superthread
       end
 
       desc "delete CARD", "Delete a card"
+      # Permanently delete a card after confirmation.
+      #
+      # @param card_ref [String] the card ID or reference to delete
+      # @return [void]
       def delete(card_ref)
         handle_error do
           card = client.cards.find(workspace_id, card_ref)
@@ -132,6 +154,10 @@ module Superthread
       option :board, type: :string, required: true, aliases: "-b", desc: "Destination board (ID or name)"
       option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      # Create a copy of an existing card in a specified location.
+      #
+      # @param card_id [String] the unique identifier of the card to duplicate
+      # @return [void]
       def duplicate(card_id)
         handle_error do
           opts = symbolized_options(:title)
@@ -148,6 +174,10 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :project, type: :string, desc: "Filter by project (ID)"
       option :archived, type: :boolean, desc: "Include archived"
+      # List all cards assigned to a specific user.
+      #
+      # @param user_ref [String] the user ID, name, or email to look up assignments for
+      # @return [void]
       def assigned(user_ref)
         handle_error do
           opts = symbolized_options(:archived)
@@ -161,6 +191,11 @@ module Superthread
 
       desc "assign CARD_ID USER", "Assign a user to a card"
       option :role, type: :string, default: "member", desc: "Member role"
+      # Add a user as a member of a card.
+      #
+      # @param card_id [String] the unique identifier of the card
+      # @param user_ref [String] the user ID, name, or email to assign
+      # @return [void]
       def assign(card_id, user_ref)
         handle_error do
           user_id = resolve_user(user_ref)
@@ -170,6 +205,11 @@ module Superthread
       end
 
       desc "unassign CARD_ID USER", "Unassign a user from a card"
+      # Remove a user's membership from a card.
+      #
+      # @param card_id [String] the unique identifier of the card
+      # @param user_ref [String] the user ID, name, or email to unassign
+      # @return [void]
       def unassign(card_id, user_ref)
         handle_error do
           user_id = resolve_user(user_ref)
@@ -183,6 +223,9 @@ module Superthread
       option :related, type: :string, required: true, aliases: "-r", desc: "Related card ID"
       option :type, type: :string, required: true, enum: %w[blocks blocked_by related duplicates],
         desc: "Relationship type"
+      # Create a relationship between two cards.
+      #
+      # @return [void]
       def link
         handle_error do
           client.cards.add_related(
@@ -197,6 +240,9 @@ module Superthread
       desc "unlink", "Remove card relationship"
       option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
       option :related, type: :string, required: true, aliases: "-r", desc: "Related card ID"
+      # Remove an existing relationship between two cards.
+      #
+      # @return [void]
       def unlink
         handle_error do
           client.cards.remove_related(workspace_id, options[:card], options[:related])
@@ -206,6 +252,10 @@ module Superthread
 
       desc "add-checklist CARD_ID", "Create a checklist on a card"
       option :title, type: :string, required: true, desc: "Checklist title"
+      # Add a new checklist to a card.
+      #
+      # @param card_id [String] the unique identifier of the card
+      # @return [void]
       def add_checklist(card_id)
         handle_error do
           checklist = client.cards.create_checklist(workspace_id, card_id, title: options[:title])
@@ -217,6 +267,9 @@ module Superthread
       option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
       option :checklist, type: :string, required: true, desc: "Checklist ID"
       option :title, type: :string, required: true, desc: "New checklist title"
+      # Rename an existing checklist on a card.
+      #
+      # @return [void]
       def edit_checklist
         handle_error do
           checklist = client.cards.update_checklist(
@@ -230,6 +283,9 @@ module Superthread
       desc "remove-checklist", "Delete a checklist"
       option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
       option :checklist, type: :string, required: true, desc: "Checklist ID"
+      # Remove a checklist and all its items from a card after confirmation.
+      #
+      # @return [void]
       def remove_checklist
         handle_error do
           card = client.cards.find(workspace_id, options[:card])
@@ -247,6 +303,9 @@ module Superthread
       option :checklist, type: :string, required: true, desc: "Checklist ID"
       option :title, type: :string, required: true, desc: "Item title"
       option :checked, type: :boolean, default: false, desc: "Create as checked"
+      # Add a new item to an existing checklist.
+      #
+      # @return [void]
       def add_item
         handle_error do
           item = client.cards.add_checklist_item(
@@ -264,6 +323,9 @@ module Superthread
       option :item, type: :string, required: true, desc: "Item ID"
       option :title, type: :string, desc: "New item title"
       option :checked, type: :boolean, desc: "Mark as checked/unchecked"
+      # Update the title or checked state of a checklist item.
+      #
+      # @return [void]
       def edit_item
         handle_error do
           opts = symbolized_options(:title, :checked)
@@ -279,6 +341,9 @@ module Superthread
       option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
       option :checklist, type: :string, required: true, desc: "Checklist ID"
       option :item, type: :string, required: true, desc: "Item ID"
+      # Remove an item from a checklist after confirmation.
+      #
+      # @return [void]
       def remove_item
         handle_error do
           card = client.cards.find(workspace_id, options[:card])
@@ -295,6 +360,9 @@ module Superthread
       desc "tags", "Get available tags"
       option :project, type: :string, desc: "Filter by project (ID)"
       option :all, type: :boolean, desc: "Get all tags"
+      # List all available tags in the workspace.
+      #
+      # @return [void]
       def tags
         handle_error do
           opts = symbolized_options(:all)
@@ -305,6 +373,11 @@ module Superthread
       end
 
       desc "tag CARD_ID TAGS", "Add tags to card (comma-separated IDs or names)"
+      # Apply one or more tags to a card.
+      #
+      # @param card_id [String] the unique identifier of the card
+      # @param tag_refs [String] comma-separated tag IDs or names to add
+      # @return [void]
       def tag(card_id, tag_refs)
         handle_error do
           ids = tag_refs.split(",").map { |ref| resolve_tag(ref.strip) }
@@ -314,6 +387,11 @@ module Superthread
       end
 
       desc "untag CARD_ID TAG", "Remove tag from card"
+      # Remove a tag from a card.
+      #
+      # @param card_id [String] the unique identifier of the card
+      # @param tag_ref [String] the tag ID or name to remove
+      # @return [void]
       def untag(card_id, tag_ref)
         handle_error do
           tag_id = resolve_tag(tag_ref)
@@ -325,6 +403,9 @@ module Superthread
       private
 
       # Output card relationships (parent, children, links) in human-readable format.
+      #
+      # @param card [Card] the card object containing relationship data
+      # @return [void]
       def output_card_relationships(card)
         has_relationships = card.parent || card.children.any? || card.links.any?
         return unless has_relationships

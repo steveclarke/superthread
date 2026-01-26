@@ -6,7 +6,9 @@ module Superthread
   module Models
     module Concerns
       # Provides a DSL for defining timestamp accessor methods.
-      # Converts Unix timestamps to Ruby Time objects.
+      #
+      # Converts Unix timestamps (integers) to Ruby Time objects automatically.
+      # Supports both auto-generated method names and explicit mappings.
       #
       # @example
       #   class Card < Superthread::Model
@@ -22,17 +24,22 @@ module Superthread
       #
       #   card.created_at  # => Time object
       #   card.start_time  # => Time object
-      #
       module Timestampable
         extend ActiveSupport::Concern
 
         class_methods do
           # Define timestamp accessor methods.
           #
-          # @param fields [Array<Symbol>, Hash<Symbol, Symbol>] Field names or field => method name mappings
+          # With symbols, creates standard accessor names:
+          # - time_created -> created_at
+          # - time_updated -> updated_at
+          # - start_date -> start_time
           #
-          # With symbols: creates standard accessor names (time_created -> created_at, start_date -> start_time)
-          # With hash: creates custom accessor names (start_date: :start_time)
+          # With hash, creates custom accessor names (e.g., start_date: :start_time).
+          #
+          # @param fields [Array<Symbol>] attribute names to create accessors for
+          # @param mappings [Hash{Symbol => Symbol}] explicit attribute to method name mappings
+          # @return [void]
           def timestamps(*fields, **mappings)
             # Handle simple field names with auto-generated method names
             fields.each do |field|
@@ -48,6 +55,10 @@ module Superthread
 
           private
 
+          # Derives a conventional method name from a timestamp field name.
+          #
+          # @param field [Symbol] the attribute name
+          # @return [Symbol] the derived method name
           def derive_method_name(field)
             name = field.to_s
             if name.start_with?("time_")
@@ -62,6 +73,11 @@ module Superthread
             end
           end
 
+          # Defines an instance method that converts a Unix timestamp to Time.
+          #
+          # @param field [Symbol] the source attribute name
+          # @param method_name [Symbol] the accessor method name to define
+          # @return [void]
           def define_timestamp_method(field, method_name)
             define_method(method_name) do
               ts = send(field)

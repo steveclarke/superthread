@@ -10,6 +10,10 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Filter by space (ID or name)"
       option :archived, type: :boolean, desc: "Include archived"
       option :grouped, type: :boolean, desc: "Group results by type"
+      # Searches across all entities in the workspace.
+      #
+      # @param search_term [String] the text to search for
+      # @return [void]
       def query(search_term)
         types = options[:types]&.split(",")&.map(&:strip)
         results = client.search.query(

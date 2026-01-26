@@ -16,7 +16,6 @@ module Superthread
   #   card[:title]            # => "My Card"
   #   card.members.first.role # => "admin"
   #   card.to_h               # => { id: "123", title: "My Card", ... }
-  #
   class Object
     include Enumerable
 
@@ -64,8 +63,10 @@ module Superthread
     end
 
     # Registry mapping API "type" values to Ruby classes.
+    #
     # Subclasses register themselves here.
-    # Note: This hash is intentionally mutable for dynamic registration.
+    #
+    # @note This hash is intentionally mutable for dynamic registration.
     @object_types = {}
 
     class << self
@@ -82,7 +83,11 @@ module Superthread
     end
 
     # Hook called when a subclass is defined.
+    #
     # Automatically registers the subclass if it defines OBJECT_NAME.
+    #
+    # @param subclass [Class] the subclass being defined
+    # @return [void]
     def self.inherited(subclass)
       super
       subclass.instance_eval do
@@ -111,7 +116,10 @@ module Superthread
 
     # Iterate over key-value pairs.
     #
-    # @yield [key, value] Each key-value pair
+    # @param block [Proc] receives key-value pairs for each attribute
+    # @yieldparam key [Symbol] the attribute key
+    # @yieldparam value [Object] the attribute value (wrapped if Hash)
+    # @return [void]
     def each(&block)
       @data.each do |key, value|
         block.call(key, wrap_value(value))
@@ -225,11 +233,15 @@ module Superthread
     private
 
     # Dynamic attribute access via method_missing.
+    #
     # Supports:
     #   - Getters: card.title
     #   - Setters: card.title = "New Title"
     #   - Predicates: card.archived?
     #
+    # @param method_name [Symbol] the method being called
+    # @param args [Array] arguments passed to the method
+    # @return [Object] the attribute value or result of assignment
     def method_missing(method_name, *args)
       name = method_name.to_s
 

@@ -2,12 +2,18 @@
 
 module Superthread
   module Cli
-    # CLI commands for tag operations.
+    # CLI commands for managing Superthread tags.
+    #
+    # Tags are labels that can be applied to cards for categorization
+    # and filtering. Each tag has a name and color.
     class Tags < Base
       desc "create", "Create a new tag"
       option :name, type: :string, required: true, desc: "Tag name"
       option :color, type: :string, required: true, desc: "Tag color (hex)"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name)"
+      # Creates a new tag in the workspace with a name and color.
+      #
+      # @return [void]
       def create
         opts = symbolized_options(:name, :color)
         opts[:space_id] = space_id if options[:space]
@@ -18,6 +24,10 @@ module Superthread
       desc "update TAG", "Update a tag"
       option :name, type: :string, desc: "New name"
       option :color, type: :string, desc: "New color (hex)"
+      # Updates an existing tag's name or color.
+      #
+      # @param tag_ref [String] tag identifier (ID or name)
+      # @return [void]
       def update(tag_ref)
         tag_id = resolve_tag(tag_ref)
         tag = client.tags.update(workspace_id, tag_id, **symbolized_options(:name, :color))
@@ -25,6 +35,10 @@ module Superthread
       end
 
       desc "delete TAG", "Delete a tag"
+      # Deletes a tag after confirmation.
+      #
+      # @param tag_ref [String] tag identifier (ID or name)
+      # @return [void]
       def delete(tag_ref)
         handle_error do
           tag = find_tag(tag_ref)
@@ -38,6 +52,10 @@ module Superthread
       private
 
       # Find tag by ID or name, returning the full tag object.
+      #
+      # @param ref [String] the tag ID or name to find
+      # @return [Superthread::Models::Tag] the matching tag object
+      # @raise [Thor::Error] if no matching tag is found
       def find_tag(ref)
         tags = client.cards.tags(workspace_id, all: true)
         tag = tags.find { |t| t.id == ref || t.name&.downcase == ref.downcase }

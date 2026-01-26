@@ -2,9 +2,15 @@
 
 module Superthread
   module Cli
-    # CLI commands for project (epic/roadmap item) operations.
+    # CLI commands for managing Superthread projects (epics/roadmap items).
+    #
+    # Projects are high-level items on the roadmap that can contain multiple
+    # cards. They have start/due dates, owners, and can be organized on boards.
     class Projects < Base
       desc "list", "List all roadmap projects"
+      # Lists all projects in the current workspace.
+      #
+      # @return [void]
       def list
         projects = client.projects.list(workspace_id)
         output_list projects, columns: %i[id title status]
@@ -12,6 +18,10 @@ module Superthread
 
       desc "get PROJECT_ID", "Get project details"
       option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
+      # Retrieves and displays details for a specific project.
+      #
+      # @param project_id [String] numeric ID or short code of the project/epic
+      # @return [void]
       def get(project_id)
         handle_error do
           project = client.projects.find(workspace_id, project_id)
@@ -31,6 +41,9 @@ module Superthread
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
       option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
       option :priority, type: :numeric, desc: "Priority level"
+      # Creates a new project on a board list.
+      #
+      # @return [void]
       def create
         opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
         opts[:list_id] = resolve_list(options[:list])
@@ -49,6 +62,10 @@ module Superthread
       option :due_date, type: :numeric, desc: "Due date"
       option :priority, type: :numeric, desc: "Priority"
       option :archived, type: :boolean, desc: "Archive/unarchive"
+      # Updates an existing project's properties.
+      #
+      # @param project_id [String] numeric ID or short code of the project/epic
+      # @return [void]
       def update(project_id)
         opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
         opts[:list_id] = resolve_list(options[:list]) if options[:list]
@@ -58,6 +75,10 @@ module Superthread
       end
 
       desc "delete PROJECT", "Delete a project"
+      # Deletes a project after confirmation.
+      #
+      # @param project_ref [String] project identifier (ID or name)
+      # @return [void]
       def delete(project_ref)
         handle_error do
           project = client.projects.find(workspace_id, project_ref)
@@ -69,12 +90,22 @@ module Superthread
       end
 
       desc "add_card PROJECT_ID CARD_ID", "Link a card to a project"
+      # Links an existing card to a project.
+      #
+      # @param project_id [String] numeric ID or short code of the project/epic
+      # @param card_id [String] unique identifier of the card to link
+      # @return [void]
       def add_card(project_id, card_id)
         client.projects.add_card(workspace_id, project_id, card_id)
         output_success "Linked card #{card_id} to project #{project_id}"
       end
 
       desc "remove_card PROJECT_ID CARD_ID", "Remove a card from a project"
+      # Removes a card's association from a project.
+      #
+      # @param project_id [String] numeric ID or short code of the project/epic
+      # @param card_id [String] unique identifier of the card to unlink
+      # @return [void]
       def remove_card(project_id, card_id)
         client.projects.remove_card(workspace_id, project_id, card_id)
         output_success "Removed card #{card_id} from project #{project_id}"

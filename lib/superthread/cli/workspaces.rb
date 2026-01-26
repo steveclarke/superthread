@@ -5,6 +5,9 @@ module Superthread
     # CLI commands for workspace management within the current account.
     class Workspaces < Base
       desc "list", "List available workspaces for current account"
+      # Lists all workspaces available to the current account.
+      #
+      # @return [void]
       def list
         user = client.users.me
         teams = extract_teams(user)
@@ -28,6 +31,10 @@ module Superthread
       end
 
       desc "use WORKSPACE", "Set default workspace for current account"
+      # Sets the default workspace for the current account.
+      #
+      # @param workspace_ref [String] workspace ID or name to switch to
+      # @return [void]
       def use(workspace_ref)
         handle_error do
           cfg = Superthread::Configuration.new
@@ -60,6 +67,9 @@ module Superthread
       end
 
       desc "current", "Show current default workspace"
+      # Displays the currently selected default workspace.
+      #
+      # @return [void]
       def current
         cfg = Superthread::Configuration.new
 
@@ -75,6 +85,10 @@ module Superthread
 
       private
 
+      # Extract team/workspace information from a user object.
+      #
+      # @param user [Superthread::Models::User] the user object with teams data
+      # @return [Array<Hash{Symbol => String}>] array of workspace hashes with :id, :name, :role
       def extract_teams(user)
         return [] unless user.teams
 

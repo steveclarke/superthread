@@ -3,23 +3,24 @@
 module Superthread
   module Resources
     # API resource for user operations.
+    #
+    # Provides methods for retrieving user information and
+    # listing workspace members via the Superthread API.
     class Users < Base
-      # Gets the current user's account information.
-      # API: GET /users/me
+      # Gets the current authenticated user's account information.
       #
-      # @return [Superthread::Models::User] User account information
+      # @return [Superthread::Models::User] the current user's profile
       def me
         get_object("/users/me", object_class: Models::User, unwrap_key: :user)
       end
 
       # Gets workspace members.
-      # API: GET /teams/:workspace/members
       #
-      # @param workspace_id [String] Workspace ID
-      # @return [Superthread::Objects::Collection<User>] List of workspace members
+      # @param workspace_id [String] the workspace identifier
+      # @return [Superthread::Objects::Collection<Superthread::Models::User>] the workspace members
+      # @note The API uses /teams/:id/members but we use workspace terminology.
       def members(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
-        # NOTE: API uses /teams/:id/members but we use workspace terminology
         get_collection("/teams/#{ws}/members",
           item_class: Models::User, items_key: :members)
       end
