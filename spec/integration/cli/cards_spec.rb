@@ -8,6 +8,48 @@ RSpec.describe "st cards", :cli do
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
+  describe "cards list with --since" do
+    let(:now) { Time.new(2025, 1, 20, 12, 0, 0) }
+    let(:today_ts) { Time.new(2025, 1, 20, 10, 0, 0).to_i * 1000 }
+    let(:old_ts) { Time.new(2025, 1, 10, 10, 0, 0).to_i * 1000 }
+
+    before do
+      allow(Date).to receive(:today).and_return(now.to_date)
+      allow(Time).to receive(:now).and_return(now)
+
+      stub_api_post("test_workspace/views/preview", response: {
+        cards: [
+          {id: "card-1", title: "New Card", priority: 2, list_title: "To Do", time_created: today_ts, time_updated: today_ts},
+          {id: "card-2", title: "Old Card", priority: 1, list_title: "Done", time_created: old_ts, time_updated: old_ts}
+        ]
+      })
+    end
+
+    it "filters cards by created date" do
+      result = run_cli("cards", "list", "-b", "10", "--since=today")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("New Card")
+      expect(result[:stdout]).not_to include("Old Card")
+    end
+
+    it "filters cards by updated date" do
+      result = run_cli("cards", "list", "-b", "10", "--updated-since=today")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("New Card")
+      expect(result[:stdout]).not_to include("Old Card")
+    end
+
+    it "accepts natural language dates" do
+      result = run_cli("cards", "list", "-b", "10", "--since=friday")
+
+      expect(result[:exit_code]).to eq(0)
+      # Both cards should be included since Friday Jan 17 is before both
+      expect(result[:stdout]).to include("New Card")
+    end
+  end
+
   describe "cards get CARD_ID" do
     before do
       stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::GET)
