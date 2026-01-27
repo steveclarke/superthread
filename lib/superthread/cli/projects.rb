@@ -31,7 +31,13 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Project not found: '#{project_id}'. Use 'suth projects list' to see available projects."
           end
-          output_item project, fields: %i[id title status start_date due_date time_created time_updated], labels: {id: "Project ID"}
+          output_item project, fields: %i[id title status start_date due_date time_created time_updated], labels: {
+            id: "Project ID",
+            start_date: "Start Date",
+            due_date: "Due Date",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 

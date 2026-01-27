@@ -37,7 +37,11 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
           end
-          output_item board, fields: %i[id title time_created time_updated], labels: {id: "Board ID"}
+          output_item board, fields: %i[id title time_created time_updated], labels: {
+            id: "Board ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 
@@ -62,7 +66,10 @@ module Superthread
           opts = symbolized_options(:title, :icon, :color, :layout)
           opts[:content] = options[:description] if options[:description]
           board = client.boards.create(workspace_id, space_id: space_id, **opts)
-          output_item board, fields: %i[id title time_created], labels: {id: "Board ID"}
+          output_item board, fields: %i[id title time_created], labels: {
+            id: "Board ID",
+            time_created: "Time Created"
+          }
         end
       end
 
@@ -88,7 +95,11 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
           end
-          output_item board, fields: %i[id title time_created time_updated], labels: {id: "Board ID"}
+          output_item board, fields: %i[id title time_created time_updated], labels: {
+            id: "Board ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 
@@ -110,7 +121,10 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
           end
-          output_item board, fields: %i[id title time_created], labels: {id: "Board ID"}
+          output_item board, fields: %i[id title time_created], labels: {
+            id: "Board ID",
+            time_created: "Time Created"
+          }
         end
       end
 

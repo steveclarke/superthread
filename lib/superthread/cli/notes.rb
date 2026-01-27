@@ -28,7 +28,11 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Note not found: '#{note_id}'. Use 'suth notes list' to see available notes."
           end
-          output_item note, fields: %i[id title content time_created time_updated], labels: {id: "Note ID"}
+          output_item note, fields: %i[id title content time_created time_updated], labels: {
+            id: "Note ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 

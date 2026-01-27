@@ -36,7 +36,9 @@ module Superthread
             output_item user
           else
             # Show basic user info
-            output_item user, fields: %i[display_name email time_created]
+            output_item user, fields: %i[display_name email time_created], labels: {
+              time_created: "Time Created"
+            }
 
             # Show workspaces with roles
             if user.teams&.any?

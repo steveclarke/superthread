@@ -23,7 +23,12 @@ module Superthread
       def get(sprint_id)
         handle_error do
           sprint = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-          output_item sprint, fields: %i[id title start_date time_created time_updated], labels: {id: "Sprint ID"}
+          output_item sprint, fields: %i[id title start_date time_created time_updated], labels: {
+            id: "Sprint ID",
+            start_date: "Start Date",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
     end

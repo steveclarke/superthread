@@ -34,7 +34,11 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Page not found: '#{page_id}'. Use 'suth pages list' to see available pages."
           end
-          output_item page, fields: %i[id title time_created time_updated], labels: {id: "Page ID"}
+          output_item page, fields: %i[id title time_created time_updated], labels: {
+            id: "Page ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 

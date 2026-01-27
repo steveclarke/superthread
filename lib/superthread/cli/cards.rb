@@ -56,13 +56,32 @@ module Superthread
               members start_date due_date time_created time_updated
               parent_card child_cards linked_cards checklists]
             fields.insert(2, :content) unless options[:no_content]
-            output_item card, fields: fields, labels: {id: "Card ID"}
+            output_item card, fields: fields, labels: {
+              id: "Card ID",
+              list_title: "List Title",
+              board_title: "Board Title",
+              parent_card: "Parent Card",
+              child_cards: "Child Cards",
+              linked_cards: "Linked Cards",
+              start_date: "Start Date",
+              due_date: "Due Date",
+              time_created: "Time Created",
+              time_updated: "Time Updated"
+            }
           else
             # Output metadata fields (status used for coloring list, not shown separately)
             output_item card,
               fields: %i[id title priority list_title board_title
                 members start_date due_date time_created time_updated],
-              labels: {id: "Card ID", list_title: "List", board_title: "Board"}
+              labels: {
+                id: "Card ID",
+                list_title: "List",
+                board_title: "Board",
+                start_date: "Start Date",
+                due_date: "Due Date",
+                time_created: "Time Created",
+                time_updated: "Time Updated"
+              }
 
             # Output card relationships
             output_card_relationships(card)

@@ -13,7 +13,7 @@ RSpec.describe "st me", :cli do
     result = run_cli("me")
 
     expect(result[:exit_code]).to eq(0)
-    expect(result[:stdout]).to include("Display name")
+    expect(result[:stdout]).to include("Display Name")
     expect(result[:stdout]).to include("Test User")
     expect(result[:stdout]).to include("Email")
     expect(result[:stdout]).to include("test@example.com")

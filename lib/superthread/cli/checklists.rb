@@ -42,9 +42,17 @@ module Superthread
           raise Thor::Error, "Checklist not found: #{checklist_id}" unless checklist
 
           if json_output?
-            output_item checklist, fields: %i[id title card_id items time_created], labels: {id: "Checklist ID"}
+            output_item checklist, fields: %i[id title card_id items time_created], labels: {
+              id: "Checklist ID",
+              card_id: "Card ID",
+              time_created: "Time Created"
+            }
           else
-            output_item checklist, fields: %i[id title card_id time_created], labels: {id: "Checklist ID"}
+            output_item checklist, fields: %i[id title card_id time_created], labels: {
+              id: "Checklist ID",
+              card_id: "Card ID",
+              time_created: "Time Created"
+            }
 
             if checklist.items&.any?
               puts ""
@@ -121,7 +129,10 @@ module Superthread
             title: options[:title],
             checked: options[:checked]
           )
-          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
+          output_item item, fields: %i[id title checked checklist_id], labels: {
+            id: "Item ID",
+            checklist_id: "Checklist ID"
+          }
         end
       end
 
@@ -141,7 +152,10 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             **opts
           )
-          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
+          output_item item, fields: %i[id title checked checklist_id], labels: {
+            id: "Item ID",
+            checklist_id: "Checklist ID"
+          }
         end
       end
 
@@ -178,7 +192,10 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             checked: true
           )
-          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
+          output_item item, fields: %i[id title checked checklist_id], labels: {
+            id: "Item ID",
+            checklist_id: "Checklist ID"
+          }
         end
       end
 
@@ -195,7 +212,10 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             checked: false
           )
-          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
+          output_item item, fields: %i[id title checked checklist_id], labels: {
+            id: "Item ID",
+            checklist_id: "Checklist ID"
+          }
         end
       end
     end

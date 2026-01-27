@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_support/core_ext/string/inflections"
+
 module Superthread
   module Cli
     # Formatter for CLI output in gh-style format.
@@ -243,9 +245,9 @@ module Superthread
       # Converts a symbol or string to a human-readable label.
       #
       # @param key [Symbol, String] the field name to humanize (e.g., :time_created)
-      # @return [String] the humanized label with underscores replaced and capitalized
+      # @return [String] the humanized label with title case and proper acronyms
       def humanize(key)
-        key.to_s.tr("_", " ").capitalize
+        key.to_s.titleize.gsub(/\bId\b/, "ID")
       end
 
       # Formats a cell value for display in a table column.

@@ -60,7 +60,10 @@ module Superthread
           opts = symbolized_options(:title, :icon, :color)
           opts[:content] = options[:description] if options[:description]
           list = client.boards.create_list(workspace_id, board_id: board_id, **opts)
-          output_item list, fields: %i[id title color board_id], labels: {id: "List ID"}
+          output_item list, fields: %i[id title color board_id], labels: {
+            id: "List ID",
+            board_id: "Board ID"
+          }
         end
       end
 
@@ -82,7 +85,10 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "List not found: '#{list_id}'. Use 'suth lists list -b BOARD' to see available lists."
           end
-          output_item list, fields: %i[id title color board_id], labels: {id: "List ID"}
+          output_item list, fields: %i[id title color board_id], labels: {
+            id: "List ID",
+            board_id: "Board ID"
+          }
         end
       end
 

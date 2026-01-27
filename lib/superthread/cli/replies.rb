@@ -27,7 +27,13 @@ module Superthread
       def get(reply_id)
         handle_error do
           reply = client.comments.find(workspace_id, reply_id)
-          output_item reply, fields: %i[id content user_id card_id time_created time_updated], labels: {id: "Reply ID"}
+          output_item reply, fields: %i[id content user_id card_id time_created time_updated], labels: {
+            id: "Reply ID",
+            user_id: "User ID",
+            card_id: "Card ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 

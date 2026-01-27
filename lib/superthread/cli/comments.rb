@@ -18,7 +18,13 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Comment not found: '#{comment_id}'."
           end
-          output_item comment, fields: %i[id content user_id card_id time_created time_updated], labels: {id: "Comment ID"}
+          output_item comment, fields: %i[id content user_id card_id time_created time_updated], labels: {
+            id: "Comment ID",
+            user_id: "User ID",
+            card_id: "Card ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 

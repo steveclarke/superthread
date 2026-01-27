@@ -33,7 +33,11 @@ module Superthread
           rescue Superthread::ForbiddenError
             raise Thor::Error, "Space not found: '#{space_ref}'. Use 'suth spaces list' to see available spaces."
           end
-          output_item space, fields: %i[id title description time_created time_updated], labels: {id: "Space ID"}
+          output_item space, fields: %i[id title description time_created time_updated], labels: {
+            id: "Space ID",
+            time_created: "Time Created",
+            time_updated: "Time Updated"
+          }
         end
       end
 
