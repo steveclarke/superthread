@@ -675,16 +675,21 @@ module ApiFixtures
   end
 
   module Search
+    # API returns wrapped objects when grouped=false (our default)
     RESULTS = {
+      count: 2,
+      cursor: "",
       results: [
-        {id: "card-auth", title: "Auth Module", type: "card", space_id: "1"},
-        {id: "page-login", title: "Login Flow", type: "page", space_id: "1"}
+        {card: {id: "card-auth", title: "Auth Module", board_id: "1", list_id: "1", project_id: "1"}},
+        {page: {id: "page-login", title: "Login Flow", space_id: "1"}}
       ]
     }.freeze
 
     RESULTS_TYPED = {
+      count: 1,
+      cursor: "",
       results: [
-        {id: "card-auth", title: "Auth Module", type: "card", space_id: "1"}
+        {card: {id: "card-auth", title: "Auth Module", board_id: "1", list_id: "1", project_id: "1"}}
       ]
     }.freeze
   end
