@@ -370,31 +370,6 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards tags" do
-    before do
-      stub_api_get("test_workspace/tags", response: ApiFixtures::Tags::LIST)
-    end
-
-    it "lists available tags" do
-      result = run_cli("cards", "tags")
-
-      expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("backend")
-      expect(result[:stdout]).to include("frontend")
-      expect(result[:stdout]).to include("bug")
-    end
-
-    it "outputs JSON with --json flag" do
-      json = cli_json("cards", "tags")
-
-      expect(json).to be_an(Array)
-      expect(json.length).to eq(3)
-      expect(json.first).to have_key("name")
-      expect(json.first).to have_key("color")
-      expect(json.first).to have_key("total_cards")
-    end
-  end
-
   describe "cards tag CARD_ID TAGS" do
     before do
       # resolve_tag tries name resolution first, so stub the tags list API

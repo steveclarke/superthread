@@ -265,7 +265,7 @@ module Superthread
         # If not found by name, assume it's an ID
         return ref if looks_like_id?(ref)
 
-        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags."
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st tags list' to see available tags."
       end
 
       # Find a tag by name from the cached list.

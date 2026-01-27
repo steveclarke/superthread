@@ -7,6 +7,21 @@ module Superthread
     # Tags are labels that can be applied to cards for categorization
     # and filtering. Each tag has a name and color.
     class Tags < Base
+      desc "list", "List available tags"
+      option :space, type: :string, aliases: "-s", desc: "Filter by space (ID or name)"
+      option :all, type: :boolean, desc: "Include unused tags"
+      # Lists all available tags in the workspace.
+      #
+      # @return [void]
+      def list
+        handle_error do
+          opts = symbolized_options(:all)
+          opts[:project_id] = space_id if options[:space]
+          tags = client.cards.tags(workspace_id, **opts)
+          output_list tags, columns: %i[id name color total_cards]
+        end
+      end
+
       desc "create", "Create a new tag"
       option :name, type: :string, required: true, desc: "Tag name"
       option :color, type: :string, required: true, desc: "Tag color (hex)"
@@ -59,7 +74,7 @@ module Superthread
       def find_tag(ref)
         tags = client.cards.tags(workspace_id, all: true)
         tag = tags.find { |t| t.id == ref || t.name&.downcase == ref.downcase }
-        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags." unless tag
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st tags list' to see available tags." unless tag
         tag
       end
     end

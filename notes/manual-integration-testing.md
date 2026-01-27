@@ -683,15 +683,10 @@ suth cards remove-item CARD_ID CHECKLIST_ID ITEM_ID
 **Notes:**
 
 
-### 4.11 cards tags / tag / untag
-Manage card tags.
+### 4.11 cards tag / untag
+Add and remove tags from cards.
 
 ```bash
-# List available tags
-suth cards tags
-suth cards tags --all
-suth cards tags --project PROJECT_ID
-
 # Add tags to card
 suth cards tag CARD_ID "tag-name"
 suth cards tag CARD_ID "tag1,tag2,tag3"
@@ -701,9 +696,6 @@ suth cards untag CARD_ID "tag-name"
 ```
 
 **Check:**
-- [ ] Tags listed with ID, name, color, total_cards
-- [ ] --all shows all tags
-- [ ] --project filters by project
 - [ ] Tag by name works
 - [ ] Multiple tags (comma-separated) works
 - [ ] Untag works
@@ -1134,6 +1126,23 @@ suth projects delete PROJECT_ID --skip-confirm
 ---
 
 ## 9. TAGS
+
+### 9.0 tags list
+List available tags.
+
+```bash
+suth tags list
+suth tags list --all
+suth tags list -s SPACE
+```
+
+**Check:**
+- [ ] Tags listed with ID, name, color, total_cards
+- [ ] --all shows all tags including unused
+- [ ] -s SPACE filters by space
+
+**Notes:**
+
 
 ### 9.1 tags create
 Create a tag.

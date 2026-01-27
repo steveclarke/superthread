@@ -374,21 +374,6 @@ module Superthread
         end
       end
 
-      desc "tags", "Get available tags"
-      option :project, type: :string, desc: "Filter by project (ID)"
-      option :all, type: :boolean, desc: "Get all tags"
-      # List all available tags in the workspace.
-      #
-      # @return [void]
-      def tags
-        handle_error do
-          opts = symbolized_options(:all)
-          opts[:project_id] = options[:project] if options[:project]
-          tags = client.cards.tags(workspace_id, **opts)
-          output_list tags, columns: %i[id name color total_cards]
-        end
-      end
-
       desc "tag CARD_ID TAGS", "Add tags to card (comma-separated IDs or names)"
       # Apply one or more tags to a card.
       #
