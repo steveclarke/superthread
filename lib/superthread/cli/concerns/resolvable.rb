@@ -31,26 +31,26 @@ module Superthread
       #   # This creates:
       #   #   resolve_space(ref)  - returns ID or raises error
       #   #   find_space_by_name(name) - returns item or nil
-      #
       module Resolvable
         extend ActiveSupport::Concern
 
         # Check if value looks like an ID (alphanumeric, reasonable length).
         #
-        # @param value [String] The value to check
-        # @return [Boolean] True if it looks like an ID
+        # @param value [String] the value to check for ID-like pattern
+        # @return [Boolean] true if it matches alphanumeric ID pattern
         def looks_like_id?(value)
           value.to_s.match?(/\A[a-zA-Z0-9_-]+\z/) && value.to_s.length <= 30
         end
 
         class_methods do
-          # Define a resolver for a resource type.
+          # Define a resolver for a resource type that handles name-to-ID conversion.
           #
-          # @param name [Symbol] The resource name (e.g., :space, :board)
-          # @param loader [Proc] Lambda that loads all resources (called with instance context)
-          # @param finder [Proc] Lambda that matches an item to a name (receives item, name)
-          # @param id_method [Symbol] Method to call on item to get ID (default: :id)
-          # @param not_found [String] Error message template with %s for the reference
+          # @param name [Symbol] the resource type name (e.g., :space, :board)
+          # @param loader [Proc] lambda that loads all resources (executed in instance context)
+          # @param finder [Proc] lambda that matches an item to a name (receives item, search_name)
+          # @param id_method [Symbol] method to call on item to get its ID
+          # @param not_found [String, nil] error message template with %s placeholder for the reference
+          # @return [void]
           def resolver(name, loader:, finder:, id_method: :id, not_found: nil)
             cache_var = "@#{name}s_cache"
             not_found_msg = not_found || "#{name.to_s.capitalize} not found: '%s'."

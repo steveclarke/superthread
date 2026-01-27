@@ -6,6 +6,9 @@ module Superthread
     class Sprints < Base
       desc "list", "List all sprints in a space"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
+      # Lists all sprints in a specified space.
+      #
+      # @return [void]
       def list
         sprints = client.sprints.list(workspace_id, space_id: space_id)
         output_list sprints, columns: %i[id title start_date]
@@ -14,6 +17,10 @@ module Superthread
       desc "get SPRINT_ID", "Get sprint details"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
       option :open, type: :boolean, desc: "Open in web browser"
+      # Displays detailed information about a specific sprint.
+      #
+      # @param sprint_id [String] the unique identifier of the sprint to retrieve
+      # @return [void]
       def get(sprint_id)
         handle_error do
           sprint = client.sprints.find(workspace_id, sprint_id, space_id: space_id)

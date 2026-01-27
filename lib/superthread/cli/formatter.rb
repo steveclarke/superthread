@@ -9,7 +9,6 @@ module Superthread
     #   formatter = Formatter.new(color: true)
     #   formatter.table(cards, columns: [:id, :title, :status])
     #   formatter.detail(card, fields: [:id, :title, :status, :priority])
-    #
     module Formatter
       # ANSI color codes
       COLORS = {
@@ -47,6 +46,8 @@ module Superthread
         1 => :gray      # low
       }.freeze
 
+      # Human-readable labels for priority levels.
+      # @return [Hash{Integer => String}]
       PRIORITY_LABELS = {
         4 => "urgent",
         3 => "high",
@@ -56,12 +57,12 @@ module Superthread
 
       module_function
 
-      # Truncates a string to a maximum length.
+      # Truncates a string to a maximum length with an ellipsis indicator.
       #
-      # @param str [String] The string to truncate
-      # @param max_length [Integer] Maximum length
-      # @param omission [String] String to append when truncated
-      # @return [String] Truncated string
+      # @param str [String] the source string to truncate
+      # @param max_length [Integer] the maximum character length for the result
+      # @param omission [String] the suffix to append when truncation occurs
+      # @return [String] the truncated string, or original if within limit
       def truncate(str, max_length, omission: "...")
         str = str.to_s
         return str if str.length <= max_length
@@ -69,23 +70,23 @@ module Superthread
         "#{str[0, max_length - omission.length]}#{omission}"
       end
 
-      # Applies color to text if color is enabled.
+      # Applies ANSI color codes to text for terminal display.
       #
-      # @param text [String] Text to colorize
-      # @param color [Symbol] Color name
-      # @param enabled [Boolean] Whether color is enabled
-      # @return [String] Colorized text
+      # @param text [String] the plain text to wrap with color codes
+      # @param color [Symbol] the color name from COLORS constant (e.g., :red, :green)
+      # @param enabled [Boolean] whether to apply color or return plain text
+      # @return [String] text wrapped with ANSI codes if enabled, otherwise plain text
       def colorize(text, color, enabled: true)
         return text.to_s unless enabled && COLORS.key?(color)
 
         "#{COLORS[color]}#{text}#{COLORS[:reset]}"
       end
 
-      # Formats a status with appropriate color.
+      # Formats a workflow status with semantic color coding.
       #
-      # @param status [String] Status value
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted status
+      # @param status [String] the status value (e.g., "started", "done", "blocked")
+      # @param color_enabled [Boolean] whether to apply ANSI color codes
+      # @return [String] the status with appropriate color for its state
       def format_status(status, color_enabled: true)
         return "-" if status.nil?
 
@@ -93,11 +94,11 @@ module Superthread
         colorize(status, color, enabled: color_enabled)
       end
 
-      # Formats a priority with label and color.
+      # Formats a priority level with human-readable label and color.
       #
-      # @param priority [Integer] Priority value (1-4)
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted priority
+      # @param priority [Integer] the priority value (1=low, 2=medium, 3=high, 4=urgent)
+      # @param color_enabled [Boolean] whether to apply ANSI color codes
+      # @return [String] the priority label with appropriate urgency color
       def format_priority(priority, color_enabled: true)
         return "-" if priority.nil?
 
@@ -106,11 +107,11 @@ module Superthread
         colorize(label, color, enabled: color_enabled)
       end
 
-      # Formats a timestamp as a relative time or date.
+      # Formats a timestamp as a relative time or absolute date string.
       #
-      # @param timestamp [Integer, Time] Unix timestamp in milliseconds or Time object
-      # @param relative [Boolean] Use relative time (e.g., "2 days ago")
-      # @return [String] Formatted time
+      # @param timestamp [Integer, Time] Unix timestamp in seconds or a Time object
+      # @param relative [Boolean] whether to use relative format (e.g., "2d ago") or absolute
+      # @return [String] the formatted time string, or "-" if nil/zero
       def format_time(timestamp, relative: true)
         return "-" if timestamp.nil? || timestamp == 0
 
@@ -123,10 +124,10 @@ module Superthread
         end
       end
 
-      # Formats a relative time string.
+      # Formats a Time object as a human-readable relative time string.
       #
-      # @param time [Time] Time to format
-      # @return [String] Relative time string
+      # @param time [Time] the timestamp to format relative to now
+      # @return [String] relative time like "just now", "5m ago", "3d ago", or a date
       def format_relative_time(time)
         diff = Time.now - time
 
@@ -140,11 +141,11 @@ module Superthread
         end
       end
 
-      # Formats a boolean value.
+      # Formats a boolean value as a colored yes/no string.
       #
-      # @param value [Boolean] Boolean value
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted boolean
+      # @param value [Boolean] the boolean to format
+      # @param color_enabled [Boolean] whether to apply green/gray ANSI color
+      # @return [String] "yes" (green) for true, "no" (gray) for false
       def format_boolean(value, color_enabled: true)
         if value
           colorize("yes", :green, enabled: color_enabled)
@@ -153,13 +154,13 @@ module Superthread
         end
       end
 
-      # Formats data as a table.
+      # Formats data as an aligned text table with headers.
       #
-      # @param data [Array<Hash>, Collection] Data to format
-      # @param columns [Array<Symbol>] Columns to display
-      # @param headers [Hash<Symbol, String>] Custom column headers
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted table
+      # @param data [Array<Hash>, Collection] the items to display as rows
+      # @param columns [Array<Symbol>] the field names to include as columns
+      # @param headers [Hash{Symbol => String}] custom header labels keyed by column name
+      # @param color_enabled [Boolean] whether to apply ANSI color to values
+      # @return [String] the formatted table with header row and data rows
       def table(data, columns:, headers: {}, color_enabled: true)
         items = data.respond_to?(:items) ? data.items : Array(data)
         return "" if items.empty?
@@ -194,13 +195,13 @@ module Superthread
         lines.join("\n")
       end
 
-      # Formats a single item as key-value pairs.
+      # Formats a single item as aligned key-value pairs for detail view.
       #
-      # @param item [Hash, Object] Item to format
-      # @param fields [Array<Symbol>] Fields to display
-      # @param labels [Hash<Symbol, String>] Custom field labels
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted detail view
+      # @param item [Hash, Object] the item to display (hash or object with to_h)
+      # @param fields [Array<Symbol>] the field names to include
+      # @param labels [Hash{Symbol => String}] custom labels keyed by field name
+      # @param color_enabled [Boolean] whether to apply ANSI color to values
+      # @return [String] the formatted detail view with aligned labels and values
       def detail(item, fields:, labels: {}, color_enabled: true)
         data = item.respond_to?(:to_h) ? item.to_h : item
 
@@ -215,10 +216,10 @@ module Superthread
         lines.join("\n")
       end
 
-      # Formats as JSON.
+      # Formats data as pretty-printed JSON for output.
       #
-      # @param data [Object] Data to format
-      # @return [String] JSON string
+      # @param data [Object] the data to serialize (supports arrays, hashes, and objects with to_h)
+      # @return [String] the indented JSON string
       def json(data)
         obj = if data.is_a?(Array)
           # Plain arrays of model objects need to be mapped to hashes
@@ -231,28 +232,28 @@ module Superthread
         JSON.pretty_generate(obj)
       end
 
-      # Strips ANSI color codes from a string.
+      # Strips ANSI escape codes from a string for width calculation.
       #
-      # @param str [String] String with ANSI codes
-      # @return [String] Plain string
+      # @param str [String] the string potentially containing ANSI escape sequences
+      # @return [String] the plain text without any ANSI codes
       def strip_ansi(str)
         str.to_s.gsub(/\e\[[0-9;]*m/, "")
       end
 
-      # Humanizes a symbol or string.
+      # Converts a symbol or string to a human-readable label.
       #
-      # @param key [Symbol, String] Key to humanize
-      # @return [String] Humanized string
+      # @param key [Symbol, String] the field name to humanize (e.g., :time_created)
+      # @return [String] the humanized label with underscores replaced and capitalized
       def humanize(key)
         key.to_s.tr("_", " ").capitalize
       end
 
-      # Formats a cell value for a table.
+      # Formats a cell value for display in a table column.
       #
-      # @param item [Hash, Object] Item containing the value
-      # @param column [Symbol] Column/field name
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted cell value
+      # @param item [Hash, Object] the row item containing the field value
+      # @param column [Symbol] the column name to extract and format
+      # @param color_enabled [Boolean] whether to apply semantic color formatting
+      # @return [String] the formatted cell value ready for table display
       def format_cell(item, column, color_enabled: true)
         value = item.respond_to?(column) ? item.send(column) : item[column]
 
@@ -268,12 +269,12 @@ module Superthread
         format_value(value, column, color_enabled: color_enabled)
       end
 
-      # Formats a field value for detail view.
+      # Formats a field value for display in a detail key-value view.
       #
-      # @param data [Hash] Data hash
-      # @param field [Symbol] Field name
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted field value
+      # @param data [Hash] the hash containing field values
+      # @param field [Symbol] the field name to extract and format
+      # @param color_enabled [Boolean] whether to apply semantic color formatting
+      # @return [String] the formatted field value ready for detail display
       def format_field(data, field, color_enabled: true)
         value = data[field]
 
@@ -289,12 +290,12 @@ module Superthread
         format_value(value, field, color_enabled: color_enabled)
       end
 
-      # Formats a value based on its name and type.
+      # Formats a value based on its field name with appropriate type handling.
       #
-      # @param value [Object] Value to format
-      # @param name [Symbol] Field/column name
-      # @param color_enabled [Boolean] Whether color is enabled
-      # @return [String] Formatted value
+      # @param value [Object] the raw value to format
+      # @param name [Symbol] the field name used to determine formatting rules
+      # @param color_enabled [Boolean] whether to apply semantic color formatting
+      # @return [String] the formatted value string, or "-" if nil
       def format_value(value, name, color_enabled: true)
         return "-" if value.nil?
 

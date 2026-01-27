@@ -4,6 +4,7 @@ require "active_support/concern"
 
 module Superthread
   module Models
+    # Shared behavior modules for Superthread models.
     module Concerns
       # Provides archived status checking for models with an `archived` attribute.
       #
@@ -15,7 +16,6 @@ module Superthread
       #   end
       #
       #   board.archived?  # => true/false
-      #
       module Archivable
         extend ActiveSupport::Concern
 

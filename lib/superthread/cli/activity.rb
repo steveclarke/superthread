@@ -11,6 +11,9 @@ module Superthread
       option :user, type: :string, desc: "Filter by user (ID, name, or 'me')"
       option :board, type: :string, aliases: "-b", desc: "Filter by board (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      # Display recent activity across the workspace.
+      #
+      # @return [void]
       def show
         handle_error do
           since_ts = parse_date(options[:since])
@@ -75,7 +78,7 @@ module Superthread
 
       # Categorize cards into activity buckets based on timestamps.
       #
-      # @param cards [Array<Card>] Cards to categorize
+      # @param cards [Array<Card>] the cards to sort into created, updated, and completed buckets
       # @param since_ts [Integer] Filter timestamp
       # @return [Hash] Categorized activity
       def categorize_activity(cards, since_ts)
@@ -120,6 +123,9 @@ module Superthread
       end
 
       # Output activity as JSON.
+      #
+      # @param activity [Hash] the categorized activity data with :created, :updated, :completed keys
+      # @return [void]
       def output_activity_json(activity)
         json_data = {
           created: activity[:created].map { |c| card_to_hash(c) },
@@ -135,6 +141,9 @@ module Superthread
       end
 
       # Convert card to hash for JSON output.
+      #
+      # @param card [Card] the card to convert
+      # @return [Hash] the card data as a hash
       def card_to_hash(card)
         {
           id: card.id,
@@ -150,6 +159,10 @@ module Superthread
       end
 
       # Output activity as a formatted summary.
+      #
+      # @param activity [Hash] the categorized activity data
+      # @param since_label [String] the label describing the time period
+      # @return [void]
       def output_activity_summary(activity, since_label)
         total = activity[:created].size + activity[:updated].size + activity[:completed].size
 
@@ -179,6 +192,11 @@ module Superthread
       end
 
       # Output a section of activity.
+      #
+      # @param label [String] the section header label
+      # @param cards [Array<Card>] the cards to display in this section
+      # @param color [Symbol] the color for the section header
+      # @return [void]
       def output_activity_section(label, cards, color)
         say "#{label} (#{cards.size}):", color
         cards.each do |card|

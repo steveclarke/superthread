@@ -5,6 +5,9 @@ module Superthread
     # CLI commands for workspace member operations.
     class Members < Base
       desc "list", "List workspace members"
+      # Lists all members of the current workspace.
+      #
+      # @return [void]
       def list
         handle_error do
           members = client.users.members(workspace_id)

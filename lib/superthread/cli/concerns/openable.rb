@@ -6,12 +6,15 @@ module Superthread
       # Provides browser opening functionality for CLI commands.
       # Include this concern and call open_in_browser after displaying an item.
       module Openable
+        # Base URL for the Superthread web application.
+        # @return [String]
         WEB_BASE_URL = "https://app.superthread.com"
 
         # Open an item in the browser if --open flag is set.
         #
-        # @param item_type [Symbol, String] Item type (card, board, project, etc.)
-        # @param item_id [String] Item ID
+        # @param item_type [Symbol, String] the resource type (card, board, project, etc.)
+        # @param item_id [String] the unique identifier of the resource
+        # @return [void]
         def open_in_browser(item_type, item_id)
           return unless options[:open]
 
@@ -23,7 +26,11 @@ module Superthread
         private
 
         # Open a URL in the default browser.
-        # Cross-platform: macOS (open), Linux (xdg-open), Windows (start).
+        #
+        # Cross-platform: uses open on macOS, xdg-open on Linux, start on Windows.
+        #
+        # @param url [String] the full URL to open
+        # @return [Boolean, nil] the result of the system command
         def browser_open(url)
           command = case RUBY_PLATFORM
           when /darwin/i

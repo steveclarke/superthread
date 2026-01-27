@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
-# Namespace for Shale-based models.
-# These are replacing the Superthread::Objects classes during migration.
 module Superthread
+  # Namespace for Shale-based API response models.
+  #
+  # These typed models are replacing the generic Superthread::Object
+  # classes, providing better type safety and validation.
+  #
+  # @see Superthread::Model Base class for all models
   module Models
   end
 end

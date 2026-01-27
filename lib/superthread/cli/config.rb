@@ -4,8 +4,13 @@ require "fileutils"
 
 module Superthread
   module Cli
+    # CLI commands for managing Superthread configuration files.
+    # Handles config file creation, viewing settings, and updating values.
     class Config < Base
       desc "init", "Create config file at ~/.config/superthread/config.yaml"
+      # Creates the Superthread configuration file with default settings.
+      #
+      # @return [void]
       def init
         config_path = Superthread::Configuration.new.config_path
         config_dir = File.dirname(config_path)
@@ -37,11 +42,17 @@ module Superthread
       end
 
       desc "path", "Show config file path"
+      # Displays the path to the configuration file.
+      #
+      # @return [void]
       def path
         puts Superthread::Configuration.new.config_path
       end
 
       desc "show", "Show current configuration"
+      # Displays the current configuration settings and account information.
+      #
+      # @return [void]
       def show
         cfg = Superthread::Configuration.new
 
@@ -86,6 +97,11 @@ module Superthread
           suth config set format json
           suth config set format table
       DESC
+      # Sets a configuration value in the config file.
+      #
+      # @param key [String] configuration key to set (format or base_url)
+      # @param value [String] value to assign to the configuration key
+      # @return [void]
       def set(key, value)
         cfg = Superthread::Configuration.new
 

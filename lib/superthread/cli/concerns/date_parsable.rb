@@ -17,11 +17,13 @@ module Superthread
       #       # Filter cards by since_timestamp...
       #     end
       #   end
-      #
       module DateParsable
         extend ActiveSupport::Concern
 
+        # Number of seconds in a day (24 hours).
         SECONDS_PER_DAY = 86_400
+
+        # Number of seconds in a week (7 days).
         SECONDS_PER_WEEK = 604_800
 
         # Parse a date string into a Unix timestamp (seconds).
@@ -43,7 +45,6 @@ module Superthread
         #   parse_date("last week")       # => Start of last week
         #   parse_date("this week")       # => Start of this week
         #   parse_date("2026-01-20")      # => Specific date
-        #
         def parse_date(date_string)
           return nil if date_string.nil? || date_string.empty?
 
@@ -83,7 +84,6 @@ module Superthread
         #
         # @param date_string [String, nil] Date expression to parse
         # @return [Integer, nil] Unix timestamp at end of day, or nil
-        #
         def parse_date_end(date_string)
           timestamp = parse_date(date_string)
           return nil unless timestamp
@@ -100,7 +100,6 @@ module Superthread
         # @param since [Integer, nil] Minimum timestamp (inclusive)
         # @param until_time [Integer, nil] Maximum timestamp (inclusive)
         # @return [Array] Filtered items
-        #
         def filter_by_date(items, field:, since: nil, until_time: nil)
           items.select do |item|
             ts = item.send(field)
@@ -116,11 +115,17 @@ module Superthread
         private
 
         # Convert Date to Time at beginning of day (midnight).
+        #
+        # @param date [Date] the date to convert
+        # @return [Time] midnight on the given date
         def beginning_of_day(date)
           Time.new(date.year, date.month, date.day, 0, 0, 0)
         end
 
         # Get the beginning of the week for a date (Monday).
+        #
+        # @param date [Date] the date to find the week start for
+        # @return [Time] midnight on Monday of the given date's week
         def beginning_of_week(date)
           # wday: 0=Sunday, 1=Monday, ... 6=Saturday
           # We want Monday as start of week
@@ -138,7 +143,6 @@ module Superthread
         # @param day_name [String] Day name (e.g., "friday", "mon")
         # @param force_past [Boolean] Always return a date in the past
         # @return [Time] Start of that day
-        #
         def parse_weekday(day_name, force_past: false)
           target_wday = weekday_number(day_name)
           today = Date.today
@@ -158,6 +162,9 @@ module Superthread
         end
 
         # Convert day name to weekday number (0=Sunday, 6=Saturday).
+        #
+        # @param day_name [String] the day name (full or abbreviated)
+        # @return [Integer] weekday number where 0=Sunday and 6=Saturday
         def weekday_number(day_name)
           case day_name.downcase
           when "sunday", "sun" then 0
@@ -173,6 +180,9 @@ module Superthread
         end
 
         # Parse an explicit date string (YYYY-MM-DD, etc.).
+        #
+        # @param date_string [String] the date string in an explicit format
+        # @return [Time] midnight on the parsed date
         def parse_explicit_date(date_string)
           beginning_of_day(Date.parse(date_string))
         rescue ArgumentError

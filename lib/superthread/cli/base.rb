@@ -10,6 +10,9 @@ module Superthread
     class Base < Thor
       include Concerns::Openable
 
+      # Indicates Thor should exit with failure code on errors.
+      #
+      # @return [Boolean] always returns true
       def self.exit_on_failure?
         true
       end
@@ -23,6 +26,9 @@ module Superthread
 
       private
 
+      # Get the Superthread API client, creating if needed.
+      #
+      # @return [Superthread::Client] the configured API client
       def client
         @client ||= if options[:account]
           # Create client with specific account's API key
@@ -34,6 +40,10 @@ module Superthread
       end
 
       # Get configuration for a specific account (for --account flag).
+      #
+      # @param account_name [String] the account name from config file
+      # @return [Superthread::Configuration] configured for the specified account
+      # @raise [Thor::Error] if the account is not found
       def config_for_account(account_name)
         cfg = Superthread::Configuration.new
         account_data = cfg.accounts[account_name]
@@ -52,6 +62,10 @@ module Superthread
       # Workspace resolution
       # ========================================
 
+      # Get the current workspace ID from options, config, or raise error.
+      #
+      # @return [String] the resolved workspace ID
+      # @raise [Thor::Error] if no workspace is configured
       def workspace_id
         ws = options[:workspace] || client.default_workspace
         return resolve_workspace(ws) if ws
@@ -61,6 +75,10 @@ module Superthread
           "or add workspace to ~/.config/superthread/config.yaml"
       end
 
+      # Resolve a workspace reference (ID or name) to its ID.
+      #
+      # @param ref [String, nil] the workspace ID or name to resolve
+      # @return [String, nil] the resolved workspace ID, or nil if ref is nil
       def resolve_workspace(ref)
         return ref if ref.nil?
 
@@ -76,17 +94,28 @@ module Superthread
         ref
       end
 
+      # Check if a value looks like a workspace ID (alphanumeric, starts with letter).
+      #
+      # @param value [String] the value to check
+      # @return [Boolean] true if it matches workspace ID pattern
       def looks_like_workspace_id?(value)
         # Workspace IDs are typically 8 chars, start with a letter, alphanumeric
         # Also accept test IDs like "test_workspace"
         value.match?(/\A[a-zA-Z][a-zA-Z0-9_]{5,20}\z/)
       end
 
+      # Find a workspace by name from the cached list.
+      #
+      # @param name [String] the workspace name to search for (case-insensitive)
+      # @return [Hash, nil] the workspace hash with :id and :name, or nil if not found
       def find_workspace_by_name(name)
         @workspaces_cache ||= extract_workspaces_from_user
         @workspaces_cache.find { |w| w[:name]&.downcase == name.downcase }
       end
 
+      # Extract workspace list from the current user's teams.
+      #
+      # @return [Array<Hash{Symbol => String}>] array of workspace hashes with :id and :name
       def extract_workspaces_from_user
         user = client.users.me
         return [] unless user.teams
@@ -100,10 +129,18 @@ module Superthread
       # Space resolution
       # ========================================
 
+      # Get the space ID from --space option, resolving name if needed.
+      #
+      # @return [String, nil] the resolved space ID, or nil if not specified
       def space_id
         resolve_space(options[:space])
       end
 
+      # Resolve a space reference (ID or name) to its ID.
+      #
+      # @param ref [String, nil] the space ID or name to resolve
+      # @return [String, nil] the resolved space ID
+      # @raise [Thor::Error] if name is provided but not found
       def resolve_space(ref)
         return ref if ref.nil?
         return ref if looks_like_id?(ref)
@@ -114,6 +151,10 @@ module Superthread
         raise Thor::Error, "Space not found: '#{ref}'. Use 'st spaces list' to see available spaces."
       end
 
+      # Find a space by name from the cached list.
+      #
+      # @param name [String] the space name to search for (case-insensitive)
+      # @return [Superthread::Models::Space, nil] the space object or nil if not found
       def find_space_by_name(name)
         @spaces_cache ||= client.spaces.list(workspace_id)
         @spaces_cache.find { |s| s.title&.downcase == name.downcase }
@@ -123,10 +164,18 @@ module Superthread
       # Board resolution
       # ========================================
 
+      # Get the board ID from --board option, resolving name if needed.
+      #
+      # @return [String, nil] the resolved board ID, or nil if not specified
       def board_id
         resolve_board(options[:board])
       end
 
+      # Resolve a board reference (ID or name) to its ID.
+      #
+      # @param ref [String, nil] the board ID or name to resolve
+      # @return [String, nil] the resolved board ID
+      # @raise [Thor::Error] if name is provided but not found
       def resolve_board(ref)
         return ref if ref.nil?
         return ref if looks_like_id?(ref)
@@ -137,6 +186,10 @@ module Superthread
         raise Thor::Error, "Board not found: '#{ref}'. Use 'st boards list --space <space>' to see available boards."
       end
 
+      # Find a board by name, searching within space if specified or all spaces.
+      #
+      # @param name [String] the board name to search for (case-insensitive)
+      # @return [Superthread::Models::Board, nil] the board object or nil if not found
       def find_board_by_name(name)
         # If space is specified, search only in that space
         if options[:space]
@@ -149,6 +202,9 @@ module Superthread
         @all_boards_cache.find { |b| b.title&.downcase == name.downcase }
       end
 
+      # Load all boards from all spaces in the workspace.
+      #
+      # @return [Array<Superthread::Models::Board>] all accessible boards
       def load_all_boards
         spaces = client.spaces.list(workspace_id)
         spaces.flat_map do |space|
@@ -162,6 +218,11 @@ module Superthread
       # User resolution
       # ========================================
 
+      # Resolve a user reference (ID, name, or email) to their user identifier.
+      #
+      # @param ref [String, nil] the user ID, display name, or email to resolve
+      # @return [String, nil] the resolved user identifier
+      # @raise [Thor::Error] if name/email is provided but not found
       def resolve_user(ref)
         return ref if ref.nil?
         return ref if looks_like_id?(ref)
@@ -172,6 +233,10 @@ module Superthread
         raise Thor::Error, "User not found: '#{ref}'. Use 'st users members' to see available users."
       end
 
+      # Find a user by display name or email from the cached member list.
+      #
+      # @param name [String] the display name or email to search for (case-insensitive)
+      # @return [Superthread::Models::User, nil] the user object or nil if not found
       def find_user_by_name(name)
         @users_cache ||= client.users.members(workspace_id)
         @users_cache.find do |u|
@@ -184,6 +249,11 @@ module Superthread
       # Tag resolution
       # ========================================
 
+      # Resolve a tag reference (ID or name) to its ID.
+      #
+      # @param ref [String, nil] the tag ID or name to resolve
+      # @return [String, nil] the resolved tag ID
+      # @raise [Thor::Error] if name is provided but not found
       def resolve_tag(ref)
         return ref if ref.nil?
         return ref if looks_like_id?(ref)
@@ -194,6 +264,10 @@ module Superthread
         raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags."
       end
 
+      # Find a tag by name from the cached list.
+      #
+      # @param name [String] the tag name to search for (case-insensitive)
+      # @return [Superthread::Models::Tag, nil] the tag object or nil if not found
       def find_tag_by_name(name)
         @tags_cache ||= client.cards.tags(workspace_id, all: true)
         @tags_cache.find { |t| t.name&.downcase == name.downcase }
@@ -203,6 +277,11 @@ module Superthread
       # List resolution (requires board context)
       # ========================================
 
+      # Resolve a list reference (ID or name) to its ID.
+      #
+      # @param ref [String, nil] the list ID or name to resolve
+      # @return [String, nil] the resolved list ID
+      # @raise [Thor::Error] if name is provided but not found
       def resolve_list(ref)
         return ref if ref.nil?
         return ref if looks_like_id?(ref)
@@ -213,6 +292,10 @@ module Superthread
         raise Thor::Error, "List not found: '#{ref}'. Specify a board with --board to search by list name."
       end
 
+      # Find a list by name within the current board context.
+      #
+      # @param name [String] the list name to search for (case-insensitive)
+      # @return [Superthread::Models::List, nil] the list object or nil if not found
       def find_list_by_name(name)
         return nil unless options[:board]
 
@@ -227,34 +310,47 @@ module Superthread
       # Helper to detect if value looks like an ID
       # ========================================
 
+      # Check if a value looks like a resource ID (alphanumeric, reasonable length).
+      #
+      # @param value [String] the value to check
+      # @return [Boolean] true if it matches ID pattern
       def looks_like_id?(value)
         # IDs are typically short alphanumeric strings
         value.match?(/\A[a-zA-Z0-9_-]+\z/) && value.length <= 30
       end
 
-      # Check if color output is enabled.
+      # Check if color output is enabled based on TTY and quiet mode.
+      #
+      # @return [Boolean] true if colors should be applied to output
       def color_enabled?
         $stdout.tty? && !options[:quiet]
       end
 
-      # Check if JSON output is enabled (via --json flag or config format).
+      # Check if JSON output is enabled via --json flag or config setting.
+      #
+      # @return [Boolean] true if output should be JSON formatted
       def json_output?
         options[:json] || app_config.format == "json"
       end
 
-      # Get the configuration object.
+      # Get the application configuration object.
+      #
       # Named app_config to avoid collision with Thor's subcommand delegation
       # (Thor generates a `config` method for the `config` subcommand).
+      #
+      # @return [Superthread::Configuration] the configuration instance
       def app_config
         @app_config ||= Superthread::Configuration.new
       end
 
-      # Output a single item.
-      # In JSON mode, outputs as JSON. Otherwise, outputs as key-value pairs.
+      # Output a single item as detail view or JSON.
       #
-      # @param item [Object] Item to output
-      # @param fields [Array<Symbol>] Fields to display in table mode
-      # @param labels [Hash<Symbol, String>] Custom field labels
+      # In JSON mode, outputs as JSON object. Otherwise, outputs as key-value pairs.
+      #
+      # @param item [Object] the item to output (model object or hash)
+      # @param fields [Array<Symbol>] the fields to display in table mode
+      # @param labels [Hash{Symbol => String}] custom labels for field names
+      # @return [void]
       def output_item(item, fields: nil, labels: {})
         if json_output?
           puts Formatter.json(item)
@@ -264,12 +360,14 @@ module Superthread
         end
       end
 
-      # Output a collection/list.
-      # In JSON mode, outputs as JSON array. Otherwise, outputs as table.
+      # Output a collection as table or JSON array.
       #
-      # @param items [Array, Collection] Items to output
-      # @param columns [Array<Symbol>] Columns to display in table mode
-      # @param headers [Hash<Symbol, String>] Custom column headers
+      # In JSON mode, outputs as JSON array. Otherwise, outputs as formatted table.
+      #
+      # @param items [Array, Collection] the items to output
+      # @param columns [Array<Symbol>] the columns to display in table mode
+      # @param headers [Hash{Symbol => String}] custom labels for column headers
+      # @return [void]
       def output_list(items, columns: nil, headers: {})
         if json_output?
           puts Formatter.json(items)
@@ -284,10 +382,13 @@ module Superthread
         end
       end
 
-      # Output raw data (legacy support for commands not yet updated).
-      # In JSON mode or when data is not an object, outputs as JSON.
+      # Output raw data with automatic format detection.
       #
-      # @param data [Object] Data to output
+      # Legacy support for commands not yet updated. In JSON mode or when data
+      # is not a recognized object type, outputs as JSON.
+      #
+      # @param data [Object] the data to output (auto-detects format)
+      # @return [void]
       def output(data)
         if json_output?
           puts Formatter.json(data)
@@ -300,9 +401,10 @@ module Superthread
         end
       end
 
-      # Output a success message.
+      # Output a success message in green or as JSON.
       #
-      # @param message [String] Message to display
+      # @param message [String] the success message to display
+      # @return [void]
       def output_success(message)
         if json_output?
           puts Formatter.json({success: true, message: message})
@@ -311,7 +413,10 @@ module Superthread
         end
       end
 
-      # Default detail fields based on item type.
+      # Get default detail fields based on the item's model type.
+      #
+      # @param item [Object] the item to determine fields for
+      # @return [Array<Symbol>] the default fields for this item type
       def default_detail_fields(item)
         case item
         when Superthread::Models::Card
@@ -345,7 +450,10 @@ module Superthread
         end
       end
 
-      # Default list columns based on item type.
+      # Get default list columns based on the first item's model type.
+      #
+      # @param items [Array, Collection] the items to determine columns for
+      # @return [Array<Symbol>] the default columns for this collection type
       def default_list_columns(items)
         first = items.respond_to?(:first) ? items.first : nil
         return [] if first.nil?
@@ -382,10 +490,10 @@ module Superthread
         end
       end
 
-      # Helper to get symbolized options for passing to API methods.
+      # Extract specified options as a hash with symbol keys for API calls.
       #
-      # @param keys [Array<Symbol>] Keys to extract
-      # @return [Hash] Hash with symbol keys
+      # @param keys [Array<Symbol>] the option keys to extract
+      # @return [Hash{Symbol => Object}] hash of non-nil option values
       def symbolized_options(*keys)
         keys.each_with_object({}) do |key, hash|
           value = options[key.to_s]
@@ -394,11 +502,12 @@ module Superthread
       end
 
       # Truncate content for display in confirmation prompts.
-      # Strips HTML tags and truncates to max_length characters.
       #
-      # @param content [String] Content to truncate (may contain HTML)
-      # @param max_length [Integer] Maximum length (default: 50)
-      # @return [String] Truncated plain text
+      # Strips HTML tags, normalizes whitespace, and truncates with ellipsis.
+      #
+      # @param content [String] the content to truncate (may contain HTML)
+      # @param max_length [Integer] the maximum character length
+      # @return [String] the truncated plain text with ellipsis if needed
       def truncate_content(content, max_length: 50)
         return "" if content.nil? || content.empty?
 
@@ -409,23 +518,37 @@ module Superthread
         "#{plain[0, max_length]}..."
       end
 
+      # Display an informational message in cyan unless quiet mode.
+      #
+      # @param message [String] the info message to display
+      # @return [void]
       def say_info(message)
         say message, :cyan unless options[:quiet]
       end
 
+      # Display a success message in green unless quiet mode.
+      #
+      # @param message [String] the success message to display
+      # @return [void]
       def say_success(message)
         say message, :green unless options[:quiet]
       end
 
+      # Display a warning message in yellow (always shown).
+      #
+      # @param message [String] the warning message to display
+      # @return [void]
       def say_warning(message)
         say message, :yellow
       end
 
-      # Wraps a block with consistent error handling.
-      # Catches API and configuration errors and displays user-friendly messages.
+      # Wrap a block with consistent error handling for API operations.
       #
-      # @yield Block to execute
-      # @return [Object] Block return value
+      # Catches API and configuration errors and displays user-friendly messages
+      # before exiting with appropriate status codes.
+      #
+      # @yield the block to execute with error handling
+      # @return [Object] the return value of the block
       def handle_error
         yield
       rescue Superthread::NotFoundError => e
@@ -453,12 +576,14 @@ module Superthread
         exit 1
       end
 
-      # Wraps a block with confirmation prompt.
-      # Skips confirmation if --skip-confirm/-y flag is set.
+      # Wrap a block with an optional confirmation prompt.
       #
-      # @param question [String] Confirmation question
-      # @yield Block to execute if confirmed
-      # @return [Object] Block return value or nil if aborted
+      # Skips confirmation if --skip-confirm/-y flag is set, otherwise prompts
+      # the user and only executes the block if they confirm.
+      #
+      # @param question [String] the confirmation question to display
+      # @yield the block to execute if confirmed
+      # @return [Object, nil] the block's return value, or nil if aborted
       def confirming(question)
         return yield if options[:skip_confirm]
 
@@ -470,18 +595,19 @@ module Superthread
         end
       end
 
-      # Wraps a block with a spinner.
+      # Wrap a block with an animated spinner for long operations.
       #
-      # @param title [String] Spinner message
-      # @yield Block to execute
-      # @return [Object] Block return value
+      # @param title [String] the status message shown during execution
+      # @param block [Proc] the block to execute while spinner is displayed
+      # @yieldreturn [Object] the result of the long-running operation
+      # @return [Object] the return value of the block
       def with_spinner(title, &block)
         Ui.spin(title, &block)
       end
 
-      # Access to UI module.
+      # Access the UI module for terminal output helpers.
       #
-      # @return [Module] The Ui module
+      # @return [Module] the Ui module with styled output methods
       def ui
         Ui
       end

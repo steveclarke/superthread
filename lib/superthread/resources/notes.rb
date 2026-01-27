@@ -3,12 +3,14 @@
 module Superthread
   module Resources
     # API resource for note operations.
+    #
+    # Provides methods for listing, creating, and managing notes
+    # (meeting notes, transcripts) via the Superthread API.
     class Notes < Base
       # Lists all notes in a workspace.
-      # API: GET /:workspace/notes
       #
-      # @param workspace_id [String] Workspace ID
-      # @return [Superthread::Objects::Collection<Note>] List of notes
+      # @param workspace_id [String] the workspace identifier
+      # @return [Superthread::Objects::Collection<Superthread::Models::Note>] the notes in the workspace
       def list(workspace_id)
         ws = safe_id("workspace_id", workspace_id)
         get_collection("/#{ws}/notes",
@@ -16,11 +18,10 @@ module Superthread
       end
 
       # Gets a specific note.
-      # API: GET /:workspace/notes/:note
       #
-      # @param workspace_id [String] Workspace ID
-      # @param note_id [String] Note ID
-      # @return [Superthread::Models::Note] Note details
+      # @param workspace_id [String] the workspace identifier
+      # @param note_id [String] the note identifier
+      # @return [Superthread::Models::Note] the note with all attributes
       def find(workspace_id, note_id)
         ws = safe_id("workspace_id", workspace_id)
         note = safe_id("note_id", note_id)
@@ -29,12 +30,14 @@ module Superthread
       end
 
       # Creates a new note.
-      # API: POST /:workspace/notes
       #
-      # @param workspace_id [String] Workspace ID
-      # @param title [String] Note title
-      # @param params [Hash] Optional parameters (transcript, transcripts, user_notes, etc.)
-      # @return [Superthread::Models::Note] Created note
+      # @param workspace_id [String] the workspace identifier
+      # @param title [String] the note title
+      # @param params [Hash{Symbol => Object}] optional note parameters
+      # @option params [String] :transcript the meeting transcript content
+      # @option params [Array<Hash{Symbol => Object}>] :transcripts multiple transcript segments
+      # @option params [String] :user_notes user-added notes content
+      # @return [Superthread::Models::Note] the created note
       def create(workspace_id, title:, **params)
         ws = safe_id("workspace_id", workspace_id)
         body = compact_params(title: title, **params)
@@ -42,12 +45,11 @@ module Superthread
           object_class: Models::Note, unwrap_key: :note)
       end
 
-      # Deletes a note.
-      # API: DELETE /:workspace/notes/:note
+      # Deletes a note permanently.
       #
-      # @param workspace_id [String] Workspace ID
-      # @param note_id [String] Note ID
-      # @return [Superthread::Object] Success response
+      # @param workspace_id [String] the workspace identifier
+      # @param note_id [String] the note identifier to delete
+      # @return [Superthread::Object] a response object with success: true
       def destroy(workspace_id, note_id)
         ws = safe_id("workspace_id", workspace_id)
         note = safe_id("note_id", note_id)

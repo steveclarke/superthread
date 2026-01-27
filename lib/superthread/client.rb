@@ -3,14 +3,43 @@
 require "json"
 
 module Superthread
+  # HTTP client for the Superthread API.
+  #
+  # Provides access to all API resources through typed accessors.
+  # Handles authentication, request signing, and response parsing.
+  #
+  # @example Creating a client
+  #   client = Superthread::Client.new(api_key: "sk_...")
+  #   cards = client.cards.list(workspace_id)
+  #   card = client.cards.find(workspace_id, card_id)
+  #
+  # @example Using environment configuration
+  #   # Uses SUPERTHREAD_API_KEY and config files
+  #   client = Superthread::Client.new
   class Client
-    # Resource accessors for API endpoints
+    # @return [Superthread::Resources::Users] users resource
+    # @return [Superthread::Resources::Projects] projects resource
+    # @return [Superthread::Resources::Spaces] spaces resource
+    # @return [Superthread::Resources::Boards] boards resource
+    # @return [Superthread::Resources::Cards] cards resource
+    # @return [Superthread::Resources::Comments] comments resource
+    # @return [Superthread::Resources::Pages] pages resource
+    # @return [Superthread::Resources::Notes] notes resource
+    # @return [Superthread::Resources::Sprints] sprints resource
+    # @return [Superthread::Resources::Search] search resource
+    # @return [Superthread::Resources::Tags] tags resource
     attr_reader :users, :projects, :spaces, :boards, :cards,
       :comments, :pages, :notes, :sprints, :search, :tags
 
-    # The last HTTP response received (for accessing headers, status, etc.)
+    # @return [Faraday::Response, nil] the last HTTP response received
     attr_reader :last_response
 
+    # Creates a new API client.
+    #
+    # @param api_key [String, nil] API key (overrides config file and environment)
+    # @param base_url [String, nil] custom API base URL
+    # @param workspace [String, nil] default workspace ID
+    # @raise [ConfigurationError] if no valid API key is available
     def initialize(api_key: nil, base_url: nil, workspace: nil)
       @config = build_config(api_key, base_url, workspace)
       @config.validate!
@@ -30,65 +59,75 @@ module Superthread
       @tags = Superthread::Resources::Tags.new(self)
     end
 
-    # Access the resolved default workspace
+    # Returns the resolved default workspace ID.
+    #
+    # @return [String, nil] workspace ID from configuration
     def default_workspace
       @config.workspace
     end
 
-    # Resolve a workspace reference (alias or direct ID)
+    # Resolves a workspace reference to an ID.
+    #
+    # @param workspace_ref [String] workspace alias or direct ID
+    # @return [String] resolved workspace ID
     def resolve_workspace(workspace_ref)
       @config.resolve_workspace(workspace_ref)
     end
 
-    # Make an API request and return raw hash data.
+    # Makes an API request and returns raw hash data.
+    #
     # Use this when you need the raw response before object conversion.
     #
     # @param method [Symbol] HTTP method (:get, :post, :patch, :delete)
-    # @param path [String] API path
-    # @param params [Hash] Query parameters (optional)
-    # @param body [Hash] Request body (optional)
-    # @return [Hash] Parsed JSON response as a hash
+    # @param path [String] API endpoint path relative to base URL (e.g., "/cards/123")
+    # @param params [Hash{Symbol => Object}, nil] query parameters to include
+    # @param body [Hash{Symbol => Object}, nil] request body to send as JSON
+    # @return [Hash{Symbol => Object}] parsed JSON response
+    # @raise [Superthread::ApiError] if the request fails
     def request(method:, path:, params: nil, body: nil)
       response = @connection.request(method: method, path: path, params: params, body: body)
       @last_response = response
       handle_response(response)
     end
 
-    # Make an API request and return a Superthread::Object.
+    # Makes an API request and returns a typed object.
+    #
     # This is the primary method used by resource classes.
     #
-    # @param method [Symbol] HTTP method
-    # @param path [String] API path
-    # @param params [Hash] Query parameters (optional)
-    # @param body [Hash] Request body (optional)
-    # @param object_class [Class] The class to use for the response (optional)
-    # @param unwrap_key [Symbol] Key to unwrap from response (e.g., :card, :board)
-    # @return [Superthread::Object] Response wrapped in appropriate object class
+    # @param method [Symbol] HTTP method (:get, :post, :patch, :delete)
+    # @param path [String] API endpoint path relative to base URL
+    # @param params [Hash{Symbol => Object}, nil] query parameters to include
+    # @param body [Hash{Symbol => Object}, nil] request body to send as JSON
+    # @param object_class [Class, nil] class to instantiate for the response
+    # @param unwrap_key [Symbol, nil] key to unwrap from response (e.g., :card extracts response[:card])
+    # @return [Superthread::Object, Superthread::Model] response wrapped in appropriate object class
+    # @raise [Superthread::ApiError] if the request fails
     def request_object(method:, path:, params: nil, body: nil, object_class: nil, unwrap_key: nil)
       data = request(method: method, path: path, params: params, body: body)
       convert_to_object(data, object_class: object_class, unwrap_key: unwrap_key)
     end
 
-    # Make an API request and return a collection of objects.
+    # Makes an API request and returns a collection of objects.
     #
-    # @param method [Symbol] HTTP method
-    # @param path [String] API path
-    # @param params [Hash] Query parameters (optional)
-    # @param body [Hash] Request body (optional)
-    # @param item_class [Class] The class to use for items (optional)
-    # @param items_key [Symbol] Key containing the items array (optional, auto-detected)
-    # @return [Superthread::Objects::Collection] Collection of objects
+    # @param method [Symbol] HTTP method (:get, :post, :patch, :delete)
+    # @param path [String] API endpoint path relative to base URL
+    # @param params [Hash{Symbol => Object}, nil] query parameters to include
+    # @param body [Hash{Symbol => Object}, nil] request body to send as JSON
+    # @param item_class [Class, nil] class to instantiate for each item
+    # @param items_key [Symbol, nil] key containing the items array (auto-detected if nil)
+    # @return [Superthread::Objects::Collection] collection of objects
+    # @raise [Superthread::ApiError] if the request fails
     def request_collection(method:, path:, params: nil, body: nil, item_class: nil, items_key: nil)
       data = request(method: method, path: path, params: params, body: body)
       Superthread::Objects::Collection.from_response(data, key: items_key, item_class: item_class)
     end
 
-    # Convert raw hash data to a Superthread::Object or Model.
+    # Converts raw hash data to a typed object.
     #
-    # @param data [Hash, Array] Raw response data
-    # @param object_class [Class] Optional class to use
-    # @param unwrap_key [Symbol] Optional key to unwrap
-    # @return [Superthread::Object, Superthread::Model, Array]
+    # @param data [Hash{Symbol => Object}, Array<Hash>] raw response data
+    # @param object_class [Class, nil] class to instantiate
+    # @param unwrap_key [Symbol, nil] key to unwrap from response
+    # @return [Superthread::Object, Superthread::Model, Array, Object] converted object(s)
     def convert_to_object(data, object_class: nil, unwrap_key: nil)
       # Unwrap nested response (e.g., { card: { ... } } -> { ... })
       data = data[unwrap_key] if unwrap_key && data.is_a?(Hash) && data.key?(unwrap_key)
@@ -120,16 +159,22 @@ module Superthread
       end
     end
 
-    # Check if a class is a Shale-based Model.
+    # Checks if a class is a Shale-based Model.
     #
-    # @param klass [Class] The class to check
-    # @return [Boolean] True if it's a Shale model
+    # @param klass [Class] the class to check
+    # @return [Boolean] true if the class is a Shale model
     def shale_model?(klass)
       klass.respond_to?(:shale_model?) && klass.shale_model?
     end
 
     private
 
+    # Builds a configuration object with optional overrides.
+    #
+    # @param api_key [String, nil] API key override
+    # @param base_url [String, nil] base URL override
+    # @param workspace [String, nil] workspace ID override
+    # @return [Superthread::Configuration] the configured configuration object
     def build_config(api_key, base_url, workspace)
       config = Superthread::Configuration.new
       config.api_key = api_key if api_key
@@ -138,6 +183,11 @@ module Superthread
       config
     end
 
+    # Handles an HTTP response, parsing success or raising on error.
+    #
+    # @param response [Faraday::Response] the HTTP response object
+    # @return [Hash{Symbol => Object}] parsed response body
+    # @raise [Superthread::ApiError] if response status indicates failure
     def handle_response(response)
       case response.status
       when 200..299
@@ -147,6 +197,10 @@ module Superthread
       end
     end
 
+    # Parses a successful HTTP response body as JSON.
+    #
+    # @param response [Faraday::Response] the HTTP response object
+    # @return [Hash{Symbol => Object}] parsed JSON with symbol keys
     def parse_response(response)
       return {success: true} if response.status == 204
 

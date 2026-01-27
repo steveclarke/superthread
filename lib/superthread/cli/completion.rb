@@ -23,6 +23,9 @@ module Superthread
 
         You will need to start a new shell for this setup to take effect.
       DESC
+      # Outputs a bash completion script for the CLI.
+      #
+      # @return [void]
       def bash
         puts bash_completion_script
       end
@@ -45,6 +48,9 @@ module Superthread
 
         You will need to start a new shell for this setup to take effect.
       DESC
+      # Outputs a zsh completion script for the CLI.
+      #
+      # @return [void]
       def zsh
         puts zsh_completion_script
       end
@@ -63,17 +69,25 @@ module Superthread
 
         You will need to start a new shell for this setup to take effect.
       DESC
+      # Outputs a fish completion script for the CLI.
+      #
+      # @return [void]
       def fish
         puts fish_completion_script
       end
 
       private
 
-      # Introspect Thor to get command structure
+      # Get the cached command structure from Thor introspection.
+      #
+      # @return [Hash{String => Hash}] command names mapped to their metadata
       def command_structure
         @command_structure ||= build_command_structure
       end
 
+      # Build command structure by introspecting Thor classes.
+      #
+      # @return [Hash{String => Hash}] command names with :desc, :subcommands, :options
       def build_command_structure
         structure = {}
         main_class = Superthread::Cli::Main
@@ -105,6 +119,10 @@ module Superthread
         structure
       end
 
+      # Extract option definitions from a Thor command.
+      #
+      # @param command [Thor::Command] the command to extract options from
+      # @return [Array<Hash{Symbol => String}>] array of option hashes with :flag, :name, :desc
       def extract_options(command)
         command.options.map do |name, opt|
           flag = "--#{name.to_s.tr("_", "-")}"
@@ -113,6 +131,9 @@ module Superthread
         end
       end
 
+      # Get the list of global CLI options available on all commands.
+      #
+      # @return [Array<Hash{Symbol => String}>] array of option hashes with :flag, :name, :desc
       def global_options
         [
           {flag: "-v, --verbose", name: "verbose", desc: "Detailed logging"},
@@ -124,6 +145,9 @@ module Superthread
         ]
       end
 
+      # Generate a bash completion script for the CLI.
+      #
+      # @return [String] the complete bash completion script
       def bash_completion_script
         cmds = command_structure
         main_commands = cmds.keys.join(" ")
@@ -172,6 +196,9 @@ module Superthread
         BASH
       end
 
+      # Generate a zsh completion script for the CLI.
+      #
+      # @return [String] the complete zsh completion script
       def zsh_completion_script
         cmds = command_structure
 
@@ -224,6 +251,9 @@ module Superthread
         ZSH
       end
 
+      # Generate a fish completion script for the CLI.
+      #
+      # @return [String] the complete fish completion script
       def fish_completion_script
         cmds = command_structure
 
@@ -256,10 +286,18 @@ module Superthread
         lines.join("\n")
       end
 
+      # Escape a string for safe inclusion in zsh completion script.
+      #
+      # @param str [String] the string to escape
+      # @return [String] the escaped string with single quotes properly handled
       def escape_zsh(str)
         str.to_s.gsub("'", "'\\''")
       end
 
+      # Escape a string for safe inclusion in fish completion script.
+      #
+      # @param str [String] the string to escape
+      # @return [String] the escaped string with single quotes properly handled
       def escape_fish(str)
         str.to_s.gsub("'", "\\\\'")
       end

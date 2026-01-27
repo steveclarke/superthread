@@ -34,7 +34,6 @@ module Superthread
       #   end
       #
       #   checklist.to_s  # => "Requirements (2/3)"
-      #
       module Presentable
         extend ActiveSupport::Concern
 
@@ -45,33 +44,38 @@ module Superthread
 
         class_methods do
           # Configure which attribute to use for string representation.
-          # Optionally accepts a block for custom formatting.
           #
-          # @param attribute [Symbol] The attribute name to use for to_s
-          # @yield Block evaluated in instance context for custom formatting
+          # When called with just an attribute, that attribute's value becomes
+          # the string representation. When called with a block, the block is
+          # evaluated in the instance context to produce the string.
+          #
+          # @param attribute [Symbol] attribute name to use for to_s output
+          # @yield optional block evaluated in instance context for custom formatting
+          # @yieldreturn [String] the formatted string representation
+          # @return [void]
           def presents_as(attribute, &block)
             @presentation_attribute = attribute
             @presentation_block = block
           end
 
-          # Get the configured presentation attribute.
+          # Returns the configured presentation attribute.
           #
-          # @return [Symbol] The attribute name
+          # @return [Symbol] attribute name used for string representation
           def presentation_attribute
             @presentation_attribute || :title
           end
 
-          # Get the configured presentation block.
+          # Returns the configured presentation block, if any.
           #
-          # @return [Proc, nil] The block or nil
+          # @return [Proc, nil] custom formatting block or nil if using attribute directly
           def presentation_block
             @presentation_block
           end
         end
 
-        # String representation using the configured attribute or block.
+        # Returns the string representation using the configured attribute or block.
         #
-        # @return [String] The string value
+        # @return [String] formatted string for display
         def to_s
           if self.class.presentation_block
             instance_eval(&self.class.presentation_block).to_s

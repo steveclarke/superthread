@@ -2,9 +2,15 @@
 
 module Superthread
   module Cli
-    # CLI commands for account management.
+    # CLI commands for managing Superthread accounts.
+    #
+    # Accounts store API credentials and workspace associations. Multiple
+    # accounts can be configured and switched between using these commands.
     class Accounts < Base
       desc "list", "List all configured accounts"
+      # Lists all configured accounts with their workspace associations.
+      #
+      # @return [void]
       def list
         accounts = app_config.accounts
 
@@ -28,6 +34,10 @@ module Superthread
       end
 
       desc "show [NAME]", "Show account details (defaults to current account)"
+      # Displays details for a specific account or the current account.
+      #
+      # @param name [String, nil] account name to show, or nil for current account
+      # @return [void]
       def show(name = nil)
         name ||= app_config.current_account
 
@@ -55,6 +65,10 @@ module Superthread
       end
 
       desc "use NAME", "Switch to a different account"
+      # Switches the active account to the specified account.
+      #
+      # @param name [String] account name to switch to
+      # @return [void]
       def use(name)
         unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"
@@ -70,6 +84,10 @@ module Superthread
       end
 
       desc "add NAME", "Add a new account"
+      # Adds a new account by prompting for API key and workspace selection.
+      #
+      # @param name [String] unique name for the new account
+      # @return [void]
       def add(name)
         if app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' already exists"
@@ -119,6 +137,10 @@ module Superthread
       end
 
       desc "remove NAME", "Remove an account"
+      # Removes a configured account after confirmation.
+      #
+      # @param name [String] account name to remove
+      # @return [void]
       def remove(name)
         unless app_config.accounts.key?(name.to_sym)
           Ui.error "Account '#{name}' not found"
@@ -140,6 +162,10 @@ module Superthread
 
       private
 
+      # Masks an API key for display, showing only the first 7 and last 4 characters.
+      #
+      # @param key [String, nil] the API key to mask
+      # @return [String] the masked key or "(not set)" if nil
       def mask_api_key(key)
         return "(not set)" unless key
 
