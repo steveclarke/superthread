@@ -397,6 +397,11 @@ RSpec.describe "st cards", :cli do
 
   describe "cards tag CARD_ID TAGS" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_post("test_workspace/cards/card-123/tags", response: ApiFixtures::SUCCESS)
     end
 
@@ -410,6 +415,11 @@ RSpec.describe "st cards", :cli do
 
   describe "cards untag CARD_ID TAG" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_delete("test_workspace/cards/card-123/tags/tag-1")
     end
 
