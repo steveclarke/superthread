@@ -44,7 +44,6 @@ module Superthread
       desc "get CARD_ID", "Get card details"
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       option :no_content, type: :boolean, desc: "Hide content, show only metadata"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Display detailed information about a specific card.
       #
       # @param card_id [String] the unique identifier of the card to retrieve
@@ -80,8 +79,6 @@ module Superthread
               end
             end
           end
-
-          open_in_browser(:card, card_id)
         end
       end
 
@@ -203,32 +200,38 @@ module Superthread
         end
       end
 
-      desc "assign CARD_ID USER", "Assign a user to a card"
+      desc "assign CARD_ID USERS", "Assign user(s) to a card (comma-separated)"
       option :role, type: :string, default: "member", desc: "Member role"
-      # Add a user as a member of a card.
+      # Add one or more users as members of a card.
       #
       # @param card_id [String] the unique identifier of the card
-      # @param user_ref [String] the user ID, name, or email to assign
+      # @param user_refs [String] comma-separated user IDs, names, or emails to assign
       # @return [void]
-      def assign(card_id, user_ref)
+      def assign(card_id, user_refs)
         handle_error do
-          user_id = resolve_user(user_ref)
-          client.cards.add_member(workspace_id, card_id, user_id: user_id, role: options[:role])
-          Ui.success "Assigned #{user_ref} to card #{card_id}"
+          users = user_refs.split(",").map(&:strip)
+          users.each do |user_ref|
+            user_id = resolve_user(user_ref)
+            client.cards.add_member(workspace_id, card_id, user_id: user_id, role: options[:role])
+          end
+          Ui.success "Assigned #{users.size} user(s) to card #{card_id}"
         end
       end
 
-      desc "unassign CARD_ID USER", "Unassign a user from a card"
-      # Remove a user's membership from a card.
+      desc "unassign CARD_ID USERS", "Unassign user(s) from a card (comma-separated)"
+      # Remove one or more users from a card.
       #
       # @param card_id [String] the unique identifier of the card
-      # @param user_ref [String] the user ID, name, or email to unassign
+      # @param user_refs [String] comma-separated user IDs, names, or emails to unassign
       # @return [void]
-      def unassign(card_id, user_ref)
+      def unassign(card_id, user_refs)
         handle_error do
-          user_id = resolve_user(user_ref)
-          client.cards.remove_member(workspace_id, card_id, user_id)
-          Ui.success "Unassigned #{user_ref} from card #{card_id}"
+          users = user_refs.split(",").map(&:strip)
+          users.each do |user_ref|
+            user_id = resolve_user(user_ref)
+            client.cards.remove_member(workspace_id, card_id, user_id)
+          end
+          Ui.success "Unassigned #{users.size} user(s) from card #{card_id}"
         end
       end
 

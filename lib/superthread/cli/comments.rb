@@ -12,7 +12,6 @@ module Superthread
         "delete-reply" => :delete_reply
 
       desc "get COMMENT_ID", "Get comment details"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Display detailed information about a specific comment.
       #
       # @param comment_id [String] the unique identifier of the comment to retrieve
@@ -21,15 +20,6 @@ module Superthread
         handle_error do
           comment = client.comments.find(workspace_id, comment_id)
           output_item comment, fields: %i[id content user_id card_id time_created time_updated]
-
-          # For comments, open the parent card if available
-          if options[:open]
-            if comment.card_id
-              open_in_browser(:card, comment.card_id)
-            else
-              Ui.warning "Cannot open comment in browser (no associated card)"
-            end
-          end
         end
       end
 

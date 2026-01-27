@@ -8,8 +8,6 @@ module Superthread
     # Base class for all CLI commands.
     # Provides common options, client access, and output formatting.
     class Base < Thor
-      include Concerns::Openable
-
       # Indicates Thor should exit with failure code on errors.
       #
       # @return [Boolean] always returns true

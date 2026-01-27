@@ -22,7 +22,6 @@ module Superthread
       end
 
       desc "get PAGE_ID", "Get page details"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Retrieves and displays details for a specific page.
       #
       # @param page_id [String] numeric ID or URL slug of the page to retrieve
@@ -31,8 +30,6 @@ module Superthread
         handle_error do
           page = client.pages.find(workspace_id, page_id)
           output_item page, fields: %i[id title time_created time_updated]
-
-          open_in_browser(:page, page_id)
         end
       end
 

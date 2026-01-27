@@ -16,7 +16,6 @@ module Superthread
 
       desc "get SPRINT_ID", "Get sprint details"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
-      option :open, type: :boolean, desc: "Open in web browser"
       # Displays detailed information about a specific sprint.
       #
       # @param sprint_id [String] the unique identifier of the sprint to retrieve
@@ -25,8 +24,6 @@ module Superthread
         handle_error do
           sprint = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
           output_item sprint, fields: %i[id title start_date time_created time_updated]
-
-          open_in_browser(:sprint, sprint_id)
         end
       end
     end

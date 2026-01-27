@@ -157,7 +157,7 @@ suth members list                              # List workspace members
 
 # Cards
 suth cards list -b BOARD                       # List cards on a board
-suth cards get CARD_ID [-o]                    # Get card details (--open to view in browser)
+suth cards get CARD_ID                         # Get card details
 suth cards create --title "Task" -l LIST -b BOARD
 suth cards update CARD_ID --title "New title"
 suth cards delete CARD_ID
@@ -183,7 +183,7 @@ suth cards untag CARD_ID TAG                   # Remove tag from card
 
 # Boards
 suth boards list -s SPACE                      # List boards in a space
-suth boards get BOARD [-o]                     # Get board details
+suth boards get BOARD                     # Get board details
 suth boards lists BOARD                        # List columns/lists on a board
 suth boards create --title "Board" -s SPACE
 suth boards update BOARD --title "New name"
@@ -197,7 +197,7 @@ suth boards delete-list LIST_ID
 
 # Projects (Epics)
 suth projects list                             # List all projects
-suth projects get PROJECT_ID [-o]              # Get project details
+suth projects get PROJECT_ID              # Get project details
 suth projects create --title "Q1 Roadmap" -l LIST [-b BOARD]
 suth projects update PROJECT_ID --title "New title"
 suth projects delete PROJECT_ID
@@ -206,7 +206,7 @@ suth projects remove_card PROJECT_ID CARD_ID   # Remove card from project
 
 # Spaces
 suth spaces list                               # List all spaces
-suth spaces get SPACE [-o]                     # Get space details
+suth spaces get SPACE                     # Get space details
 suth spaces create --title "Engineering"
 suth spaces update SPACE --title "New name"
 suth spaces delete SPACE
@@ -215,7 +215,7 @@ suth spaces remove_member SPACE USER
 
 # Pages
 suth pages list [-s SPACE]                     # List pages
-suth pages get PAGE_ID [-o]                    # Get page details
+suth pages get PAGE_ID                    # Get page details
 suth pages create -s SPACE [--title "Wiki"]
 suth pages update PAGE_ID --title "New title"
 suth pages duplicate PAGE_ID -s SPACE
@@ -223,7 +223,7 @@ suth pages archive PAGE_ID
 suth pages delete PAGE_ID
 
 # Comments
-suth comments get COMMENT_ID [-o]              # Get comment (opens parent card)
+suth comments get COMMENT_ID              # Get comment (opens parent card)
 suth comments create --content "Looks good!" --card CARD
 suth comments update COMMENT_ID --content "Updated"
 suth comments delete COMMENT_ID
@@ -234,7 +234,7 @@ suth comments delete-reply --comment COMMENT --reply REPLY
 
 # Notes
 suth notes list
-suth notes get NOTE_ID [-o]                    # Get note details
+suth notes get NOTE_ID                    # Get note details
 suth notes create --title "Meeting notes" [--transcript "..."]
 suth notes delete NOTE_ID
 
@@ -293,7 +293,6 @@ Common options have short aliases:
 | `--card` | `-c` | Card ID |
 | `--related` | `-r` | Related card ID |
 | `--owner` | `-o` | Owner (user ID, name, or email) |
-| `--open` | `-o` | Open in browser (on get commands) |
 | `--yes` | `-y` | Skip confirmation prompts |
 
 ### Tips
@@ -302,7 +301,6 @@ Common options have short aliases:
 - Use `-s SPACE` to help resolve ambiguous board/list names
 - Use `--json` for scripted output: `suth cards assigned me --json`
 - Use `me` as a user reference: `suth cards assigned me`
-- Use `-o` to open any resource in your browser: `suth cards get CARD -o`
 - Use `-y` to skip confirmation prompts (for scripts/agents)
 - Priority levels: 1=Urgent, 2=High, 3=Medium, 4=Low
 

@@ -18,7 +18,6 @@ module Superthread
       end
 
       desc "get SPACE", "Get space details"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Retrieves and displays details for a specific space.
       #
       # @param space_ref [String] space identifier (ID or name)
@@ -28,8 +27,6 @@ module Superthread
           resolved_space_id = resolve_space(space_ref)
           space = client.spaces.find(workspace_id, resolved_space_id)
           output_item space, fields: %i[id title description time_created time_updated]
-
-          open_in_browser(:space, resolved_space_id)
         end
       end
 
@@ -75,32 +72,40 @@ module Superthread
         end
       end
 
-      desc "add_member SPACE USER", "Add a member to a space"
+      desc "add_member SPACE USERS", "Add member(s) to a space (comma-separated)"
       option :role, type: :string, desc: "Member role"
-      # Adds a user as a member of a space with an optional role.
+      # Adds one or more users as members of a space with an optional role.
       #
       # @param space_ref [String] space identifier (ID or name)
-      # @param user_ref [String] user identifier (ID, name, or email)
+      # @param user_refs [String] comma-separated user IDs, names, or emails
       # @return [void]
-      def add_member(space_ref, user_ref)
-        space_resolved = resolve_space(space_ref)
-        user_resolved = resolve_user(user_ref)
-        client.spaces.add_member(workspace_id, space_resolved, user_id: user_resolved, role: options[:role])
-        output_success "Added #{user_ref} to space #{space_ref}"
-      end
-
-      desc "remove_member SPACE USER", "Remove a member from a space"
-      # Removes a user's membership from a space.
-      #
-      # @param space_ref [String] space identifier (ID or name)
-      # @param user_ref [String] user identifier (ID, name, or email)
-      # @return [void]
-      def remove_member(space_ref, user_ref)
+      def add_member(space_ref, user_refs)
         handle_error do
           space_resolved = resolve_space(space_ref)
-          user_resolved = resolve_user(user_ref)
-          client.spaces.remove_member(workspace_id, space_resolved, user_resolved)
-          output_success "Removed #{user_ref} from space #{space_ref}"
+          users = user_refs.split(",").map(&:strip)
+          users.each do |user_ref|
+            user_resolved = resolve_user(user_ref)
+            client.spaces.add_member(workspace_id, space_resolved, user_id: user_resolved, role: options[:role])
+          end
+          output_success "Added #{users.size} user(s) to space #{space_ref}"
+        end
+      end
+
+      desc "remove_member SPACE USERS", "Remove member(s) from a space (comma-separated)"
+      # Removes one or more users from a space.
+      #
+      # @param space_ref [String] space identifier (ID or name)
+      # @param user_refs [String] comma-separated user IDs, names, or emails
+      # @return [void]
+      def remove_member(space_ref, user_refs)
+        handle_error do
+          space_resolved = resolve_space(space_ref)
+          users = user_refs.split(",").map(&:strip)
+          users.each do |user_ref|
+            user_resolved = resolve_user(user_ref)
+            client.spaces.remove_member(workspace_id, space_resolved, user_resolved)
+          end
+          output_success "Removed #{users.size} user(s) from space #{space_ref}"
         end
       end
     end

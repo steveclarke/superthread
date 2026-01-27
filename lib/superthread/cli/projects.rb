@@ -17,7 +17,6 @@ module Superthread
       end
 
       desc "get PROJECT_ID", "Get project details"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Retrieves and displays details for a specific project.
       #
       # @param project_id [String] numeric ID or short code of the project/epic
@@ -26,8 +25,6 @@ module Superthread
         handle_error do
           project = client.projects.find(workspace_id, project_id)
           output_item project, fields: %i[id title status start_date due_date time_created time_updated]
-
-          open_in_browser(:project, project_id)
         end
       end
 

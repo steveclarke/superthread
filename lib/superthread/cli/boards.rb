@@ -23,7 +23,6 @@ module Superthread
 
       desc "get BOARD", "Get board details"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :open, type: :boolean, aliases: "-o", desc: "Open in web browser"
       # Display detailed information about a specific board.
       #
       # @param board_ref [String] the board ID or name to retrieve
@@ -33,8 +32,6 @@ module Superthread
           resolved_board_id = resolve_board(board_ref)
           board = client.boards.find(workspace_id, resolved_board_id)
           output_item board, fields: %i[id title time_created time_updated]
-
-          open_in_browser(:board, resolved_board_id)
         end
       end
 

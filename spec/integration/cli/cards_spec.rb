@@ -196,7 +196,7 @@ RSpec.describe "st cards", :cli do
       result = run_cli("cards", "assign", "card-123", "u456def")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Assigned u456def to card card-123")
+      expect(result[:stdout]).to include("Assigned 1 user(s) to card card-123")
     end
   end
 
@@ -209,7 +209,7 @@ RSpec.describe "st cards", :cli do
       result = run_cli("cards", "unassign", "card-123", "u456def")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Unassigned u456def from card card-123")
+      expect(result[:stdout]).to include("Unassigned 1 user(s) from card card-123")
     end
   end
 

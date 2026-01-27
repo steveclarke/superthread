@@ -117,7 +117,7 @@ RSpec.describe "st spaces", :cli do
       result = run_cli("spaces", "add_member", "1", "user-123")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Added user-123 to space 1")
+      expect(result[:stdout]).to include("Added 1 user(s) to space 1")
     end
   end
 
@@ -130,7 +130,7 @@ RSpec.describe "st spaces", :cli do
       result = run_cli("spaces", "add_member", "1", "user-123", "--role=admin")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Added user-123 to space 1")
+      expect(result[:stdout]).to include("Added 1 user(s) to space 1")
     end
   end
 
@@ -143,7 +143,7 @@ RSpec.describe "st spaces", :cli do
       result = run_cli("spaces", "remove_member", "1", "member-123")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("Removed member-123 from space 1")
+      expect(result[:stdout]).to include("Removed 1 user(s) from space 1")
     end
   end
 end
