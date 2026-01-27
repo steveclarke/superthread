@@ -46,14 +46,13 @@ module Superthread
       option :title, type: :string, desc: "New title"
       option :description, type: :string, desc: "New description"
       option :icon, type: :string, desc: "New icon"
-      option :archived, type: :boolean, desc: "Archive/unarchive"
       # Updates an existing space's properties.
       #
       # @param space_ref [String] space identifier (ID or name)
       # @return [void]
       def update(space_ref)
         space = client.spaces.update(workspace_id, resolve_space(space_ref),
-          **symbolized_options(:title, :description, :icon, :archived))
+          **symbolized_options(:title, :description, :icon))
         output_item space
       end
 
