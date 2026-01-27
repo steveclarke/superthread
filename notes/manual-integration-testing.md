@@ -1325,11 +1325,11 @@ suth spaces delete "Test Space" --skip-confirm
 | # | Command | Issue Description | Severity | Status |
 |---|---------|-------------------|----------|--------|
 | 1 | `spaces list --json` | `icon` field contains Ruby hash syntax instead of JSON | Low | Open |
-| 2 | `spaces get NAME` | Name resolution returns 403 instead of resolving to ID | Medium | Open |
-| 3 | `spaces create --icon` | `--icon` expects Image object, fails with string | Medium | Open |
+| 2 | `spaces get NAME` | Name resolution returns 403 instead of resolving to ID | Medium | Fixed |
+| 3 | `spaces create --icon` | `--icon` expects Image object, fails with string | Medium | Fixed |
 | 4 | `spaces update --archived` | API doesn't support archiving spaces - option removed | Medium | Removed |
 | 5 | `boards get --open` | URL format `/workspace/boards/ID` gives glitch error (needs verification) | Low | Open |
-| 6 | `cards update` | Title ignored when combined with list move (`--title` + `-l`) | Medium | Open |
+| 6 | `cards update` | Title ignored when combined with list move (`--title` + `-l`) | Medium | Fixed |
 | 7 | `cards duplicate` | Fails - API requires `project_id` but no option exists | High | Fixed |
 | 8 | `cards add-checklist` | Response shows all "-" - data saved but not returned properly | Medium | Fixed |
 | 9 | `cards add-item` | Response shows all "-" - data saved but not returned properly | Medium | Fixed |
@@ -1343,5 +1343,5 @@ suth spaces delete "Test Space" --skip-confirm
 | 17 | `pages get/create` | Shows "Space id: -" but API doesn't return space_id - either remove field or populate it | Medium | Open |
 | 18 | `pages list` | Returns empty without `-s` filter even when pages exist | Medium | Open |
 | 19 | `projects list` | Returns empty even when projects exist (similar to pages issue) | Medium | Open |
-| 20 | `search query` | Wrong param name: uses `q` but API expects `query` - returns 400 | High | Partial (no longer errors, but no results - see #21) |
+| 20 | `search query` | Wrong param name: uses `q` but API expects `query` - returns 400 | High | Fixed |
 | 21 | `search query` | Search returns no results even with valid terms - needs investigation | High | Fixed |

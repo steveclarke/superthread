@@ -32,6 +32,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces get SPACE_ID" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_get("test_workspace/projects/1", response: ApiFixtures::Spaces::GET)
     end
 
@@ -76,6 +78,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces update SPACE_ID" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_patch("test_workspace/projects/1", response: ApiFixtures::Spaces::UPDATE)
     end
 
@@ -96,6 +100,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces delete SPACE_ID" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_get("test_workspace/projects/space-to-delete", response: ApiFixtures::Spaces::DELETE)
       stub_api_delete("test_workspace/projects/space-to-delete")
     end
@@ -110,6 +116,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces add_member SPACE_ID USER_ID" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_post("test_workspace/projects/1/members", response: ApiFixtures::Spaces::ADD_MEMBER)
     end
 
@@ -123,6 +131,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces add_member with role" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_post("test_workspace/projects/1/members", response: ApiFixtures::Spaces::ADD_MEMBER_ROLE)
     end
 
@@ -136,6 +146,8 @@ RSpec.describe "st spaces", :cli do
 
   describe "spaces remove_member SPACE_ID MEMBER_ID" do
     before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
       stub_api_delete("test_workspace/projects/1/members/member-123")
     end
 

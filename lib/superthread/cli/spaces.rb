@@ -25,7 +25,11 @@ module Superthread
       def get(space_ref)
         handle_error do
           resolved_space_id = resolve_space(space_ref)
-          space = client.spaces.find(workspace_id, resolved_space_id)
+          begin
+            space = client.spaces.find(workspace_id, resolved_space_id)
+          rescue Superthread::ForbiddenError
+            raise Thor::Error, "Space not found: '#{space_ref}'. Use 'suth spaces list' to see available spaces."
+          end
           output_item space, fields: %i[id title description time_created time_updated]
         end
       end
@@ -33,27 +37,36 @@ module Superthread
       desc "create", "Create a new space"
       option :title, type: :string, required: true, desc: "Space title"
       option :description, type: :string, desc: "Space description"
-      option :icon, type: :string, desc: "Space icon"
+      option :icon, type: :string, desc: "Space icon name (e.g., rocket, folder, star)"
+      option :icon_color, type: :string, desc: "Space icon color (hex, e.g., #FF5733)"
       # Creates a new space in the current workspace.
       #
       # @return [void]
       def create
-        space = client.spaces.create(workspace_id, **symbolized_options(:title, :description, :icon))
-        output_item space
+        handle_error do
+          opts = symbolized_options(:title, :description)
+          opts[:icon] = build_icon_object if options[:icon]
+          space = client.spaces.create(workspace_id, **opts)
+          output_item space
+        end
       end
 
       desc "update SPACE", "Update a space"
       option :title, type: :string, desc: "New title"
       option :description, type: :string, desc: "New description"
-      option :icon, type: :string, desc: "New icon"
+      option :icon, type: :string, desc: "New icon name (e.g., rocket, folder, star)"
+      option :icon_color, type: :string, desc: "New icon color (hex, e.g., #FF5733)"
       # Updates an existing space's properties.
       #
       # @param space_ref [String] space identifier (ID or name)
       # @return [void]
       def update(space_ref)
-        space = client.spaces.update(workspace_id, resolve_space(space_ref),
-          **symbolized_options(:title, :description, :icon))
-        output_item space
+        handle_error do
+          opts = symbolized_options(:title, :description)
+          opts[:icon] = build_icon_object if options[:icon] || options[:icon_color]
+          space = client.spaces.update(workspace_id, resolve_space(space_ref), **opts)
+          output_item space
+        end
       end
 
       desc "delete SPACE", "Delete a space"
@@ -106,6 +119,18 @@ module Superthread
           end
           output_success "Removed #{users.size} user(s) from space #{space_ref}"
         end
+      end
+
+      private
+
+      # Build an icon object from CLI options.
+      #
+      # @return [Hash] the icon object for the API
+      def build_icon_object
+        icon = {type: "icon"}
+        icon[:src] = options[:icon] if options[:icon]
+        icon[:color] = options[:icon_color] if options[:icon_color]
+        icon
       end
     end
   end

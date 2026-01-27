@@ -141,12 +141,13 @@ module Superthread
       # @raise [Thor::Error] if name is provided but not found
       def resolve_space(ref)
         return ref if ref.nil?
-        return ref if looks_like_id?(ref)
 
+        # Try name resolution first, then fall back to assuming it's an ID
         space = find_space_by_name(ref)
         return space.id if space
 
-        raise Thor::Error, "Space not found: '#{ref}'. Use 'st spaces list' to see available spaces."
+        # Assume it's an ID if name lookup failed
+        ref
       end
 
       # Find a space by name from the cached list.
