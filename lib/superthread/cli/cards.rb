@@ -55,7 +55,7 @@ module Superthread
           if json_output?
             fields = %i[id title status priority list_title board_title
               members start_date due_date time_created time_updated
-              parent_card child_cards linked_cards]
+              parent_card child_cards linked_cards checklists]
             fields.insert(2, :content) unless options[:no_content]
             output_item card, fields: fields
           else
@@ -67,6 +67,9 @@ module Superthread
 
             # Output card relationships
             output_card_relationships(card)
+
+            # Output checklists
+            output_card_checklists(card)
 
             # Render content separately with markdown formatting
             if !options[:no_content] && card.content && !card.content.empty?
@@ -448,6 +451,26 @@ module Superthread
             label = type.tr("_", " ").capitalize
             Ui.kv(label, "")
             links.each { |link| puts "  #{link}" }
+          end
+        end
+      end
+
+      # Output card checklists with items in human-readable format.
+      #
+      # @param card [Card] the card object containing checklist data
+      # @return [void]
+      def output_card_checklists(card)
+        return unless card.checklists&.any?
+
+        puts ""
+        Ui.section "Checklists"
+
+        card.checklists.each do |checklist|
+          progress = "(#{checklist.completed_count}/#{checklist.total_count})"
+          Ui.kv(checklist.title, progress)
+          checklist.items&.each do |item|
+            marker = item.checked? ? "✓" : "○"
+            puts "  #{marker} #{item.title}"
           end
         end
       end
