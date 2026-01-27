@@ -247,7 +247,13 @@ module Superthread
       # @param key [Symbol, String] the field name to humanize (e.g., :time_created)
       # @return [String] the humanized label with title case and proper acronyms
       def humanize(key)
-        key.to_s.titleize.gsub(/\bId\b/, "ID")
+        str = key.to_s
+        # Handle _id suffix specially since titleize treats "id" as an acronym and drops it
+        if str.end_with?("_id")
+          str.sub(/_id$/, "").titleize + " ID"
+        else
+          str.titleize
+        end
       end
 
       # Formats a cell value for display in a table column.
