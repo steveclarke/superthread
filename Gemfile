@@ -13,4 +13,6 @@ group :development, :test do
   gem "simplecov-review", require: false
   gem "standard", "~> 1.40"
   gem "webmock", "~> 3.18"
+  gem "yard"
+  gem "yard-lint"
 end

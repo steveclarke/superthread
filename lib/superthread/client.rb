@@ -169,6 +169,12 @@ module Superthread
 
     private
 
+    # Builds a configuration object with optional overrides.
+    #
+    # @param api_key [String, nil] API key override
+    # @param base_url [String, nil] base URL override
+    # @param workspace [String, nil] workspace ID override
+    # @return [Superthread::Configuration] the configured configuration object
     def build_config(api_key, base_url, workspace)
       config = Superthread::Configuration.new
       config.api_key = api_key if api_key
@@ -177,6 +183,11 @@ module Superthread
       config
     end
 
+    # Handles an HTTP response, parsing success or raising on error.
+    #
+    # @param response [Faraday::Response] the HTTP response object
+    # @return [Hash{Symbol => Object}] parsed response body
+    # @raise [Superthread::ApiError] if response status indicates failure
     def handle_response(response)
       case response.status
       when 200..299
@@ -186,6 +197,10 @@ module Superthread
       end
     end
 
+    # Parses a successful HTTP response body as JSON.
+    #
+    # @param response [Faraday::Response] the HTTP response object
+    # @return [Hash{Symbol => Object}] parsed JSON with symbol keys
     def parse_response(response)
       return {success: true} if response.status == 204
 

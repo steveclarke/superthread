@@ -379,12 +379,44 @@ bundle install
 # Run tests
 bundle exec rspec
 
-# Run linter
+# Run code linter
 bundle exec standardrb
+
+# Run documentation linter
+bundle exec yard-lint lib/
 
 # Run CLI locally
 bundle exec bin/suth version
 ```
+
+### Documentation
+
+This project uses [yard-lint](https://github.com/mensfeld/yard-lint) to enforce YARD documentation standards. See [docs/yard-linting.md](docs/yard-linting.md) for the full guide.
+
+```bash
+# Check all files
+bundle exec yard-lint lib/
+
+# Check with coverage stats
+bundle exec yard-lint lib/ --stats
+
+# Check only changed files
+bundle exec yard-lint lib/ --diff main
+```
+
+### Git Hooks
+
+This project uses [Lefthook](https://github.com/evilmartians/lefthook) for pre-commit hooks.
+
+```bash
+# Install lefthook (macOS)
+brew install lefthook
+
+# Set up hooks
+lefthook install
+```
+
+The pre-commit hook runs StandardRB and yard-lint on staged files.
 
 ### Releasing
 

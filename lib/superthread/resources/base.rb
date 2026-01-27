@@ -162,7 +162,10 @@ module Superthread
 
       # Filters nil values from a params hash.
       #
-      # @param args [Hash{Symbol => Object}] key-value pairs for parameters
+      # Accepts arbitrary keyword arguments and returns only non-nil values.
+      # Used internally to clean up API request parameters.
+      #
+      # @param args [Hash{Symbol => Object}] arbitrary key-value pairs
       # @return [Hash{Symbol => Object}] hash with nil values removed
       def compact_params(**args)
         args.compact

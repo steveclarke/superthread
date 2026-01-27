@@ -598,7 +598,8 @@ module Superthread
       # Wrap a block with an animated spinner for long operations.
       #
       # @param title [String] the status message shown during execution
-      # @yield the block to execute while spinner is displayed
+      # @param block [Proc] the block to execute while spinner is displayed
+      # @yieldreturn [Object] the result of the long-running operation
       # @return [Object] the return value of the block
       def with_spinner(title, &block)
         Ui.spin(title, &block)

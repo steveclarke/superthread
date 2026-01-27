@@ -28,6 +28,9 @@ jobs:
       - name: Run linter
         run: bundle exec standardrb
 
+      - name: Check documentation
+        run: bundle exec yard-lint lib/
+
       - name: Verify CLI runs
         run: |
           bundle exec exe/suth version

@@ -40,6 +40,9 @@ module Superthread
 
     private
 
+    # Builds a configured Faraday connection for API requests.
+    #
+    # @return [Faraday::Connection] connection with auth headers and timeouts
     def build_connection
       Faraday.new(url: @config.base_url) do |conn|
         conn.headers["Authorization"] = "Bearer #{@config.api_key}"

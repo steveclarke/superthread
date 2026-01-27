@@ -114,6 +114,10 @@ module Superthread
 
     private
 
+    # Builds a formatted error message with HTTP status prefix.
+    #
+    # @param message [String] the error message text
+    # @return [String] formatted message with status code if present
     def build_message(message)
       parts = []
       parts << "HTTP #{@status}" if @status
