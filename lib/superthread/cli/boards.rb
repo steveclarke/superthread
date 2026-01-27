@@ -35,23 +35,6 @@ module Superthread
         end
       end
 
-      desc "lists BOARD", "List columns/lists on a board"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      # Display all columns (lists) configured on a board.
-      #
-      # @param board_ref [String] the board ID or name to list columns for
-      # @return [void]
-      def lists(board_ref)
-        handle_error do
-          board = client.boards.find(workspace_id, resolve_board(board_ref))
-          if board.lists.nil? || board.lists.empty?
-            say "No lists found on this board.", :yellow
-          else
-            output_list board.lists, columns: %i[id title color]
-          end
-        end
-      end
-
       # Available layout options for boards.
       LAYOUTS = %w[board list timeline calendar].freeze
 
@@ -127,57 +110,6 @@ module Superthread
           confirming("Delete board '#{board.title}' (#{board.id})?") do
             client.boards.destroy(workspace_id, board.id)
             output_success "Board '#{board.title}' deleted"
-          end
-        end
-      end
-
-      desc "create-list", "Create a list on a board"
-      option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :title, type: :string, required: true, desc: "List title"
-      option :description, type: :string, desc: "List description"
-      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
-      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
-      # Add a new column (list) to a board.
-      #
-      # @return [void]
-      def create_list
-        handle_error do
-          opts = symbolized_options(:title, :icon, :color)
-          opts[:content] = options[:description] if options[:description]
-          list = client.boards.create_list(workspace_id, board_id: board_id, **opts)
-          output_item list, fields: %i[id title color board_id]
-        end
-      end
-
-      desc "update-list LIST_ID", "Update a list"
-      option :title, type: :string, desc: "New title"
-      option :description, type: :string, desc: "New description"
-      option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
-      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
-      # Update an existing list's properties.
-      #
-      # @param list_id [String] the unique identifier of the list to update
-      # @return [void]
-      def update_list(list_id)
-        handle_error do
-          opts = symbolized_options(:title, :icon, :color)
-          opts[:content] = options[:description] if options[:description]
-          list = client.boards.update_list(workspace_id, list_id, **opts)
-          output_item list, fields: %i[id title color board_id]
-        end
-      end
-
-      desc "delete-list LIST_ID", "Delete a list"
-      # Permanently delete a list from a board after confirmation.
-      #
-      # @param list_id [String] the unique identifier of the list to delete
-      # @return [void]
-      def delete_list(list_id)
-        handle_error do
-          confirming("Delete list #{list_id}?") do
-            client.boards.delete_list(workspace_id, list_id)
-            Ui.success "List #{list_id} deleted"
           end
         end
       end

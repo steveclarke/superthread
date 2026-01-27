@@ -199,18 +199,18 @@ suth spaces update "CLI Test Space Updated" --description "Updated description"
 - `--archived` option removed - Superthread API doesn't support archiving spaces
 
 
-### 2.5 spaces add_member / remove_member
+### 2.5 spaces add-member / remove-member
 Manage space membership.
 
 ```bash
 # Add a member (use a valid user ID/email from your workspace)
-suth spaces add_member "CLI Test Space" USER_REF
+suth spaces add-member "CLI Test Space" USER_REF
 
 # Add with role
-suth spaces add_member "CLI Test Space" USER_REF --role admin
+suth spaces add-member "CLI Test Space" USER_REF --role admin
 
 # Remove member
-suth spaces remove_member "CLI Test Space" USER_REF
+suth spaces remove-member "CLI Test Space" USER_REF
 ```
 
 **Check:**
@@ -304,25 +304,7 @@ suth boards get BOARD_ID --json
 **Notes:** --open generates URL `/t5kahi36/boards/4` which gives "There's been a glitch" error. URL format may be wrong (needs verification with correct browser session).
 
 
-### 3.3 boards lists
-List columns/lists on a board.
-
-```bash
-suth boards lists BOARD_ID
-suth boards lists "Board Name" -s "Space Name"
-suth boards lists BOARD_ID --json
-```
-
-**Check:**
-- [x] Shows table with ID, Title, Color columns
-- [ ] Board name resolution works (not tested)
-- [ ] JSON output is valid (not tested)
-- [ ] Message if no lists found (not tested)
-
-**Notes:** Lists displayed correctly with colors.
-
-
-### 3.4 boards create
+### 3.3 boards create
 Create a new board.
 
 ```bash
@@ -347,7 +329,7 @@ suth boards create -s "Space Name" --title "CLI Test Board Full" \
 **Notes:** Basic create works. Options like layout/color not visible in API response - need web app verification.
 
 
-### 3.5 boards update
+### 3.4 boards update
 Update a board.
 
 ```bash
@@ -369,7 +351,7 @@ suth boards update BOARD_ID --no-archived
 **Notes:** Title update confirmed working.
 
 
-### 3.6 boards duplicate
+### 3.5 boards duplicate
 Duplicate a board.
 
 ```bash
@@ -395,58 +377,7 @@ suth boards duplicate BOARD_ID -s "Space Name" --copy-cards --create-missing-tag
 **Notes:** Duplicate works - copies lists with colors.
 
 
-### 3.7 boards create-list
-Create a list/column on a board.
-
-```bash
-suth boards create-list -b BOARD_ID --title "New List"
-suth boards create-list -b "Board Name" -s "Space Name" --title "Styled List" \
-  --description "List description" \
-  --color green \
-  --icon checkmark
-```
-
-**Check:**
-- [x] List created on correct board
-- [ ] Description applied (not tested)
-- [x] Color applied
-- [ ] Icon applied (not tested)
-- [ ] Verify in web app (not verified)
-
-**Notes:** Create-list works with title and color.
-
-
-### 3.8 boards update-list
-Update a list.
-
-```bash
-suth boards update-list LIST_ID --title "Renamed List"
-suth boards update-list LIST_ID --color red
-```
-
-**Check:**
-- [x] Title update works
-- [x] Color update works
-
-**Notes:** Both title and color updates work.
-
-
-### 3.9 boards delete-list
-Delete a list.
-
-```bash
-suth boards delete-list LIST_ID
-suth boards delete-list LIST_ID --skip-confirm
-```
-
-**Check:**
-- [x] Confirmation prompt appears
-- [x] List deleted successfully
-
-**Notes:** Confirmation and delete work correctly.
-
-
-### 3.10 boards delete
+### 3.6 boards delete
 Delete a board.
 
 ```bash
@@ -629,64 +560,7 @@ suth cards unlink CARD_ID OTHER_CARD_ID
 **Notes:**
 
 
-### 4.9 cards add-checklist / edit-checklist / remove-checklist
-Manage checklists. Checklists are displayed in `cards get` output.
-
-```bash
-# View checklists on a card
-suth cards get CARD_ID
-
-# Create a checklist
-suth cards add-checklist CARD_ID --title "Test Checklist"
-# Note the checklist ID from output
-
-# Edit checklist title
-suth cards edit-checklist -c CARD_ID --checklist CHECKLIST_ID --title "Renamed Checklist"
-
-# Delete checklist
-suth cards remove-checklist -c CARD_ID --checklist CHECKLIST_ID
-```
-
-**Check:**
-- [ ] Checklists displayed in `cards get` with progress (e.g., "2/5")
-- [ ] Checklist items shown with ✓/○ markers
-- [ ] Checklist created
-- [ ] Checklist renamed
-- [ ] Checklist deleted
-- [ ] Confirmation prompt for delete
-
-**Notes:**
-
-
-### 4.10 cards add-item / edit-item / remove-item
-Manage checklist items.
-
-```bash
-# Add items to checklist
-suth cards add-item -c CARD_ID --checklist CHECKLIST_ID --title "Item 1"
-suth cards add-item -c CARD_ID --checklist CHECKLIST_ID --title "Item 2 (checked)" --checked
-# Note the item ID from output
-
-# Edit item (title or checked state)
-suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --title "Renamed item"
-suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --checked
-suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --no-checked
-
-# Delete item
-suth cards remove-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID
-```
-
-**Check:**
-- [ ] Item created unchecked by default
-- [ ] Item created checked with --checked
-- [ ] Item renamed
-- [ ] Item checked/unchecked
-- [ ] Item deleted
-
-**Notes:**
-
-
-### 4.11 cards tag / untag
+### 4.9 cards tag / untag
 Add and remove tags from cards.
 
 ```bash
@@ -706,7 +580,7 @@ suth cards untag CARD_ID "tag-name"
 **Notes:**
 
 
-### 4.12 cards delete
+### 4.10 cards delete
 Delete a card.
 
 ```bash
@@ -775,37 +649,7 @@ suth comments update COMMENT_ID --status open
 **Notes:**
 
 
-### 5.4 comments reply / replies
-Comment threads.
-
-```bash
-suth comments reply COMMENT_ID --content "This is a reply"
-suth comments replies COMMENT_ID
-```
-
-**Check:**
-- [ ] Reply created
-- [ ] Replies listed correctly
-
-**Notes:**
-
-
-### 5.5 comments update_reply / delete_reply
-Manage replies.
-
-```bash
-suth comments update_reply COMMENT_ID REPLY_ID --content "Updated reply"
-suth comments delete_reply COMMENT_ID REPLY_ID
-```
-
-**Check:**
-- [ ] Reply content updated
-- [ ] Reply deleted with confirmation
-
-**Notes:**
-
-
-### 5.6 comments delete
+### 5.4 comments delete
 Delete a comment.
 
 ```bash
@@ -1095,12 +939,12 @@ suth projects update PROJECT_ID --archived
 **Notes:**
 
 
-### 8.5 projects add_card / remove_card
+### 8.5 projects add-card / remove-card
 Link cards to projects.
 
 ```bash
-suth projects add_card PROJECT_ID CARD_ID
-suth projects remove_card PROJECT_ID CARD_ID
+suth projects add-card PROJECT_ID CARD_ID
+suth projects remove-card PROJECT_ID CARD_ID
 ```
 
 **Check:**
@@ -1280,6 +1124,316 @@ suth completion fish
 **Check:**
 - [ ] Script generated without errors
 - [ ] Script has proper fish completion format
+
+**Notes:**
+
+
+---
+
+## 12. LISTS
+
+### 12.1 lists list
+List all lists (columns) on a board.
+
+```bash
+suth lists list --board BOARD_ID
+suth lists list --board "Board Name" --space "Space Name"
+suth lists list --board BOARD_ID --json
+```
+
+**Check:**
+- [ ] Shows table with ID, Title, Color columns
+- [ ] Board name resolution works (with space hint)
+- [ ] JSON output is valid
+- [ ] Message if no lists found
+
+**Notes:**
+
+
+### 12.2 lists get
+Get list details.
+
+```bash
+suth lists get LIST_ID
+suth lists get LIST_ID --json
+```
+
+**Check:**
+- [ ] Displays: id, title, color
+- [ ] JSON output is valid
+
+**Notes:**
+
+
+### 12.3 lists create
+Create a new list on a board.
+
+```bash
+suth lists create --board BOARD_ID --title "New List"
+suth lists create --board BOARD_ID --title "Colored List" --color blue
+suth lists create --board BOARD_ID --title "Positioned List" --position 0
+```
+
+**Check:**
+- [ ] List created successfully
+- [ ] Color applied correctly
+- [ ] Position respected
+- [ ] Verify in web app
+
+**Notes:**
+
+
+### 12.4 lists update
+Update a list.
+
+```bash
+suth lists update LIST_ID --title "Updated Title"
+suth lists update LIST_ID --color green
+suth lists update LIST_ID --position 2
+```
+
+**Check:**
+- [ ] Title update works
+- [ ] Color update works
+- [ ] Position update works
+
+**Notes:**
+
+
+### 12.5 lists delete
+Delete a list.
+
+```bash
+suth lists delete LIST_ID
+suth lists delete LIST_ID -y
+```
+
+**Check:**
+- [ ] Confirmation shows list title
+- [ ] -y skips confirmation
+- [ ] List deleted successfully
+
+**Notes:**
+
+
+---
+
+## 13. CHECKLISTS
+
+### 13.1 checklists list
+List all checklists on a card.
+
+```bash
+suth checklists list --card CARD_ID
+suth checklists list --card CARD_ID --json
+```
+
+**Check:**
+- [ ] Shows table with ID, Title columns
+- [ ] JSON output is valid
+- [ ] Message if no checklists found
+
+**Notes:**
+
+
+### 13.2 checklists get
+Get checklist details.
+
+```bash
+suth checklists get CHECKLIST_ID --card CARD_ID
+suth checklists get CHECKLIST_ID --card CARD_ID --json
+```
+
+**Check:**
+- [ ] Displays checklist with items
+- [ ] Items show checked status
+- [ ] JSON output is valid
+
+**Notes:**
+
+
+### 13.3 checklists create
+Create a checklist on a card.
+
+```bash
+suth checklists create --card CARD_ID --title "QA Tasks"
+suth checklists create --card CARD_ID --title "Review Checklist" --json
+```
+
+**Check:**
+- [ ] Checklist created successfully
+- [ ] Verify in web app
+- [ ] JSON output is valid
+
+**Notes:**
+
+
+### 13.4 checklists update
+Update a checklist.
+
+```bash
+suth checklists update CHECKLIST_ID --card CARD_ID --title "Updated Title"
+```
+
+**Check:**
+- [ ] Title update works
+
+**Notes:**
+
+
+### 13.5 checklists delete
+Delete a checklist.
+
+```bash
+suth checklists delete CHECKLIST_ID --card CARD_ID
+suth checklists delete CHECKLIST_ID --card CARD_ID -y
+```
+
+**Check:**
+- [ ] Confirmation shows checklist title
+- [ ] -y skips confirmation
+- [ ] Checklist deleted successfully
+
+**Notes:**
+
+
+### 13.6 checklists add-item
+Add an item to a checklist.
+
+```bash
+suth checklists add-item CHECKLIST_ID --card CARD_ID --title "New item"
+suth checklists add-item CHECKLIST_ID --card CARD_ID --title "Another item" --json
+```
+
+**Check:**
+- [ ] Item added successfully
+- [ ] Item appears unchecked by default
+- [ ] Verify in web app
+
+**Notes:**
+
+
+### 13.7 checklists update-item
+Update a checklist item.
+
+```bash
+suth checklists update-item ITEM_ID --card CARD_ID --checklist CHECKLIST_ID --title "Updated item"
+```
+
+**Check:**
+- [ ] Title update works
+
+**Notes:**
+
+
+### 13.8 checklists check / uncheck
+Toggle item checked status.
+
+```bash
+suth checklists check ITEM_ID --card CARD_ID --checklist CHECKLIST_ID
+suth checklists uncheck ITEM_ID --card CARD_ID --checklist CHECKLIST_ID
+```
+
+**Check:**
+- [ ] Check marks item as complete
+- [ ] Uncheck marks item as incomplete
+- [ ] Verify in web app
+
+**Notes:**
+
+
+### 13.9 checklists remove-item
+Remove a checklist item.
+
+```bash
+suth checklists remove-item ITEM_ID --card CARD_ID --checklist CHECKLIST_ID
+suth checklists remove-item ITEM_ID --card CARD_ID --checklist CHECKLIST_ID -y
+```
+
+**Check:**
+- [ ] Confirmation shows item title
+- [ ] -y skips confirmation
+- [ ] Item removed successfully
+
+**Notes:**
+
+
+---
+
+## 14. REPLIES
+
+### 14.1 replies list
+List replies to a comment.
+
+```bash
+suth replies list --comment COMMENT_ID
+suth replies list --comment COMMENT_ID --json
+```
+
+**Check:**
+- [ ] Shows table with ID, Content, Author columns
+- [ ] JSON output is valid
+- [ ] Message if no replies found
+
+**Notes:**
+
+
+### 14.2 replies get
+Get reply details.
+
+```bash
+suth replies get REPLY_ID
+suth replies get REPLY_ID --json
+```
+
+**Check:**
+- [ ] Displays: id, content, user_id, timestamps
+- [ ] JSON output is valid
+
+**Notes:**
+
+
+### 14.3 replies create
+Create a reply to a comment.
+
+```bash
+suth replies create --comment COMMENT_ID --content "This is a reply"
+suth replies create --comment COMMENT_ID --content "Another reply" --json
+```
+
+**Check:**
+- [ ] Reply created successfully
+- [ ] Verify in web app
+- [ ] JSON output is valid
+
+**Notes:**
+
+
+### 14.4 replies update
+Update a reply.
+
+```bash
+suth replies update REPLY_ID --comment COMMENT_ID --content "Updated content"
+```
+
+**Check:**
+- [ ] Content update works
+
+**Notes:**
+
+
+### 14.5 replies delete
+Delete a reply.
+
+```bash
+suth replies delete REPLY_ID --comment COMMENT_ID
+suth replies delete REPLY_ID --comment COMMENT_ID -y
+```
+
+**Check:**
+- [ ] Confirmation shown
+- [ ] -y skips confirmation
+- [ ] Reply deleted successfully
 
 **Notes:**
 

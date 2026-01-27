@@ -7,6 +7,9 @@ module Superthread
     # Projects are high-level items on the roadmap that can contain multiple
     # cards. They have start/due dates, owners, and can be organized on boards.
     class Projects < Base
+      # Kebab-case aliases for commands
+      map "add-card" => :add_card,
+        "remove-card" => :remove_card
       desc "list", "List all roadmap projects"
       # Lists all projects in the current workspace.
       #

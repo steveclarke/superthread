@@ -168,49 +168,41 @@ suth cards unassign CARD_ID USER               # Unassign user from card
 suth cards link --card CARD --related OTHER --type blocks  # Link cards
 suth cards unlink --card CARD --related OTHER  # Remove card relationship
 
-# Card Checklists
-suth cards add-checklist CARD_ID --title "Tasks"
-suth cards edit-checklist --card CARD --checklist CL --title "New title"
-suth cards remove-checklist --card CARD --checklist CL
-suth cards add-item --card CARD --checklist CL --title "Item" [--checked]
-suth cards edit-item --card CARD --checklist CL --item ITEM --title "New"
-suth cards remove-item --card CARD --checklist CL --item ITEM
-
 # Card Tags
 suth cards tag CARD_ID TAG1,TAG2               # Add tags to card
 suth cards untag CARD_ID TAG                   # Remove tag from card
 
 # Boards
 suth boards list -s SPACE                      # List boards in a space
-suth boards get BOARD                     # Get board details
-suth boards lists BOARD                        # List columns/lists on a board
+suth boards get BOARD                          # Get board details
 suth boards create --title "Board" -s SPACE
 suth boards update BOARD --title "New name"
 suth boards duplicate BOARD                    # Clone a board
 suth boards delete BOARD
 
-# Board Lists (Columns)
-suth boards create-list -b BOARD --title "Column"
-suth boards update-list LIST_ID --title "New name"
-suth boards delete-list LIST_ID
+# Lists (Board Columns)
+suth lists list -b BOARD                       # List columns on a board
+suth lists create -b BOARD --title "Column"
+suth lists update LIST_ID --title "New name"
+suth lists delete LIST_ID
 
 # Projects (Epics)
 suth projects list                             # List all projects
-suth projects get PROJECT_ID              # Get project details
+suth projects get PROJECT_ID                   # Get project details
 suth projects create --title "Q1 Roadmap" -l LIST [-b BOARD]
 suth projects update PROJECT_ID --title "New title"
 suth projects delete PROJECT_ID
-suth projects add_card PROJECT_ID CARD_ID      # Link card to project
-suth projects remove_card PROJECT_ID CARD_ID   # Remove card from project
+suth projects add-card PROJECT_ID CARD_ID      # Link card to project
+suth projects remove-card PROJECT_ID CARD_ID   # Remove card from project
 
 # Spaces
 suth spaces list                               # List all spaces
-suth spaces get SPACE                     # Get space details
+suth spaces get SPACE                          # Get space details
 suth spaces create --title "Engineering"
 suth spaces update SPACE --title "New name"
 suth spaces delete SPACE
-suth spaces add_member SPACE USER [--role ROLE]
-suth spaces remove_member SPACE USER
+suth spaces add-member SPACE USER [--role ROLE]
+suth spaces remove-member SPACE USER
 
 # Pages
 suth pages list [-s SPACE]                     # List pages
@@ -222,14 +214,29 @@ suth pages archive PAGE_ID
 suth pages delete PAGE_ID
 
 # Comments
-suth comments get COMMENT_ID              # Get comment (opens parent card)
+suth comments get COMMENT_ID                   # Get comment details
 suth comments create --content "Looks good!" --card CARD
 suth comments update COMMENT_ID --content "Updated"
 suth comments delete COMMENT_ID
-suth comments reply COMMENT_ID --content "Reply text"
-suth comments replies COMMENT_ID               # Get replies to a comment
-suth comments update-reply --comment COMMENT --reply REPLY --content "New"
-suth comments delete-reply --comment COMMENT --reply REPLY
+
+# Replies (Comment Threads)
+suth replies list --comment COMMENT_ID         # List replies to a comment
+suth replies get REPLY_ID                      # Get reply details
+suth replies create --comment COMMENT_ID --content "Reply text"
+suth replies update REPLY_ID --comment COMMENT_ID --content "Updated"
+suth replies delete REPLY_ID --comment COMMENT_ID
+
+# Checklists
+suth checklists list -c CARD_ID                # List checklists on a card
+suth checklists get CHECKLIST_ID -c CARD_ID    # Get checklist details
+suth checklists create -c CARD_ID --title "Tasks"
+suth checklists update CHECKLIST_ID -c CARD_ID --title "New title"
+suth checklists delete CHECKLIST_ID -c CARD_ID
+suth checklists add-item CHECKLIST_ID -c CARD_ID --title "Item"
+suth checklists update-item ITEM_ID -c CARD_ID --checklist CL_ID --title "New"
+suth checklists remove-item ITEM_ID -c CARD_ID --checklist CL_ID
+suth checklists check ITEM_ID -c CARD_ID --checklist CL_ID
+suth checklists uncheck ITEM_ID -c CARD_ID --checklist CL_ID
 
 # Notes
 suth notes list

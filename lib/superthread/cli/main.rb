@@ -74,6 +74,15 @@ module Superthread
       desc "comments SUBCOMMAND", "Comment management commands"
       subcommand "comments", Superthread::Cli::Comments
 
+      desc "replies SUBCOMMAND", "Comment reply commands"
+      subcommand "replies", Superthread::Cli::Replies
+
+      desc "lists SUBCOMMAND", "Board list (column) commands"
+      subcommand "lists", Superthread::Cli::Lists
+
+      desc "checklists SUBCOMMAND", "Card checklist commands"
+      subcommand "checklists", Superthread::Cli::Checklists
+
       desc "pages SUBCOMMAND", "Page/documentation commands"
       subcommand "pages", Superthread::Cli::Pages
 

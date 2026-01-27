@@ -8,6 +8,9 @@ module Superthread
     # within a workspace. This class provides commands to list, create,
     # update, and delete spaces, as well as manage space membership.
     class Spaces < Base
+      # Kebab-case aliases for commands
+      map "add-member" => :add_member,
+        "remove-member" => :remove_member
       desc "list", "List all spaces"
       # Lists all spaces in the current workspace.
       #
