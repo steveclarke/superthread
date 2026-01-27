@@ -241,7 +241,7 @@ module Superthread
           title: title,
           checklist_id: checklist_id,
           checked: checked
-        }, object_class: Models::ChecklistItem)
+        }, object_class: Models::ChecklistItem, unwrap_key: :checklist_item)
       end
 
       # Updates a checklist item.
@@ -261,7 +261,7 @@ module Superthread
         item = safe_id("item_id", item_id)
 
         patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
-          body: compact_params(**params), object_class: Models::ChecklistItem)
+          body: compact_params(**params), object_class: Models::ChecklistItem, unwrap_key: :checklist_item)
       end
 
       # Deletes a checklist item.
