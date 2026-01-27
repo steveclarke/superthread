@@ -25,7 +25,11 @@ module Superthread
       def get(space_ref)
         handle_error do
           resolved_space_id = resolve_space(space_ref)
-          space = client.spaces.find(workspace_id, resolved_space_id)
+          begin
+            space = client.spaces.find(workspace_id, resolved_space_id)
+          rescue Superthread::ForbiddenError
+            raise Thor::Error, "Space not found: '#{space_ref}'. Use 'suth spaces list' to see available spaces."
+          end
           output_item space, fields: %i[id title description time_created time_updated]
         end
       end
