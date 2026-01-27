@@ -188,23 +188,15 @@ suth spaces update "CLI Test Space" --title "CLI Test Space Updated"
 
 # Update description
 suth spaces update "CLI Test Space Updated" --description "Updated description"
-
-# Archive
-suth spaces update "CLI Test Space Updated" --archived
-
-# Unarchive
-suth spaces update "CLI Test Space Updated" --no-archived
 ```
 
 **Check:**
 - [x] Title update works
 - [x] Description update works
-- [!] Archive works (verify in web app)
-- [ ] Unarchive works (not tested)
 
 **Notes:**
 - Title and description updates work fine
-- **BUG:** `--archived` fails with "HTTP 400: no fields to update" - boolean flag not being sent to API
+- `--archived` option removed - Superthread API doesn't support archiving spaces
 
 
 ### 2.5 spaces add_member / remove_member
@@ -638,18 +630,26 @@ suth cards unlink CARD_ID OTHER_CARD_ID
 
 
 ### 4.9 cards add-checklist / edit-checklist / remove-checklist
-Manage checklists.
+Manage checklists. Checklists are displayed in `cards get` output.
 
 ```bash
+# View checklists on a card
+suth cards get CARD_ID
+
+# Create a checklist
 suth cards add-checklist CARD_ID --title "Test Checklist"
 # Note the checklist ID from output
 
-suth cards edit-checklist CARD_ID CHECKLIST_ID --title "Renamed Checklist"
+# Edit checklist title
+suth cards edit-checklist -c CARD_ID --checklist CHECKLIST_ID --title "Renamed Checklist"
 
-suth cards remove-checklist CARD_ID CHECKLIST_ID
+# Delete checklist
+suth cards remove-checklist -c CARD_ID --checklist CHECKLIST_ID
 ```
 
 **Check:**
+- [ ] Checklists displayed in `cards get` with progress (e.g., "2/5")
+- [ ] Checklist items shown with ✓/○ markers
 - [ ] Checklist created
 - [ ] Checklist renamed
 - [ ] Checklist deleted
@@ -662,15 +662,18 @@ suth cards remove-checklist CARD_ID CHECKLIST_ID
 Manage checklist items.
 
 ```bash
-suth cards add-item CARD_ID CHECKLIST_ID --title "Item 1"
-suth cards add-item CARD_ID CHECKLIST_ID --title "Item 2 (checked)" --checked
+# Add items to checklist
+suth cards add-item -c CARD_ID --checklist CHECKLIST_ID --title "Item 1"
+suth cards add-item -c CARD_ID --checklist CHECKLIST_ID --title "Item 2 (checked)" --checked
 # Note the item ID from output
 
-suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --title "Renamed item"
-suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --checked
-suth cards edit-item CARD_ID CHECKLIST_ID ITEM_ID --no-checked
+# Edit item (title or checked state)
+suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --title "Renamed item"
+suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --checked
+suth cards edit-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID --no-checked
 
-suth cards remove-item CARD_ID CHECKLIST_ID ITEM_ID
+# Delete item
+suth cards remove-item -c CARD_ID --checklist CHECKLIST_ID --item ITEM_ID
 ```
 
 **Check:**
@@ -683,15 +686,10 @@ suth cards remove-item CARD_ID CHECKLIST_ID ITEM_ID
 **Notes:**
 
 
-### 4.11 cards tags / tag / untag
-Manage card tags.
+### 4.11 cards tag / untag
+Add and remove tags from cards.
 
 ```bash
-# List available tags
-suth cards tags
-suth cards tags --all
-suth cards tags --project PROJECT_ID
-
 # Add tags to card
 suth cards tag CARD_ID "tag-name"
 suth cards tag CARD_ID "tag1,tag2,tag3"
@@ -701,9 +699,6 @@ suth cards untag CARD_ID "tag-name"
 ```
 
 **Check:**
-- [ ] Tags listed with ID, name, color, total_cards
-- [ ] --all shows all tags
-- [ ] --project filters by project
 - [ ] Tag by name works
 - [ ] Multiple tags (comma-separated) works
 - [ ] Untag works
@@ -1135,6 +1130,23 @@ suth projects delete PROJECT_ID --skip-confirm
 
 ## 9. TAGS
 
+### 9.0 tags list
+List available tags.
+
+```bash
+suth tags list
+suth tags list --all
+suth tags list -s SPACE
+```
+
+**Check:**
+- [ ] Tags listed with ID, name, color, total_cards
+- [ ] --all shows all tags including unused
+- [ ] -s SPACE filters by space
+
+**Notes:**
+
+
 ### 9.1 tags create
 Create a tag.
 
@@ -1315,13 +1327,13 @@ suth spaces delete "Test Space" --skip-confirm
 | 1 | `spaces list --json` | `icon` field contains Ruby hash syntax instead of JSON | Low | Open |
 | 2 | `spaces get NAME` | Name resolution returns 403 instead of resolving to ID | Medium | Open |
 | 3 | `spaces create --icon` | `--icon` expects Image object, fails with string | Medium | Open |
-| 4 | `spaces update --archived` | Boolean flag not sent to API, "no fields to update" | Medium | Open |
+| 4 | `spaces update --archived` | API doesn't support archiving spaces - option removed | Medium | Removed |
 | 5 | `boards get --open` | URL format `/workspace/boards/ID` gives glitch error (needs verification) | Low | Open |
 | 6 | `cards update` | Title ignored when combined with list move (`--title` + `-l`) | Medium | Open |
 | 7 | `cards duplicate` | Fails - API requires `project_id` but no option exists | High | Fixed |
-| 8 | `cards add-checklist` | Response shows all "-" - data saved but not returned properly | Medium | Open |
-| 9 | `cards add-item` | Response shows all "-" - data saved but not returned properly | Medium | Open |
-| 10 | `cards tag NAME` | Tag by name fails (404), but tag by ID works - name resolution broken | Medium | Open |
+| 8 | `cards add-checklist` | Response shows all "-" - data saved but not returned properly | Medium | Fixed |
+| 9 | `cards add-item` | Response shows all "-" - data saved but not returned properly | Medium | Fixed |
+| 10 | `cards tag NAME` | Tag by name fails (404), but tag by ID works - name resolution broken | Medium | Fixed |
 | 11 | UX: Multiple commands | Positional numeric IDs are confusing - should use named options (--card, --checklist, etc.) | Medium | Open |
 | 12 | UX: Multiple commands | Consider comma-separated values for bulk operations (tags, members) | Low | Open |
 | 13 | `comments create` | Uses `--card_id` instead of `--card` (inconsistent with other commands) | Low | Open |
@@ -1332,4 +1344,4 @@ suth spaces delete "Test Space" --skip-confirm
 | 18 | `pages list` | Returns empty without `-s` filter even when pages exist | Medium | Open |
 | 19 | `projects list` | Returns empty even when projects exist (similar to pages issue) | Medium | Open |
 | 20 | `search query` | Wrong param name: uses `q` but API expects `query` - returns 400 | High | Partial (no longer errors, but no results - see #21) |
-| 21 | `search query` | Search returns no results even with valid terms - needs investigation | High | Open |
+| 21 | `search query` | Search returns no results even with valid terms - needs investigation | High | Fixed |

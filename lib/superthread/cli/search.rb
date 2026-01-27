@@ -15,17 +15,19 @@ module Superthread
       # @param search_term [String] the text to search for
       # @return [void]
       def query(search_term)
-        types = options[:types]&.split(",")&.map(&:strip)
-        results = client.search.query(
-          workspace_id,
-          query: search_term,
-          field: options[:field],
-          types: types,
-          space_id: space_id,
-          archived: options[:archived],
-          grouped: options[:grouped]
-        )
-        output_list results
+        handle_error do
+          types = options[:types]&.split(",")&.map(&:strip)
+          results = client.search.query(
+            workspace_id,
+            query: search_term,
+            field: options[:field],
+            types: types,
+            space_id: space_id,
+            archived: options[:archived],
+            grouped: options[:grouped]
+          )
+          output_list results, columns: %i[result_type id title]
+        end
       end
     end
   end

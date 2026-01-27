@@ -221,7 +221,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         post_object("/#{ws}/cards/#{card}/checklists", body: {title: title},
-          object_class: Models::Checklist)
+          object_class: Models::Checklist, unwrap_key: :checklist)
       end
 
       # Adds an item to a checklist.
@@ -241,7 +241,7 @@ module Superthread
           title: title,
           checklist_id: checklist_id,
           checked: checked
-        }, object_class: Models::ChecklistItem)
+        }, object_class: Models::ChecklistItem, unwrap_key: :checklist_item)
       end
 
       # Updates a checklist item.
@@ -261,7 +261,7 @@ module Superthread
         item = safe_id("item_id", item_id)
 
         patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
-          body: compact_params(**params), object_class: Models::ChecklistItem)
+          body: compact_params(**params), object_class: Models::ChecklistItem, unwrap_key: :checklist_item)
       end
 
       # Deletes a checklist item.
@@ -294,7 +294,7 @@ module Superthread
         checklist = safe_id("checklist_id", checklist_id)
 
         patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}", body: {title: title},
-          object_class: Models::Checklist)
+          object_class: Models::Checklist, unwrap_key: :checklist)
       end
 
       # Deletes a checklist and all its items.

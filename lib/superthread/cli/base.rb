@@ -249,17 +249,23 @@ module Superthread
 
       # Resolve a tag reference (ID or name) to its ID.
       #
+      # Tag names are often short alphanumeric strings (e.g., "bug", "feature")
+      # that would otherwise look like IDs, so we try name resolution first.
+      #
       # @param ref [String, nil] the tag ID or name to resolve
       # @return [String, nil] the resolved tag ID
-      # @raise [Thor::Error] if name is provided but not found
+      # @raise [Thor::Error] if ref doesn't match a tag name and doesn't look like an ID
       def resolve_tag(ref)
         return ref if ref.nil?
-        return ref if looks_like_id?(ref)
 
+        # Try name resolution first (tags commonly have simple names)
         tag = find_tag_by_name(ref)
         return tag.id if tag
 
-        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st cards tags' to see available tags."
+        # If not found by name, assume it's an ID
+        return ref if looks_like_id?(ref)
+
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st tags list' to see available tags."
       end
 
       # Find a tag by name from the cached list.

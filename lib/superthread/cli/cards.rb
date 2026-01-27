@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 module Superthread
   module Cli
     # CLI commands for managing Superthread cards.
@@ -55,7 +57,7 @@ module Superthread
           if json_output?
             fields = %i[id title status priority list_title board_title
               members start_date due_date time_created time_updated
-              parent_card child_cards linked_cards]
+              parent_card child_cards linked_cards checklists]
             fields.insert(2, :content) unless options[:no_content]
             output_item card, fields: fields
           else
@@ -67,6 +69,9 @@ module Superthread
 
             # Output card relationships
             output_card_relationships(card)
+
+            # Output checklists
+            output_card_checklists(card)
 
             # Render content separately with markdown formatting
             if !options[:no_content] && card.content && !card.content.empty?
@@ -374,21 +379,6 @@ module Superthread
         end
       end
 
-      desc "tags", "Get available tags"
-      option :project, type: :string, desc: "Filter by project (ID)"
-      option :all, type: :boolean, desc: "Get all tags"
-      # List all available tags in the workspace.
-      #
-      # @return [void]
-      def tags
-        handle_error do
-          opts = symbolized_options(:all)
-          opts[:project_id] = options[:project] if options[:project]
-          tags = client.cards.tags(workspace_id, **opts)
-          output_list tags, columns: %i[id name color total_cards]
-        end
-      end
-
       desc "tag CARD_ID TAGS", "Add tags to card (comma-separated IDs or names)"
       # Apply one or more tags to a card.
       #
@@ -463,6 +453,28 @@ module Superthread
             label = type.tr("_", " ").capitalize
             Ui.kv(label, "")
             links.each { |link| puts "  #{link}" }
+          end
+        end
+      end
+
+      # Output card checklists with items in human-readable format.
+      #
+      # @param card [Card] the card object containing checklist data
+      # @return [void]
+      def output_card_checklists(card)
+        return unless card.checklists&.any?
+
+        puts ""
+        Ui.section "Checklists"
+
+        card.checklists.each do |checklist|
+          progress = "(#{checklist.completed_count}/#{checklist.total_count})"
+          Ui.kv(checklist.title, progress)
+          checklist.items&.each do |item|
+            marker = item.checked? ? "✓" : "○"
+            # Strip HTML tags from item title (API may return HTML)
+            title = Nokogiri::HTML.fragment(item.title).text.strip
+            puts "  #{marker} #{title}"
           end
         end
       end

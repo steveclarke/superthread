@@ -370,33 +370,13 @@ RSpec.describe "st cards", :cli do
     end
   end
 
-  describe "cards tags" do
-    before do
-      stub_api_get("test_workspace/tags", response: ApiFixtures::Tags::LIST)
-    end
-
-    it "lists available tags" do
-      result = run_cli("cards", "tags")
-
-      expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("backend")
-      expect(result[:stdout]).to include("frontend")
-      expect(result[:stdout]).to include("bug")
-    end
-
-    it "outputs JSON with --json flag" do
-      json = cli_json("cards", "tags")
-
-      expect(json).to be_an(Array)
-      expect(json.length).to eq(3)
-      expect(json.first).to have_key("name")
-      expect(json.first).to have_key("color")
-      expect(json.first).to have_key("total_cards")
-    end
-  end
-
   describe "cards tag CARD_ID TAGS" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_post("test_workspace/cards/card-123/tags", response: ApiFixtures::SUCCESS)
     end
 
@@ -410,6 +390,11 @@ RSpec.describe "st cards", :cli do
 
   describe "cards untag CARD_ID TAG" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_delete("test_workspace/cards/card-123/tags/tag-1")
     end
 

@@ -177,7 +177,6 @@ suth cards edit-item --card CARD --checklist CL --item ITEM --title "New"
 suth cards remove-item --card CARD --checklist CL --item ITEM
 
 # Card Tags
-suth cards tags                                # List available tags
 suth cards tag CARD_ID TAG1,TAG2               # Add tags to card
 suth cards untag CARD_ID TAG                   # Remove tag from card
 
@@ -246,6 +245,9 @@ suth sprints get SPRINT_ID -s SPACE
 suth search query "bug fix" [--types card,page] [-s SPACE] [--grouped]
 
 # Tags
+suth tags list                                 # List available tags
+suth tags list --all                           # Include unused tags
+suth tags list -s SPACE                        # Filter by space
 suth tags create --name "urgent" --color "#ff0000"
 suth tags update TAG --name "critical"
 suth tags delete TAG

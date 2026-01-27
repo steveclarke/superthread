@@ -8,6 +8,31 @@ RSpec.describe "st tags", :cli do
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
+  describe "tags list" do
+    before do
+      stub_api_get("test_workspace/tags", response: ApiFixtures::Tags::LIST)
+    end
+
+    it "lists available tags" do
+      result = run_cli("tags", "list")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("backend")
+      expect(result[:stdout]).to include("frontend")
+      expect(result[:stdout]).to include("bug")
+    end
+
+    it "outputs JSON with --json flag" do
+      json = cli_json("tags", "list")
+
+      expect(json).to be_an(Array)
+      expect(json.length).to eq(3)
+      expect(json.first).to have_key("name")
+      expect(json.first).to have_key("color")
+      expect(json.first).to have_key("total_cards")
+    end
+  end
+
   describe "tags create" do
     before do
       stub_api_post("test_workspace/tags", response: ApiFixtures::Tags::CREATE)
@@ -32,6 +57,11 @@ RSpec.describe "st tags", :cli do
 
   describe "tags update TAG" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_patch("test_workspace/tags/tag-1", response: ApiFixtures::Tags::UPDATE)
     end
 
