@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 module Superthread
   module Cli
     # CLI commands for managing Superthread cards.
@@ -470,7 +472,9 @@ module Superthread
           Ui.kv(checklist.title, progress)
           checklist.items&.each do |item|
             marker = item.checked? ? "✓" : "○"
-            puts "  #{marker} #{item.title}"
+            # Strip HTML tags from item title (API may return HTML)
+            title = Nokogiri::HTML.fragment(item.title).text.strip
+            puts "  #{marker} #{title}"
           end
         end
       end
