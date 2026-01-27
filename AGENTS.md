@@ -18,12 +18,16 @@ bundle exec rspec                              # Run tests
 bundle exec rspec spec/path_spec.rb:42         # Single test by line
 bundle exec standardrb                         # Check code style
 bundle exec standardrb --fix                   # Auto-fix style issues
-rake yard:lint                                 # Check YARD documentation
+bundle exec yard-lint lib/                     # Check YARD documentation
 bundle exec bin/suth cards get CARD_ID         # Run CLI locally
 bundle exec bin/suth cards get CARD_ID --json  # Raw JSON (useful for debugging API responses)
 ```
 
-**IMPORTANT:** After making code changes, always run `bundle exec standardrb --fix` to ensure code follows StandardRB conventions.
+**IMPORTANT:** After making code changes to Ruby files:
+1. Run `bundle exec standardrb --fix` to ensure code follows StandardRB conventions
+2. Run `bundle exec yard-lint lib/` to validate YARD documentation tags and ordering
+
+Both checks are enforced by Lefthook pre-commit hooks.
 
 ## Code Style (StandardRB)
 
