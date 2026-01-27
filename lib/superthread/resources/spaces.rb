@@ -52,11 +52,15 @@ module Superthread
       # @option params [String] :title the new space title
       # @option params [String] :description the new space description
       # @option params [String] :icon the new space icon identifier
+      # @option params [Boolean] :archived whether the space is archived
       # @return [Superthread::Models::Space] the updated space
       def update(workspace_id, space_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         space = safe_id("space_id", space_id)
-        patch_object("/#{ws}/projects/#{space}", body: compact_params(**params),
+        # Map archived -> is_archived for API
+        body = compact_params(**params)
+        body[:is_archived] = body.delete(:archived) if body.key?(:archived)
+        patch_object("/#{ws}/projects/#{space}", body: body,
           object_class: Models::Space, unwrap_key: :project)
       end
 

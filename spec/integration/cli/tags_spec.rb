@@ -32,6 +32,11 @@ RSpec.describe "st tags", :cli do
 
   describe "tags update TAG" do
     before do
+      # resolve_tag tries name resolution first, so stub the tags list API
+      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
+        .with(query: hash_including(all: "true"))
+        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
+          headers: {"Content-Type" => "application/json"})
       stub_api_patch("test_workspace/tags/tag-1", response: ApiFixtures::Tags::UPDATE)
     end
 
