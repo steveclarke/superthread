@@ -124,8 +124,8 @@ module Superthread
 
       desc "update CARD_ID", "Update a card"
       option :title, type: :string, desc: "New title"
-      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name, requires --board)"
-      option :board, type: :string, aliases: "-b", desc: "Move to board (ID or name)"
+      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name)"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
       option :archived, type: :boolean, desc: "Archive/unarchive"
@@ -135,10 +135,21 @@ module Superthread
       # @return [void]
       def update(card_id)
         handle_error do
-          opts = symbolized_options(:title, :priority, :archived)
-          opts[:list_id] = resolve_list(options[:list]) if options[:list]
-          opts[:board_id] = board_id if options[:board]
-          card = client.cards.update(workspace_id, card_id, **opts)
+          # API has a bug where title is ignored when combined with list_id,
+          # so we make separate requests when both are provided
+          if options[:list] && (options[:title] || options[:priority] || options[:archived])
+            # First update non-move fields
+            field_opts = symbolized_options(:title, :priority, :archived)
+            client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
+
+            # Then move the card
+            move_opts = {list_id: resolve_list(options[:list])}
+            card = client.cards.update(workspace_id, card_id, **move_opts)
+          else
+            opts = symbolized_options(:title, :priority, :archived)
+            opts[:list_id] = resolve_list(options[:list]) if options[:list]
+            card = client.cards.update(workspace_id, card_id, **opts)
+          end
           output_item card
         end
       end
