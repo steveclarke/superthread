@@ -33,10 +33,10 @@ module Superthread
 
       desc "get LIST", "Get list details"
       # Display detailed information about a specific list.
-      # Note: Lists are fetched via their parent board.
       #
       # @param list_id [String] the unique identifier of the list
       # @return [void]
+      # @note Lists are fetched via their parent board.
       def get(list_id)
         handle_error do
           # Lists don't have a direct get endpoint; we need to find via board
