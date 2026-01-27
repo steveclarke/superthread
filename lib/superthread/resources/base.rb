@@ -165,7 +165,8 @@ module Superthread
       # Accepts arbitrary keyword arguments and returns only non-nil values.
       # Used internally to clean up API request parameters.
       #
-      # @param args [Hash{Symbol => Object}] arbitrary key-value pairs
+      # @param args [Hash{Symbol => Object}] arbitrary key-value pairs to filter
+      # @option args [Object] :any any key-value pair (nil values will be removed)
       # @return [Hash{Symbol => Object}] hash with nil values removed
       def compact_params(**args)
         args.compact

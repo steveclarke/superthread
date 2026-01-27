@@ -7,6 +7,8 @@ module Superthread
     # Provides subcommands for listing, creating, updating, and deleting cards,
     # as well as managing card assignments, relationships, checklists, and tags.
     class Cards < Base
+      include Concerns::DateParsable
+
       # Kebab-case aliases for commands
       map "add-checklist" => :add_checklist,
         "edit-checklist" => :edit_checklist,
@@ -20,6 +22,8 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :list, type: :string, aliases: "-l", desc: "Filter by list (ID or name)"
       option :archived, type: :boolean, desc: "Include archived"
+      option :since, type: :string, desc: "Filter by created date (e.g., 'friday', '3 days ago', '2026-01-20')"
+      option :updated_since, type: :string, desc: "Filter by updated date"
       # List all cards on a specified board with optional filtering.
       #
       # @return [void]
@@ -29,6 +33,10 @@ module Superthread
           opts[:board_id] = board_id
           opts[:list_id] = resolve_list(options[:list]) if options[:list]
           cards = client.cards.list(workspace_id, **opts)
+
+          # Client-side date filtering (API doesn't support time-based filters)
+          cards = apply_date_filters(cards)
+
           output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
         end
       end
@@ -174,6 +182,8 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
       option :project, type: :string, desc: "Filter by project (ID)"
       option :archived, type: :boolean, desc: "Include archived"
+      option :since, type: :string, desc: "Filter by created date (e.g., 'friday', '3 days ago', '2026-01-20')"
+      option :updated_since, type: :string, desc: "Filter by updated date"
       # List all cards assigned to a specific user.
       #
       # @param user_ref [String] the user ID, name, or email to look up assignments for
@@ -185,6 +195,10 @@ module Superthread
           opts[:board_id] = board_id if options[:board]
           opts[:project_id] = options[:project] if options[:project]
           cards = client.cards.assigned(workspace_id, **opts)
+
+          # Client-side date filtering (API doesn't support time-based filters)
+          cards = apply_date_filters(cards)
+
           output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
         end
       end
@@ -401,6 +415,27 @@ module Superthread
       end
 
       private
+
+      # Apply date filters to a collection of cards.
+      # The API doesn't support time-based filtering, so we filter client-side.
+      #
+      # @param cards [Enumerable] the cards to apply --since and --updated_since filters to
+      # @return [Array] Filtered cards
+      def apply_date_filters(cards)
+        result = cards.to_a
+
+        if options[:since]
+          since_ts = parse_date(options[:since])
+          result = filter_by_date(result, field: :time_created, since: since_ts)
+        end
+
+        if options[:updated_since]
+          updated_ts = parse_date(options[:updated_since])
+          result = filter_by_date(result, field: :time_updated, since: updated_ts)
+        end
+
+        result
+      end
 
       # Output card relationships (parent, children, links) in human-readable format.
       #
