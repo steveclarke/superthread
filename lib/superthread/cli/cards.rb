@@ -12,10 +12,10 @@ module Superthread
       include Concerns::DateParsable
 
       desc "list", "List cards on a board"
-      option :board, type: :string, required: true, aliases: "-b", desc: "Board (ID or name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :list, type: :string, aliases: "-l", desc: "Filter by list (ID or name)"
-      option :archived, type: :boolean, desc: "Include archived"
+      option :board, type: :string, required: true, aliases: "-b", desc: "Board to list cards from (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      option :list, type: :string, aliases: "-l", desc: "List to filter by (ID or name)"
+      option :include_archived, type: :boolean, desc: "Include archived cards"
       option :since, type: :string, desc: "Filter by created date (e.g., 'friday', '3 days ago', '2026-01-20')"
       option :updated_since, type: :string, desc: "Filter by updated date"
       # List all cards on a specified board with optional filtering.
@@ -23,7 +23,8 @@ module Superthread
       # @return [void]
       def list
         handle_error do
-          opts = symbolized_options(:archived)
+          opts = {}
+          opts[:archived] = options[:include_archived] if options[:include_archived]
           opts[:board_id] = board_id
           opts[:list_id] = resolve_list(options[:list]) if options[:list]
           cards = client.cards.list(workspace_id, **opts)
@@ -31,11 +32,11 @@ module Superthread
           # Client-side date filtering (API doesn't support time-based filters)
           cards = apply_date_filters(cards)
 
-          output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
+          output_list cards, columns: %i[id title priority list_title], headers: {id: "CARD_ID", list_title: "LIST"}
         end
       end
 
-      desc "get CARD_ID", "Get card details"
+      desc "get CARD", "Get card details"
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       option :no_content, type: :boolean, desc: "Hide content, show only metadata"
       # Display detailed information about a specific card.
@@ -44,20 +45,24 @@ module Superthread
       # @return [void]
       def get(card_id)
         handle_error do
-          card = client.cards.find(workspace_id, card_id)
+          begin
+            card = client.cards.find(workspace_id, card_id)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
+          end
 
           if json_output?
             fields = %i[id title status priority list_title board_title
               members start_date due_date time_created time_updated
               parent_card child_cards linked_cards checklists]
             fields.insert(2, :content) unless options[:no_content]
-            output_item card, fields: fields
+            output_item card, fields: fields, labels: {id: "Card ID"}
           else
             # Output metadata fields (status used for coloring list, not shown separately)
             output_item card,
               fields: %i[id title priority list_title board_title
                 members start_date due_date time_created time_updated],
-              labels: {list_title: "List", board_title: "Board"}
+              labels: {id: "Card ID", list_title: "List", board_title: "Board"}
 
             # Output card relationships
             output_card_relationships(card)
@@ -81,12 +86,12 @@ module Superthread
 
       desc "create", "Create a new card"
       option :title, type: :string, required: true, desc: "Card title"
-      option :list, type: :string, required: true, aliases: "-l", desc: "List (ID or name, requires --board)"
-      option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :sprint, type: :string, desc: "Sprint (ID, required unless --board)"
+      option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board containing the list (ID or name, required unless --sprint)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      option :sprint, type: :string, desc: "Sprint ID (required unless --board)"
       option :content, type: :string, desc: "Card content (HTML)"
-      option :project, type: :string, desc: "Project (ID)"
+      option :project, type: :string, desc: "Project ID"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
       option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
@@ -110,15 +115,15 @@ module Superthread
           opts[:epic_id] = options[:epic] if options[:epic]
           opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
           card = client.cards.create(workspace_id, **opts)
-          output_item card
+          output_item card, labels: {id: "Card ID"}
         end
       end
 
-      desc "update CARD_ID", "Update a card"
+      desc "update CARD", "Update a card"
       option :title, type: :string, desc: "New title"
-      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name)"
-      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :list, type: :string, aliases: "-l", desc: "Destination list (ID or name)"
+      option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       # Update an existing card's properties.
@@ -127,22 +132,26 @@ module Superthread
       # @return [void]
       def update(card_id)
         handle_error do
-          # API has a bug where title is ignored when combined with list_id,
-          # so we make separate requests when both are provided
-          if options[:list] && (options[:title] || options[:priority] || options[:archived])
-            # First update non-move fields
-            field_opts = symbolized_options(:title, :priority, :archived)
-            client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
+          begin
+            # API has a bug where title is ignored when combined with list_id,
+            # so we make separate requests when both are provided
+            if options[:list] && (options[:title] || options[:priority] || options[:archived])
+              # First update non-move fields
+              field_opts = symbolized_options(:title, :priority, :archived)
+              client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
-            # Then move the card
-            move_opts = {list_id: resolve_list(options[:list])}
-            card = client.cards.update(workspace_id, card_id, **move_opts)
-          else
-            opts = symbolized_options(:title, :priority, :archived)
-            opts[:list_id] = resolve_list(options[:list]) if options[:list]
-            card = client.cards.update(workspace_id, card_id, **opts)
+              # Then move the card
+              move_opts = {list_id: resolve_list(options[:list])}
+              card = client.cards.update(workspace_id, card_id, **move_opts)
+            else
+              opts = symbolized_options(:title, :priority, :archived)
+              opts[:list_id] = resolve_list(options[:list]) if options[:list]
+              card = client.cards.update(workspace_id, card_id, **opts)
+            end
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
           end
-          output_item card
+          output_item card, labels: {id: "Card ID"}
         end
       end
 
@@ -153,7 +162,11 @@ module Superthread
       # @return [void]
       def delete(card_ref)
         handle_error do
-          card = client.cards.find(workspace_id, card_ref)
+          begin
+            card = client.cards.find(workspace_id, card_ref)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Card not found: '#{card_ref}'. Use 'suth cards list -b BOARD' to see available cards."
+          end
           confirming("Delete card '#{card.title}' (#{card.id})?") do
             client.cards.destroy(workspace_id, card.id)
             output_success "Card '#{card.title}' deleted"
@@ -161,32 +174,36 @@ module Superthread
         end
       end
 
-      desc "duplicate CARD_ID", "Duplicate a card"
-      option :title, type: :string, desc: "Title for the copy"
-      option :project, type: :string, required: true, desc: "Project/space ID (required)"
+      desc "duplicate CARD", "Duplicate a card"
+      option :title, type: :string, desc: "Title for the duplicated card"
+      option :project, type: :string, required: true, desc: "Destination project ID"
       option :board, type: :string, required: true, aliases: "-b", desc: "Destination board (ID or name)"
       option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       # Create a copy of an existing card in a specified location.
       #
       # @param card_id [String] the unique identifier of the card to duplicate
       # @return [void]
       def duplicate(card_id)
         handle_error do
-          opts = symbolized_options(:title)
-          opts[:project_id] = options[:project]
-          opts[:board_id] = board_id
-          opts[:list_id] = resolve_list(options[:list])
-          card = client.cards.duplicate(workspace_id, card_id, **opts)
-          output_item card
+          begin
+            opts = symbolized_options(:title)
+            opts[:project_id] = options[:project]
+            opts[:board_id] = board_id
+            opts[:list_id] = resolve_list(options[:list])
+            card = client.cards.duplicate(workspace_id, card_id, **opts)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
+          end
+          output_item card, labels: {id: "Card ID"}
         end
       end
 
       desc "assigned USER", "Get cards assigned to a user"
-      option :board, type: :string, aliases: "-b", desc: "Filter by board (ID or name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
-      option :project, type: :string, desc: "Filter by project (ID)"
-      option :archived, type: :boolean, desc: "Include archived"
+      option :board, type: :string, aliases: "-b", desc: "Board to filter by (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      option :project, type: :string, desc: "Project to filter by (ID)"
+      option :include_archived, type: :boolean, desc: "Include archived cards"
       option :since, type: :string, desc: "Filter by created date (e.g., 'friday', '3 days ago', '2026-01-20')"
       option :updated_since, type: :string, desc: "Filter by updated date"
       # List all cards assigned to a specific user.
@@ -195,7 +212,8 @@ module Superthread
       # @return [void]
       def assigned(user_ref)
         handle_error do
-          opts = symbolized_options(:archived)
+          opts = {}
+          opts[:archived] = options[:include_archived] if options[:include_archived]
           opts[:user_id] = resolve_user(user_ref)
           opts[:board_id] = board_id if options[:board]
           opts[:project_id] = options[:project] if options[:project]
@@ -204,7 +222,9 @@ module Superthread
           # Client-side date filtering (API doesn't support time-based filters)
           cards = apply_date_filters(cards)
 
-          output_list cards, columns: %i[id title priority list_title], headers: {list_title: "LIST"}
+          output_list cards, columns: %i[id title priority list_title], headers: {id: "CARD_ID", list_title: "LIST"}
+        rescue Superthread::ForbiddenError, Superthread::NotFoundError
+          raise Thor::Error, "User not found: '#{user_ref}'. Use 'suth members list' to see available users."
         end
       end
 
@@ -222,7 +242,7 @@ module Superthread
             user_id = resolve_user(user_ref)
             client.cards.add_member(workspace_id, card_id, user_id: user_id, role: options[:role])
           end
-          Ui.success "Assigned #{users.size} user(s) to card #{card_id}"
+          output_success "Assigned #{users.size} user(s) to card #{card_id}"
         end
       end
 
@@ -239,7 +259,7 @@ module Superthread
             user_id = resolve_user(user_ref)
             client.cards.remove_member(workspace_id, card_id, user_id)
           end
-          Ui.success "Unassigned #{users.size} user(s) from card #{card_id}"
+          output_success "Unassigned #{users.size} user(s) from card #{card_id}"
         end
       end
 
@@ -258,7 +278,7 @@ module Superthread
             related_card_id: options[:related],
             relation_type: options[:type]
           )
-          Ui.success "Linked #{options[:card]} -> #{options[:related]} (#{options[:type]})"
+          output_success "Linked #{options[:card]} -> #{options[:related]} (#{options[:type]})"
         end
       end
 
@@ -271,7 +291,7 @@ module Superthread
       def unlink
         handle_error do
           client.cards.remove_related(workspace_id, options[:card], options[:related])
-          Ui.success "Unlinked #{options[:card]} from #{options[:related]}"
+          output_success "Unlinked #{options[:card]} from #{options[:related]}"
         end
       end
 
@@ -285,7 +305,7 @@ module Superthread
         handle_error do
           ids = tag_refs.split(",").map { |ref| resolve_tag(ref.strip) }
           client.cards.add_tags(workspace_id, card_id, tag_ids: ids)
-          Ui.success "Added #{ids.count} tag(s) to card #{card_id}"
+          output_success "Added #{ids.count} tag(s) to card #{card_id}"
         end
       end
 
@@ -299,7 +319,7 @@ module Superthread
         handle_error do
           tag_id = resolve_tag(tag_ref)
           client.cards.remove_tag(workspace_id, card_id, tag_id)
-          Ui.success "Removed tag #{tag_ref} from card #{card_id}"
+          output_success "Removed tag #{tag_ref} from card #{card_id}"
         end
       end
 

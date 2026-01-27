@@ -13,15 +13,19 @@ module Superthread
       # @return [void]
       def get(comment_id)
         handle_error do
-          comment = client.comments.find(workspace_id, comment_id)
-          output_item comment, fields: %i[id content user_id card_id time_created time_updated]
+          begin
+            comment = client.comments.find(workspace_id, comment_id)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          end
+          output_item comment, fields: %i[id content user_id card_id time_created time_updated], labels: {id: "Comment ID"}
         end
       end
 
       desc "create", "Create a comment"
       option :content, type: :string, required: true, desc: "Comment content (HTML)"
-      option :card, type: :string, aliases: "-c", desc: "Card ID (required unless --page)"
-      option :page, type: :string, aliases: "-p", desc: "Page ID (required unless --card)"
+      option :card, type: :string, aliases: "-c", desc: "Parent card ID (required unless --page)"
+      option :page, type: :string, aliases: "-p", desc: "Parent page ID (required unless --card)"
       # Create a new comment on a card or page.
       #
       # @return [void]
@@ -30,7 +34,7 @@ module Superthread
         opts[:card_id] = options[:card] if options[:card]
         opts[:page_id] = options[:page] if options[:page]
         comment = client.comments.create(workspace_id, **opts)
-        output_item comment
+        output_item comment, labels: {id: "Comment ID"}
       end
 
       desc "update COMMENT_ID", "Update a comment"
@@ -41,8 +45,14 @@ module Superthread
       # @param comment_id [String] the unique identifier of the comment to update
       # @return [void]
       def update(comment_id)
-        comment = client.comments.update(workspace_id, comment_id, **symbolized_options(:content, :status))
-        output_item comment
+        handle_error do
+          begin
+            comment = client.comments.update(workspace_id, comment_id, **symbolized_options(:content, :status))
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          end
+          output_item comment, labels: {id: "Comment ID"}
+        end
       end
 
       desc "delete COMMENT_ID", "Delete a comment"
@@ -52,8 +62,14 @@ module Superthread
       # @return [void]
       def delete(comment_id)
         handle_error do
-          comment = client.comments.find(workspace_id, comment_id)
-          preview = truncate_content(comment.content)
+          begin
+            comment = client.comments.find(workspace_id, comment_id)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          end
+          # Strip HTML and normalize whitespace for preview
+          plain = comment.content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
+          preview = Formatter.truncate(plain, 50)
           confirming("Delete comment '#{preview}' (#{comment.id})?") do
             client.comments.destroy(workspace_id, comment.id)
             output_success "Comment #{comment.id} deleted"

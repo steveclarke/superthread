@@ -17,7 +17,7 @@ module Superthread
       # @return [void]
       def list
         spaces = client.spaces.list(workspace_id)
-        output_list spaces, columns: %i[id title]
+        output_list spaces, columns: %i[id title], headers: {id: "SPACE_ID"}
       end
 
       desc "get SPACE", "Get space details"
@@ -33,7 +33,7 @@ module Superthread
           rescue Superthread::ForbiddenError
             raise Thor::Error, "Space not found: '#{space_ref}'. Use 'suth spaces list' to see available spaces."
           end
-          output_item space, fields: %i[id title description time_created time_updated]
+          output_item space, fields: %i[id title description time_created time_updated], labels: {id: "Space ID"}
         end
       end
 
@@ -50,7 +50,7 @@ module Superthread
           opts = symbolized_options(:title, :description)
           opts[:icon] = build_icon_object if options[:icon]
           space = client.spaces.create(workspace_id, **opts)
-          output_item space
+          output_item space, labels: {id: "Space ID"}
         end
       end
 
@@ -68,7 +68,7 @@ module Superthread
           opts = symbolized_options(:title, :description)
           opts[:icon] = build_icon_object if options[:icon] || options[:icon_color]
           space = client.spaces.update(workspace_id, resolve_space(space_ref), **opts)
-          output_item space
+          output_item space, labels: {id: "Space ID"}
         end
       end
 

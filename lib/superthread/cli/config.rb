@@ -37,7 +37,7 @@ module Superthread
           format: table
         YAML
 
-        say_success "Created config file at #{config_path}"
+        output_success "Created config file at #{config_path}"
         say_info "Run 'suth setup' to configure your account"
       end
 
@@ -122,7 +122,7 @@ module Superthread
 
         cfg.save_config_file
 
-        say_success "Set #{key} = #{value}"
+        output_success "Set #{key} = #{value}"
       end
     end
   end

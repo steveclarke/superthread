@@ -16,26 +16,30 @@ module Superthread
       # @return [void]
       def list
         projects = client.projects.list(workspace_id)
-        output_list projects, columns: %i[id title status]
+        output_list projects, columns: %i[id title status], headers: {id: "PROJECT_ID"}
       end
 
-      desc "get PROJECT_ID", "Get project details"
+      desc "get PROJECT", "Get project details"
       # Retrieves and displays details for a specific project.
       #
       # @param project_id [String] numeric ID or short code of the project/epic
       # @return [void]
       def get(project_id)
         handle_error do
-          project = client.projects.find(workspace_id, project_id)
-          output_item project, fields: %i[id title status start_date due_date time_created time_updated]
+          begin
+            project = client.projects.find(workspace_id, project_id)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Project not found: '#{project_id}'. Use 'suth projects list' to see available projects."
+          end
+          output_item project, fields: %i[id title status start_date due_date time_created time_updated], labels: {id: "Project ID"}
         end
       end
 
       desc "create", "Create a new project"
       option :title, type: :string, required: true, desc: "Project title"
-      option :list, type: :string, required: true, aliases: "-l", desc: "List (ID or name, requires --board)"
-      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       option :content, type: :string, desc: "Project description"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
@@ -49,14 +53,14 @@ module Superthread
         opts[:list_id] = resolve_list(options[:list])
         opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
         project = client.projects.create(workspace_id, **opts)
-        output_item project
+        output_item project, labels: {id: "Project ID"}
       end
 
-      desc "update PROJECT_ID", "Update a project"
+      desc "update PROJECT", "Update a project"
       option :title, type: :string, desc: "New title"
-      option :list, type: :string, aliases: "-l", desc: "Move to list (ID or name, requires --board)"
-      option :board, type: :string, aliases: "-b", desc: "Board (ID or name) - helps resolve list by name"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name) - helps resolve board by name"
+      option :list, type: :string, aliases: "-l", desc: "Destination list (ID or name, requires --board)"
+      option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       option :owner, type: :string, aliases: "-o", desc: "New owner (user ID, name, or email)"
       option :start_date, type: :numeric, desc: "Start date"
       option :due_date, type: :numeric, desc: "Due date"
@@ -67,11 +71,17 @@ module Superthread
       # @param project_id [String] numeric ID or short code of the project/epic
       # @return [void]
       def update(project_id)
-        opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
-        opts[:list_id] = resolve_list(options[:list]) if options[:list]
-        opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
-        project = client.projects.update(workspace_id, project_id, **opts)
-        output_item project
+        handle_error do
+          begin
+            opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
+            opts[:list_id] = resolve_list(options[:list]) if options[:list]
+            opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
+            project = client.projects.update(workspace_id, project_id, **opts)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Project not found: '#{project_id}'. Use 'suth projects list' to see available projects."
+          end
+          output_item project, labels: {id: "Project ID"}
+        end
       end
 
       desc "delete PROJECT", "Delete a project"
@@ -81,7 +91,11 @@ module Superthread
       # @return [void]
       def delete(project_ref)
         handle_error do
-          project = client.projects.find(workspace_id, project_ref)
+          begin
+            project = client.projects.find(workspace_id, project_ref)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Project not found: '#{project_ref}'. Use 'suth projects list' to see available projects."
+          end
           confirming("Delete project '#{project.title}' (#{project.id})?") do
             client.projects.destroy(workspace_id, project.id)
             output_success "Project '#{project.title}' deleted"

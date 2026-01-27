@@ -306,8 +306,12 @@ module Superthread
           format_priority(value, color_enabled: color_enabled)
         when :archived, :is_watching, :is_bookmarked, :checked
           format_boolean(value, color_enabled: color_enabled)
-        when :time_created, :time_updated, :start_date, :due_date, :completed_date
-          format_time(value)
+        when :time_created, :time_updated
+          # Use relative time for creation/update timestamps
+          format_time(value, relative: true)
+        when :start_date, :due_date, :completed_date
+          # Use absolute dates for explicit date fields
+          format_time(value, relative: false)
         when :title, :content, :description
           truncate(value.to_s, 60)
         when :tags

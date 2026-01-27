@@ -11,10 +11,10 @@ module Superthread
       # @return [void]
       def list
         sprints = client.sprints.list(workspace_id, space_id: space_id)
-        output_list sprints, columns: %i[id title start_date]
+        output_list sprints, columns: %i[id title start_date], headers: {id: "SPRINT_ID"}
       end
 
-      desc "get SPRINT_ID", "Get sprint details"
+      desc "get SPRINT", "Get sprint details"
       option :space, type: :string, required: true, aliases: "-s", desc: "Space (ID or name)"
       # Displays detailed information about a specific sprint.
       #
@@ -23,7 +23,7 @@ module Superthread
       def get(sprint_id)
         handle_error do
           sprint = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-          output_item sprint, fields: %i[id title start_date time_created time_updated]
+          output_item sprint, fields: %i[id title start_date time_created time_updated], labels: {id: "Sprint ID"}
         end
       end
     end

@@ -5,10 +5,10 @@ module Superthread
     # CLI commands for search operations.
     class Search < Base
       desc "query SEARCH_TERM", "Search across workspace"
-      option :field, type: :string, enum: %w[title content], desc: "Field to search"
-      option :types, type: :string, desc: "Entity types (comma-separated: board,card,page,project,epic,note)"
-      option :space, type: :string, aliases: "-s", desc: "Filter by space (ID or name)"
-      option :archived, type: :boolean, desc: "Include archived"
+      option :field, type: :string, enum: %w[title content], desc: "Field to search in"
+      option :types, type: :string, desc: "Entity types to search (comma-separated: board,card,page,project,epic,note)"
+      option :space, type: :string, aliases: "-s", desc: "Space to filter by (ID or name)"
+      option :include_archived, type: :boolean, desc: "Include archived items"
       option :grouped, type: :boolean, desc: "Group results by type"
       # Searches across all entities in the workspace.
       #
@@ -23,10 +23,10 @@ module Superthread
             field: options[:field],
             types: types,
             space_id: space_id,
-            archived: options[:archived],
+            archived: options[:include_archived],
             grouped: options[:grouped]
           )
-          output_list results, columns: %i[result_type id title]
+          output_list results, columns: %i[result_type id title], headers: {id: "ID"}
         end
       end
     end

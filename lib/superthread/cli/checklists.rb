@@ -14,7 +14,7 @@ module Superthread
         "remove-item" => :remove_item
 
       desc "list", "List all checklists on a card"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       # List all checklists on a specified card.
       #
       # @return [void]
@@ -24,13 +24,13 @@ module Superthread
           if card.checklists.nil? || card.checklists.empty?
             say "No checklists found on this card.", :yellow
           else
-            output_list card.checklists, columns: %i[id title]
+            output_list card.checklists, columns: %i[id title], headers: {id: "CHECKLIST_ID"}
           end
         end
       end
 
-      desc "get CHECKLIST_ID", "Get checklist details"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      desc "get CHECKLIST", "Get checklist details"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       # Display detailed information about a specific checklist.
       #
       # @param checklist_id [String] the unique identifier of the checklist
@@ -42,9 +42,9 @@ module Superthread
           raise Thor::Error, "Checklist not found: #{checklist_id}" unless checklist
 
           if json_output?
-            output_item checklist, fields: %i[id title card_id items time_created]
+            output_item checklist, fields: %i[id title card_id items time_created], labels: {id: "Checklist ID"}
           else
-            output_item checklist, fields: %i[id title card_id time_created]
+            output_item checklist, fields: %i[id title card_id time_created], labels: {id: "Checklist ID"}
 
             if checklist.items&.any?
               puts ""
@@ -59,7 +59,7 @@ module Superthread
       end
 
       desc "create", "Create a checklist on a card"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :title, type: :string, required: true, desc: "Checklist title"
       # Add a new checklist to a card.
       #
@@ -67,12 +67,12 @@ module Superthread
       def create
         handle_error do
           checklist = client.cards.create_checklist(workspace_id, options[:card], title: options[:title])
-          output_item checklist, fields: %i[id title card_id time_created]
+          output_item checklist, fields: %i[id title card_id time_created], labels: {id: "Checklist ID"}
         end
       end
 
-      desc "update CHECKLIST_ID", "Update a checklist"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      desc "update CHECKLIST", "Update a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :title, type: :string, required: true, desc: "New checklist title"
       # Rename an existing checklist on a card.
       #
@@ -84,12 +84,12 @@ module Superthread
             workspace_id, options[:card], checklist_id,
             title: options[:title]
           )
-          output_item checklist, fields: %i[id title card_id time_created]
+          output_item checklist, fields: %i[id title card_id time_created], labels: {id: "Checklist ID"}
         end
       end
 
-      desc "delete CHECKLIST_ID", "Delete a checklist"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      desc "delete CHECKLIST", "Delete a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       # Remove a checklist and all its items from a card after confirmation.
       #
       # @param checklist_id [String] the unique identifier of the checklist
@@ -106,8 +106,8 @@ module Superthread
         end
       end
 
-      desc "add-item CHECKLIST_ID", "Add item to a checklist"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      desc "add-item CHECKLIST", "Add item to a checklist"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :title, type: :string, required: true, desc: "Item title"
       option :checked, type: :boolean, default: false, desc: "Create as checked"
       # Add a new item to an existing checklist.
@@ -121,13 +121,13 @@ module Superthread
             title: options[:title],
             checked: options[:checked]
           )
-          output_item item, fields: %i[id title checked checklist_id]
+          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
         end
       end
 
       desc "update-item ITEM_ID", "Update a checklist item"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
-      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
+      option :checklist, type: :string, required: true, desc: "Parent checklist ID"
       option :title, type: :string, desc: "New item title"
       option :checked, type: :boolean, desc: "Mark as checked/unchecked"
       # Update the title or checked state of a checklist item.
@@ -141,13 +141,13 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             **opts
           )
-          output_item item, fields: %i[id title checked checklist_id]
+          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
         end
       end
 
       desc "remove-item ITEM_ID", "Delete a checklist item"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
-      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
+      option :checklist, type: :string, required: true, desc: "Parent checklist ID"
       # Remove an item from a checklist after confirmation.
       #
       # @param item_id [String] the unique identifier of the item
@@ -166,8 +166,8 @@ module Superthread
       end
 
       desc "check ITEM_ID", "Mark a checklist item as checked"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
-      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
+      option :checklist, type: :string, required: true, desc: "Parent checklist ID"
       # Mark a checklist item as completed.
       #
       # @param item_id [String] the unique identifier of the item
@@ -178,13 +178,13 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             checked: true
           )
-          output_item item, fields: %i[id title checked checklist_id]
+          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
         end
       end
 
       desc "uncheck ITEM_ID", "Mark a checklist item as unchecked"
-      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
-      option :checklist, type: :string, required: true, desc: "Checklist ID"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
+      option :checklist, type: :string, required: true, desc: "Parent checklist ID"
       # Mark a checklist item as not completed.
       #
       # @param item_id [String] the unique identifier of the item
@@ -195,7 +195,7 @@ module Superthread
             workspace_id, options[:card], options[:checklist], item_id,
             checked: false
           )
-          output_item item, fields: %i[id title checked checklist_id]
+          output_item item, fields: %i[id title checked checklist_id], labels: {id: "Item ID"}
         end
       end
     end

@@ -15,7 +15,8 @@ RSpec.describe "CLI error handling", :cli do
       result = run_cli("cards", "get", "nonexistent")
 
       expect(result[:exit_code]).to eq(1)
-      expect(result[:stdout]).to include("Not found")
+      expect(result[:stderr]).to include("Card not found")
+      expect(result[:stderr]).to include("suth cards list")
     end
   end
 

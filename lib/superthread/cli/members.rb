@@ -11,7 +11,7 @@ module Superthread
       def list
         handle_error do
           members = client.users.members(workspace_id)
-          output_list members, columns: %i[display_name email role]
+          output_list members, columns: %i[id display_name email role], headers: {id: "USER_ID"}
         end
       end
     end

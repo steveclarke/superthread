@@ -48,7 +48,7 @@ module Superthread
 
         # Done!
         Ui.blank
-        Ui.success "Setup complete!"
+        output_success "Setup complete!"
         Ui.blank
         Ui.muted "Account '#{account_name}' is now active."
         Ui.blank
@@ -173,7 +173,7 @@ module Superthread
           return nil
         end
 
-        Ui.success "Found #{workspaces.length} workspace(s)"
+        output_success "Found #{workspaces.length} workspace(s)"
         workspaces
       rescue Superthread::AuthenticationError
         Ui.error "Invalid API key"

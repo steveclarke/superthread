@@ -15,7 +15,7 @@ module Superthread
       def list
         handle_error do
           replies = client.comments.replies(workspace_id, options[:comment])
-          output_list replies, columns: %i[id content user_id time_created]
+          output_list replies, columns: %i[id content user_id time_created], headers: {id: "REPLY_ID"}
         end
       end
 
@@ -27,7 +27,7 @@ module Superthread
       def get(reply_id)
         handle_error do
           reply = client.comments.find(workspace_id, reply_id)
-          output_item reply, fields: %i[id content user_id card_id time_created time_updated]
+          output_item reply, fields: %i[id content user_id card_id time_created time_updated], labels: {id: "Reply ID"}
         end
       end
 
@@ -40,7 +40,7 @@ module Superthread
       def create
         handle_error do
           reply = client.comments.reply(workspace_id, options[:comment], content: options[:content])
-          output_item reply
+          output_item reply, labels: {id: "Reply ID"}
         end
       end
 
@@ -58,7 +58,7 @@ module Superthread
             workspace_id, options[:comment], reply_id,
             **symbolized_options(:content, :status)
           )
-          output_item reply
+          output_item reply, labels: {id: "Reply ID"}
         end
       end
 
@@ -71,7 +71,9 @@ module Superthread
       def delete(reply_id)
         handle_error do
           reply = client.comments.find(workspace_id, reply_id)
-          preview = truncate_content(reply.content)
+          # Strip HTML and normalize whitespace for preview
+          plain = reply.content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
+          preview = Formatter.truncate(plain, 50)
           confirming("Delete reply '#{preview}' (#{reply_id})?") do
             client.comments.delete_reply(workspace_id, options[:comment], reply_id)
             output_success "Reply #{reply_id} deleted"

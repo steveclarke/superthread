@@ -8,7 +8,7 @@ module Superthread
     # and filtering. Each tag has a name and color.
     class Tags < Base
       desc "list", "List available tags"
-      option :space, type: :string, aliases: "-s", desc: "Filter by space (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space to filter by (ID or name)"
       option :all, type: :boolean, desc: "Include unused tags"
       # Lists all available tags in the workspace.
       #
@@ -18,14 +18,14 @@ module Superthread
           opts = symbolized_options(:all)
           opts[:project_id] = space_id if options[:space]
           tags = client.cards.tags(workspace_id, **opts)
-          output_list tags, columns: %i[id name color total_cards]
+          output_list tags, columns: %i[id name color total_cards], headers: {id: "TAG_ID"}
         end
       end
 
       desc "create", "Create a new tag"
       option :name, type: :string, required: true, desc: "Tag name"
       option :color, type: :string, required: true, desc: "Tag color (hex)"
-      option :space, type: :string, aliases: "-s", desc: "Space (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space to create tag in (ID or name)"
       # Creates a new tag in the workspace with a name and color.
       #
       # @return [void]
@@ -33,7 +33,7 @@ module Superthread
         opts = symbolized_options(:name, :color)
         opts[:space_id] = space_id if options[:space]
         tag = client.tags.create(workspace_id, **opts)
-        output_item tag, fields: %i[id name color]
+        output_item tag, fields: %i[id name color], labels: {id: "Tag ID"}
       end
 
       desc "update TAG", "Update a tag"
@@ -44,9 +44,15 @@ module Superthread
       # @param tag_ref [String] tag identifier (ID or name)
       # @return [void]
       def update(tag_ref)
-        tag_id = resolve_tag(tag_ref)
-        tag = client.tags.update(workspace_id, tag_id, **symbolized_options(:name, :color))
-        output_item tag
+        handle_error do
+          tag_id = resolve_tag(tag_ref)
+          begin
+            tag = client.tags.update(workspace_id, tag_id, **symbolized_options(:name, :color))
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Tag not found: '#{tag_ref}'. Use 'suth tags list' to see available tags."
+          end
+          output_item tag, labels: {id: "Tag ID"}
+        end
       end
 
       desc "delete TAG", "Delete a tag"

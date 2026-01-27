@@ -13,18 +13,22 @@ module Superthread
       # @return [void]
       def list
         notes = client.notes.list(workspace_id)
-        output_list notes, columns: %i[id title time_created]
+        output_list notes, columns: %i[id title time_created], headers: {id: "NOTE_ID"}
       end
 
-      desc "get NOTE_ID", "Get note details"
+      desc "get NOTE", "Get note details"
       # Retrieves and displays details for a specific note.
       #
       # @param note_id [String] numeric ID of the note to retrieve
       # @return [void]
       def get(note_id)
         handle_error do
-          note = client.notes.find(workspace_id, note_id)
-          output_item note, fields: %i[id title content time_created time_updated]
+          begin
+            note = client.notes.find(workspace_id, note_id)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Note not found: '#{note_id}'. Use 'suth notes list' to see available notes."
+          end
+          output_item note, fields: %i[id title content time_created time_updated], labels: {id: "Note ID"}
         end
       end
 
@@ -38,7 +42,7 @@ module Superthread
       # @return [void]
       def create
         note = client.notes.create(workspace_id, **symbolized_options(:title, :transcript, :user_notes, :is_public))
-        output_item note
+        output_item note, labels: {id: "Note ID"}
       end
 
       desc "delete NOTE", "Delete a note"
@@ -48,7 +52,11 @@ module Superthread
       # @return [void]
       def delete(note_ref)
         handle_error do
-          note = client.notes.find(workspace_id, note_ref)
+          begin
+            note = client.notes.find(workspace_id, note_ref)
+          rescue Superthread::ForbiddenError, Superthread::NotFoundError
+            raise Thor::Error, "Note not found: '#{note_ref}'. Use 'suth notes list' to see available notes."
+          end
           confirming("Delete note '#{note.title}' (#{note.id})?") do
             client.notes.destroy(workspace_id, note.id)
             output_success "Note '#{note.title}' deleted"

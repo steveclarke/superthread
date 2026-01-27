@@ -506,23 +506,6 @@ module Superthread
         end
       end
 
-      # Truncate content for display in confirmation prompts.
-      #
-      # Strips HTML tags, normalizes whitespace, and truncates with ellipsis.
-      #
-      # @param content [String] the content to truncate (may contain HTML)
-      # @param max_length [Integer] the maximum character length
-      # @return [String] the truncated plain text with ellipsis if needed
-      def truncate_content(content, max_length: 50)
-        return "" if content.nil? || content.empty?
-
-        # Strip HTML tags and normalize whitespace
-        plain = content.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
-        return plain if plain.length <= max_length
-
-        "#{plain[0, max_length]}..."
-      end
-
       # Display an informational message in cyan unless quiet mode.
       #
       # @param message [String] the info message to display

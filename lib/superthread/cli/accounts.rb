@@ -80,7 +80,7 @@ module Superthread
         state = app_config.account_state(name)
         workspace_name = state&.dig(:workspace_name) || name
 
-        Ui.success "Switched to account '#{name}' (#{workspace_name})"
+        output_success "Switched to account '#{name}' (#{workspace_name})"
       end
 
       desc "add NAME", "Add a new account"
@@ -133,7 +133,7 @@ module Superthread
           workspace_name: workspace.team_name)
         app_config.set_current_account(name)
 
-        Ui.success "Account '#{name}' configured (#{workspace.team_name || workspace.id})"
+        output_success "Account '#{name}' configured (#{workspace.team_name || workspace.id})"
       end
 
       desc "remove NAME", "Remove an account"
@@ -149,7 +149,7 @@ module Superthread
 
         confirming("Remove account '#{name}'?") do
           app_config.remove_account(name)
-          Ui.success "Account '#{name}' removed"
+          output_success "Account '#{name}' removed"
 
           if app_config.accounts.empty?
             Ui.muted "No accounts remaining. Run 'suth setup' to add one."

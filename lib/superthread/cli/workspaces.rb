@@ -62,7 +62,7 @@ module Superthread
             workspace_id: workspace[:id],
             workspace_name: workspace[:name])
 
-          Ui.success "Default workspace set to: #{workspace[:name]} (#{workspace[:id]})"
+          output_success "Default workspace set to: #{workspace[:name]} (#{workspace[:id]})"
         end
       end
 
