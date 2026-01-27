@@ -6,6 +6,13 @@ require "bump/tasks"
 
 RSpec::Core::RakeTask.new(:spec)
 
+namespace :yard do
+  desc "Run yard-lint to check YARD documentation"
+  task :lint do
+    sh "bundle exec yard-lint"
+  end
+end
+
 task default: %i[spec standard]
 
 desc "Release current version (creates git tag and triggers GitHub Actions)"

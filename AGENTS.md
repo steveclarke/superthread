@@ -18,6 +18,7 @@ bundle exec rspec                              # Run tests
 bundle exec rspec spec/path_spec.rb:42         # Single test by line
 bundle exec standardrb                         # Check code style
 bundle exec standardrb --fix                   # Auto-fix style issues
+rake yard:lint                                 # Check YARD documentation
 bundle exec bin/suth cards get CARD_ID         # Run CLI locally
 bundle exec bin/suth cards get CARD_ID --json  # Raw JSON (useful for debugging API responses)
 ```

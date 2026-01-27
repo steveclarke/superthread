@@ -383,7 +383,7 @@ bundle exec rspec
 bundle exec standardrb
 
 # Run documentation linter
-bundle exec yard-lint lib/
+rake yard:lint
 
 # Run CLI locally
 bundle exec bin/suth version
@@ -395,13 +395,11 @@ This project uses [yard-lint](https://github.com/mensfeld/yard-lint) to enforce 
 
 ```bash
 # Check all files
-bundle exec yard-lint lib/
+rake yard:lint
 
-# Check with coverage stats
-bundle exec yard-lint lib/ --stats
-
-# Check only changed files
-bundle exec yard-lint lib/ --diff main
+# Or run directly with options
+bundle exec yard-lint lib/ --stats    # With coverage stats
+bundle exec yard-lint lib/ --diff main # Only changed files
 ```
 
 ### Git Hooks
