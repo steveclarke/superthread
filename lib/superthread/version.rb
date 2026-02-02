@@ -2,5 +2,5 @@
 
 module Superthread
   # Current version of the Superthread gem.
-  VERSION = "0.5.2"
+  VERSION = "0.5.3"
 end
