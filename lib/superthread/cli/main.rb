@@ -5,6 +5,8 @@ module Superthread
     # Main entry point for the Superthread CLI.
     # Registers all subcommands and provides top-level commands like version and setup.
     class Main < Base
+      map %w[--version -V] => :version
+
       desc "version", "Show version"
       # Displays the current version of the Superthread CLI.
       #
