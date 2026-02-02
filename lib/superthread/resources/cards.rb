@@ -47,6 +47,7 @@ module Superthread
       # @option params [Integer] :due_date the new due date as Unix timestamp
       # @option params [Integer] :priority the new priority level (1-4)
       # @option params [Integer] :estimate the new story point estimate
+      # @option params [String] :parent_card_id the new parent card identifier
       # @option params [Boolean] :archived whether the card is archived
       # @return [Superthread::Models::Card] the updated card
       # @note Content cannot be updated via this API; it uses WebSocket collaboration.

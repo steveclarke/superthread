@@ -144,6 +144,7 @@ module Superthread
       option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
       option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       option :priority, type: :numeric, desc: "Priority level (1=urgent, 4=low)"
+      option :parent_card, type: :string, desc: "Parent card ID"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       # Update an existing card's properties.
       #
@@ -154,9 +155,10 @@ module Superthread
           begin
             # API has a bug where title is ignored when combined with list_id,
             # so we make separate requests when both are provided
-            if options[:list] && (options[:title] || options[:priority] || options[:archived])
+            if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:parent_card])
               # First update non-move fields
               field_opts = symbolized_options(:title, :priority, :archived)
+              field_opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
               # Then move the card
@@ -164,6 +166,7 @@ module Superthread
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
               opts = symbolized_options(:title, :priority, :archived)
+              opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:list_id] = resolve_list(options[:list]) if options[:list]
               card = client.cards.update(workspace_id, card_id, **opts)
             end
