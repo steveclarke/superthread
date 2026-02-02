@@ -291,13 +291,22 @@ module Superthread
       desc "link", "Link two cards"
       option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
       option :related, type: :string, required: true, aliases: "-r", desc: "Related card ID"
-      option :type, type: :string, required: true, enum: %w[blocks blocked_by related duplicates],
-        desc: "Relationship type"
+      option :type, type: :string, required: true,
+        desc: "Relationship type (blocks, blocked_by, related, duplicates)"
       # Create a relationship between two cards.
       #
       # @return [void]
       def link
         handle_error do
+          valid_types = %w[blocks blocked_by related duplicates]
+          unless valid_types.include?(options[:type])
+            if %w[parent child].include?(options[:type])
+              raise Thor::Error,
+                "Parent/child relationships are set via --parent-card on 'suth cards create' or 'suth cards update'"
+            end
+            raise Thor::Error,
+              "Expected '--type' to be one of #{valid_types.join(", ")}; got #{options[:type]}"
+          end
           client.cards.add_related(
             workspace_id, options[:card],
             related_card_id: options[:related],
