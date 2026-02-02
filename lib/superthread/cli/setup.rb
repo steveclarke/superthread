@@ -48,7 +48,7 @@ module Superthread
 
         # Done!
         Ui.blank
-        output_success "Setup complete!"
+        Ui.success "Setup complete!"
         Ui.blank
         Ui.muted "Account '#{account_name}' is now active."
         Ui.blank
