@@ -173,7 +173,7 @@ module Superthread
           return nil
         end
 
-        output_success "Found #{workspaces.length} workspace(s)"
+        Ui.success "Found #{workspaces.length} workspace(s)"
         workspaces
       rescue Superthread::AuthenticationError
         Ui.error "Invalid API key"
