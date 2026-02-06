@@ -8,6 +8,28 @@ RSpec.describe "st comments", :cli do
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
+  describe "comments list --card" do
+    before do
+      stub_api_get("test_workspace/comments?card_id=card-123", response: ApiFixtures::Comments::LIST)
+    end
+
+    it "lists comments on a card" do
+      result = run_cli("comments", "list", "--card=card-123")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("First comment")
+      expect(result[:stdout]).to include("Second comment")
+    end
+
+    it "outputs JSON with --json flag" do
+      json = cli_json("comments", "list", "--card=card-123")
+
+      expect(json).to be_an(Array)
+      expect(json.length).to eq(2)
+      expect(json.first["id"]).to eq("comment-1")
+    end
+  end
+
   describe "comments get COMMENT_ID" do
     before do
       stub_api_get("test_workspace/comments/comment-1", response: ApiFixtures::Comments::GET)

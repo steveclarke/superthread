@@ -7,6 +7,18 @@ module Superthread
     # Provides methods for creating, updating, and managing comments
     # on cards and pages, including threaded replies.
     class Comments < Base
+      # Lists comments on a card.
+      #
+      # @param workspace_id [String] the workspace identifier
+      # @param card_id [String] the card identifier to list comments for
+      # @return [Superthread::Objects::Collection<Superthread::Models::Comment>] the card's comments
+      def list(workspace_id, card_id:)
+        ws = safe_id("workspace_id", workspace_id)
+        params = compact_params(card_id: card_id)
+        get_collection("/#{ws}/comments", params: params,
+          item_class: Models::Comment, items_key: :comments)
+      end
+
       # Creates a comment on a card or page.
       #
       # @param workspace_id [String] the workspace identifier

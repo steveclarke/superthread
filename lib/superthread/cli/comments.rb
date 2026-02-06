@@ -6,6 +6,18 @@ module Superthread
     #
     # Provides subcommands for creating, updating, and deleting comments.
     class Comments < Base
+      desc "list", "List comments on a card"
+      option :card, type: :string, required: true, aliases: "-c", desc: "Card ID"
+      # List all comments on a specified card.
+      #
+      # @return [void]
+      def list
+        handle_error do
+          comments = client.comments.list(workspace_id, card_id: options[:card])
+          output_list comments, columns: %i[id user_id content time_created], headers: {id: "COMMENT_ID"}
+        end
+      end
+
       desc "get COMMENT_ID", "Get comment details"
       # Display detailed information about a specific comment.
       #

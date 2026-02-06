@@ -466,6 +466,13 @@ module ApiFixtures
   end
 
   module Comments
+    LIST = {
+      comments: [
+        {id: "comment-1", content: "<p>First comment</p>", user_id: "user-1", card_id: "card-123", time_created: 1705312200000},
+        {id: "comment-2", content: "<p>Second comment</p>", user_id: "user-2", card_id: "card-123", time_created: 1705398600000}
+      ]
+    }.freeze
+
     GET = {
       comment: {
         id: "comment-1",
