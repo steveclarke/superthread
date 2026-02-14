@@ -105,9 +105,9 @@ module Superthread
 
       desc "create", "Create a new card"
       option :title, type: :string, required: true, desc: "Card title"
-      option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name, requires --board)"
-      option :board, type: :string, aliases: "-b", desc: "Board containing the list (ID or name, required unless --sprint)"
-      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name)"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
+      option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board name)"
       option :sprint, type: :string, desc: "Sprint ID (required unless --board)"
       option :content, type: :string, desc: "Card content (HTML)"
       option :project, type: :string, desc: "Project ID"
@@ -125,11 +125,15 @@ module Superthread
         handle_error do
           raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
 
+          if options[:sprint] && !options[:space]
+            raise Thor::Error, "--space is required when creating cards in a sprint"
+          end
+
           opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
           opts[:list_id] = resolve_list(options[:list])
           opts[:board_id] = board_id if options[:board]
           opts[:sprint_id] = options[:sprint] if options[:sprint]
-          opts[:project_id] = options[:project] if options[:project]
+          opts[:project_id] = options[:project] || (space_id if options[:sprint])
           opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
           opts[:epic_id] = options[:epic] if options[:epic]
           opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]

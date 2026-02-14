@@ -39,6 +39,10 @@ module Superthread
       #   @return [Integer] Unix timestamp when the sprint was last updated
       attribute :time_updated, Shale::Type::Integer
 
+      # @!attribute [rw] lists
+      #   @return [Array<List>] columns/lists available in this sprint
+      attribute :lists, List, collection: true
+
       timestamps :time_created, :time_updated
       timestamps start_date: :start_time
     end
