@@ -294,21 +294,25 @@ module Superthread
         list = find_list_by_name(ref)
         return list.id if list
 
-        raise Thor::Error, "List not found: '#{ref}'. Specify a board with --board to search by list name."
+        raise Thor::Error, "List not found: '#{ref}'. Specify --board or --sprint to search by list name."
       end
 
-      # Find a list by name within the current board context.
+      # Find a list by name within the current board or sprint context.
       #
       # @param name [String] the list name to search for (case-insensitive)
       # @return [Superthread::Models::List, nil] the list object or nil if not found
       def find_list_by_name(name)
-        return nil unless options[:board]
+        lists = if options[:board]
+          board = client.boards.find(workspace_id, board_id)
+          board.lists
+        elsif options[:sprint]
+          sprint = client.sprints.find(workspace_id, options[:sprint], space_id: space_id)
+          sprint.lists
+        end
 
-        # Get the board which includes its lists
-        board = client.boards.find(workspace_id, board_id)
-        return nil unless board.lists
+        return nil unless lists
 
-        board.lists.find { |l| l.title&.downcase == name.downcase }
+        lists.find { |l| l.title&.downcase == name.downcase }
       end
 
       # ========================================
@@ -320,8 +324,8 @@ module Superthread
       # @param value [String] the value to check
       # @return [Boolean] true if it matches ID pattern
       def looks_like_id?(value)
-        # IDs are typically short alphanumeric strings
-        value.match?(/\A[a-zA-Z0-9_-]+\z/) && value.length <= 30
+        # IDs are short alphanumeric strings or full UUIDs (36 chars with hyphens)
+        value.match?(/\A[a-zA-Z0-9_-]+\z/) && value.length <= 36
       end
 
       # Check if color output is enabled based on TTY and quiet mode.
