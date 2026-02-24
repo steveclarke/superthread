@@ -81,9 +81,7 @@ module Superthread
     #
     # @return [Hash{String => Hash}, nil] map of lowercase names to {id:, name:}, or nil on failure
     def build_member_map
-      members = @client.users.members(@workspace_id)
-      map = {}
-      members.each do |member|
+      @client.users.members(@workspace_id).each_with_object({}) do |member, map|
         next unless member.display_name
 
         map[member.display_name.downcase] = {
@@ -91,7 +89,6 @@ module Superthread
           name: member.display_name
         }
       end
-      map
     rescue Superthread::Error
       nil
     end
