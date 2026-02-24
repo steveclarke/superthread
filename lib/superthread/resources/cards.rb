@@ -238,6 +238,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
+        title = format_mentions(workspace_id, title)
 
         post_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items", body: {
           title: title,
@@ -261,6 +262,7 @@ module Superthread
         card = safe_id("card_id", card_id)
         checklist = safe_id("checklist_id", checklist_id)
         item = safe_id("item_id", item_id)
+        params[:title] = format_mentions(workspace_id, params[:title]) if params[:title]
 
         patch_object("/#{ws}/cards/#{card}/checklists/#{checklist}/items/#{item}",
           body: compact_params(**params), object_class: Models::ChecklistItem, unwrap_key: :checklist_item)
