@@ -93,7 +93,7 @@ module Superthread
         content = format_mentions(workspace_id, content)
         body = compact_params(content: content, **params)
         post_object("/#{ws}/comments/#{comment}/children", body: body,
-          object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :child_comment)
       end
 
       # Gets replies to a comment.
@@ -106,6 +106,25 @@ module Superthread
         comment = safe_id("comment_id", comment_id)
         get_collection("/#{ws}/comments/#{comment}/children",
           item_class: Models::Comment, items_key: :child_comments)
+      end
+
+      # Gets a specific reply by listing all replies on the parent comment
+      # and finding the matching one.
+      #
+      # @param workspace_id [String] the workspace identifier
+      # @param comment_id [String] the parent comment identifier
+      # @param reply_id [String] the reply identifier to find
+      # @return [Superthread::Models::Comment] the reply
+      # @raise [Superthread::NotFoundError] if the reply is not found
+      def find_reply(workspace_id, comment_id, reply_id)
+        all_replies = replies(workspace_id, comment_id)
+        found = all_replies.find { |r| r.id == reply_id }
+        unless found
+          raise Superthread::NotFoundError.new(
+            "Reply '#{reply_id}' not found on comment '#{comment_id}'"
+          )
+        end
+        found
       end
 
       # Updates a reply's attributes.
@@ -123,7 +142,7 @@ module Superthread
         reply = safe_id("reply_id", reply_id)
         params[:content] = format_mentions(workspace_id, params[:content]) if params[:content]
         patch_object("/#{ws}/comments/#{comment}/children/#{reply}", body: compact_params(**params),
-          object_class: Models::Comment, unwrap_key: :comment)
+          object_class: Models::Comment, unwrap_key: :child_comment)
       end
 
       # Deletes a reply permanently.

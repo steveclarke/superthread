@@ -30,24 +30,24 @@ RSpec.describe "st replies", :cli do
     end
   end
 
-  describe "replies get REPLY_ID" do
+  describe "replies get REPLY_ID --comment" do
     before do
-      stub_api_get("test_workspace/comments/reply-1", response: ApiFixtures::Comments::REPLY_CREATE)
+      stub_api_get("test_workspace/comments/comment-1/children", response: ApiFixtures::Comments::REPLIES)
     end
 
     it "displays reply details" do
-      result = run_cli("replies", "get", "reply-1")
+      result = run_cli("replies", "get", "reply-1", "--comment=comment-1")
 
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("reply-1")
-      expect(result[:stdout]).to include("This is a reply")
+      expect(result[:stdout]).to include("Reply 1")
     end
 
     it "outputs JSON with --json flag" do
-      json = cli_json("replies", "get", "reply-1")
+      json = cli_json("replies", "get", "reply-1", "--comment=comment-1")
 
       expect(json["id"]).to eq("reply-1")
-      expect(json["content"]).to include("This is a reply")
+      expect(json["content"]).to include("Reply 1")
     end
   end
 
@@ -94,7 +94,8 @@ RSpec.describe "st replies", :cli do
 
   describe "replies delete REPLY_ID" do
     before do
-      stub_api_get("test_workspace/comments/reply-to-delete", response: ApiFixtures::Comments::REPLY_DELETE)
+      stub_api_get("test_workspace/comments/comment-1/children",
+        response: ApiFixtures::Comments::REPLIES_WITH_DELETE_TARGET)
       stub_api_delete("test_workspace/comments/comment-1/children/reply-to-delete")
     end
 
