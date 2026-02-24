@@ -7,12 +7,21 @@ module Superthread
     class Main < Base
       map %w[--version -V] => :version
 
-      desc "version", "Show version"
-      # Displays the current version of the Superthread CLI.
+      desc "version", "Show version and check for updates"
+      # Displays the current version and checks for updates.
       #
       # @return [void]
       def version
         puts "superthread #{Superthread::VERSION}"
+
+        latest = Superthread::VersionChecker.check!
+        if latest && Superthread::VersionChecker.newer?(latest)
+          say ""
+          say "Update available: #{Superthread::VERSION} \u2192 #{latest}", :yellow
+          say "Run: brew upgrade superthread", :yellow
+        end
+      rescue
+        nil
       end
 
       desc "setup", "Interactive setup wizard"

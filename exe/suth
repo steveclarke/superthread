@@ -8,4 +8,12 @@ begin
 rescue Superthread::Error => e
   warn "  \e[31mERROR: #{e.message}\e[0m"
   exit 1
+ensure
+  # Check for updates (cached, at most once per day, silent on failure)
+  begin
+    Superthread::VersionChecker.check_if_stale!
+    notice = Superthread::VersionChecker.update_notice
+    $stderr.print notice if notice && $stderr.tty?
+  rescue # rubocop:disable Lint/SuppressedException
+  end
 end
