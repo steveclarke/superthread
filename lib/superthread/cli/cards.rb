@@ -158,8 +158,9 @@ module Superthread
       def update(card_id)
         handle_error do
           begin
-            # API has a bug where title is ignored when combined with list_id,
-            # so we make separate requests when both are provided
+            # WORKAROUND: API ignores title when combined with list_id,
+            # so we make separate requests when both are provided.
+            # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
             if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:parent_card] || options[:epic])
               # First update non-move fields
               field_opts = symbolized_options(:title, :priority, :archived)

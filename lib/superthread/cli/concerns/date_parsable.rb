@@ -105,8 +105,8 @@ module Superthread
             ts = item.send(field)
             next false if ts.nil?
 
-            # Handle milliseconds vs seconds
-            ts /= 1000 if ts > 9_999_999_999
+            ts = Formatter.normalize_timestamp(ts)
+            next false if ts.nil?
 
             (since.nil? || ts >= since) && (until_time.nil? || ts <= until_time)
           end

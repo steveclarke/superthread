@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 module Superthread
-  # Base class for all Superthread API response objects.
+  # Generic wrapper for API response objects (legacy pattern).
+  #
+  # Prefer {Superthread::Model} (Shale-based) for new resource types.
+  # This class is retained for backward compatibility with endpoints
+  # that haven't been migrated to typed models yet.
+  #
   # Provides hash-like access, dot notation via method_missing, and conversion to Hash.
   #
   # Inspired by Stripe's StripeObject pattern - allows both:

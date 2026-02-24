@@ -80,7 +80,7 @@ module Superthread
       def find_tag(ref)
         tags = client.cards.tags(workspace_id, all: true)
         tag = tags.find { |t| t.id == ref || t.name&.downcase == ref.downcase }
-        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st tags list' to see available tags." unless tag
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'suth tags list' to see available tags." unless tag
         tag
       end
     end

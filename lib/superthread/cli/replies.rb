@@ -82,9 +82,7 @@ module Superthread
       def delete(reply_id)
         handle_error do
           reply = client.comments.find_reply(workspace_id, options[:comment], reply_id)
-          # Strip HTML and normalize whitespace for preview
-          plain = reply.content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
-          preview = Formatter.truncate(plain, 50)
+          preview = Formatter.truncate(Formatter.strip_html(reply.content), 50)
           confirming("Delete reply '#{preview}' (#{reply_id})?") do
             client.comments.delete_reply(workspace_id, options[:comment], reply_id)
             output_success "Reply #{reply_id} deleted"

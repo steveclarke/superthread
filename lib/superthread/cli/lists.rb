@@ -7,9 +7,6 @@ module Superthread
     # Lists are columns on a board that organize cards into workflow stages.
     # This class provides commands to list, create, update, and delete lists.
     class Lists < Base
-      # Available color options for lists.
-      COLORS = %w[fog slate grey charcoal black red orange yellow green ocean blue purple pink].freeze
-
       desc "list", "List all lists on a board"
       option :board, type: :string, required: true, aliases: "-b", desc: "Board to list lists from (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
@@ -31,27 +28,13 @@ module Superthread
         end
       end
 
-      desc "get LIST", "Get list details"
-      # Display detailed information about a specific list.
-      #
-      # @param list_id [String] the unique identifier of the list
-      # @return [void]
-      # @note Lists are fetched via their parent board.
-      def get(list_id)
-        handle_error do
-          # Lists don't have a direct get endpoint; we need to find via board
-          # For now, just output the ID - a proper implementation would search boards
-          raise Thor::Error, "Direct list lookup not supported. Use 'lists list --board=BOARD_ID' to see lists."
-        end
-      end
-
       desc "create", "Create a new list on a board"
       option :board, type: :string, required: true, aliases: "-b", desc: "Board to create list in (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
       option :title, type: :string, required: true, desc: "List title"
       option :description, type: :string, desc: "List description"
       option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
-      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
+      option :color, type: :string, desc: "Color: #{Boards::COLORS.join(", ")}"
       # Add a new list (column) to a board.
       #
       # @return [void]
@@ -71,7 +54,7 @@ module Superthread
       option :title, type: :string, desc: "New title"
       option :description, type: :string, desc: "New description"
       option :icon, type: :string, desc: "Icon name (e.g., shield, rocket)"
-      option :color, type: :string, desc: "Color: #{COLORS.join(", ")}"
+      option :color, type: :string, desc: "Color: #{Boards::COLORS.join(", ")}"
       # Update an existing list's properties.
       #
       # @param list_id [String] the unique identifier of the list to update

@@ -162,14 +162,15 @@ module Superthread
 
       private
 
-      # Masks an API key for display, showing only the first 7 and last 4 characters.
+      # Masks an API key for display, showing only the first 4 and last 4 characters.
       #
       # @param key [String, nil] the API key to mask
       # @return [String] the masked key or "(not set)" if nil
       def mask_api_key(key)
         return "(not set)" unless key
+        return "***" if key.length < 10
 
-        "#{key[0..6]}...#{key[-4..]}"
+        "#{key[0..3]}...#{key[-4..]}"
       end
     end
   end

@@ -164,7 +164,7 @@ module Superthread
     # @param klass [Class] the class to check
     # @return [Boolean] true if the class is a Shale model
     def shale_model?(klass)
-      klass.respond_to?(:shale_model?) && klass.shale_model?
+      Superthread::Model.shale_class?(klass)
     end
 
     private

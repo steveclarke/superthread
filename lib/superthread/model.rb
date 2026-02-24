@@ -34,6 +34,14 @@ module Superthread
         true
       end
 
+      # Check if a given class is a Shale-based model.
+      #
+      # @param klass [Class] the class to check
+      # @return [Boolean] true if the class responds to shale_model? and returns true
+      def shale_class?(klass)
+        klass.respond_to?(:shale_model?) && klass.shale_model?
+      end
+
       # Construct a model from a hash (API response).
       # This is the primary factory method used by the client.
       #
@@ -157,14 +165,13 @@ module Superthread
 
     protected
 
-    # Converts Unix timestamp to Time.
+    # Converts Unix timestamp (seconds) to Time.
     #
     # Use in helper methods for timestamp fields.
     #
     # @param ts [Integer, nil] Unix timestamp in seconds
     # @return [Time, nil] Time object or nil
-    # @note API returns timestamps in seconds, not milliseconds.
-    def ms_to_time(ts)
+    def timestamp_to_time(ts)
       ts && ts != 0 && Time.at(ts)
     end
   end

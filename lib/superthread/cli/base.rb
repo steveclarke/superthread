@@ -183,7 +183,7 @@ module Superthread
         board = find_board_by_name(ref)
         return board.id if board
 
-        raise Thor::Error, "Board not found: '#{ref}'. Use 'st boards list --space <space>' to see available boards."
+        raise Thor::Error, "Board not found: '#{ref}'. Use 'suth boards list --space <space>' to see available boards."
       end
 
       # Find a board by name, searching within space if specified or all spaces.
@@ -230,7 +230,7 @@ module Superthread
         user = find_user_by_name(ref)
         return user.user_identifier if user
 
-        raise Thor::Error, "User not found: '#{ref}'. Use 'st users members' to see available users."
+        raise Thor::Error, "User not found: '#{ref}'. Use 'suth members list' to see available users."
       end
 
       # Find a user by display name or email from the cached member list.
@@ -267,7 +267,7 @@ module Superthread
         # If not found by name, assume it's an ID
         return ref if looks_like_id?(ref)
 
-        raise Thor::Error, "Tag not found: '#{ref}'. Use 'st tags list' to see available tags."
+        raise Thor::Error, "Tag not found: '#{ref}'. Use 'suth tags list' to see available tags."
       end
 
       # Find a tag by name from the cached list.

@@ -85,9 +85,7 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Comment not found: '#{comment_id}'."
           end
-          # Strip HTML and normalize whitespace for preview
-          plain = comment.content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
-          preview = Formatter.truncate(plain, 50)
+          preview = Formatter.truncate(Formatter.strip_html(comment.content), 50)
           confirming("Delete comment '#{preview}' (#{comment.id})?") do
             client.comments.destroy(workspace_id, comment.id)
             output_success "Comment #{comment.id} deleted"

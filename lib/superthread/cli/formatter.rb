@@ -57,7 +57,29 @@ module Superthread
         1 => "low"
       }.freeze
 
+      # Threshold for detecting millisecond timestamps vs second timestamps.
+      # Timestamps above this value are assumed to be in milliseconds.
+      MAX_SECONDS_TIMESTAMP = 9_999_999_999
+
       module_function
+
+      # Strips HTML tags from content and normalizes whitespace.
+      #
+      # @param content [String, nil] HTML content to strip
+      # @return [String] plain text with tags removed and whitespace normalized
+      def strip_html(content)
+        content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
+      end
+
+      # Normalizes a timestamp to seconds (API sometimes returns milliseconds).
+      #
+      # @param ts [Integer, nil] timestamp in seconds or milliseconds
+      # @return [Integer, nil] timestamp in seconds, or nil if nil/zero
+      def normalize_timestamp(ts)
+        return nil if ts.nil? || ts == 0
+
+        (ts > MAX_SECONDS_TIMESTAMP) ? ts / 1000 : ts
+      end
 
       # Truncates a string to a maximum length with an ellipsis indicator.
       #

@@ -206,12 +206,22 @@ module Superthread
       @manual_api_key = key
     end
 
+    # Sets a manual workspace ID override.
+    #
+    # Useful for programmatic usage without modifying config files.
+    #
+    # @param id [String] workspace ID
+    def workspace=(id)
+      @manual_workspace = id
+    end
+
     # Returns the workspace ID for the current context.
     #
-    # Checks environment variable first, then account state.
+    # Checks in order: manual override, environment variable, account state.
     #
     # @return [String, nil] workspace ID or nil if not set
     def workspace
+      return @manual_workspace if @manual_workspace
       return @env_workspace if @env_workspace
 
       account_state&.dig(:workspace_id)

@@ -118,8 +118,7 @@ module Superthread
       # @param ts [Integer, nil] Timestamp
       # @return [Integer, nil] Normalized timestamp in seconds
       def normalize_timestamp(ts)
-        return nil if ts.nil? || ts == 0
-        (ts > 9_999_999_999) ? ts / 1000 : ts
+        Formatter.normalize_timestamp(ts)
       end
 
       # Output activity as JSON.

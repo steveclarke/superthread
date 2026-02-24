@@ -195,7 +195,7 @@ module Superthread
       #
       # @return [String, nil] priority label (urgent, high, medium, low)
       def priority_name
-        {4 => "urgent", 3 => "high", 2 => "medium", 1 => "low"}[priority]
+        Cli::Formatter::PRIORITY_LABELS[priority]
       end
 
       # Returns the parent card as a CardRef, or nil if none.
