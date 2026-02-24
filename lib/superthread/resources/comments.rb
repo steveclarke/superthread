@@ -31,6 +31,7 @@ module Superthread
       # @return [Superthread::Models::Comment] the created comment
       def create(workspace_id, content:, card_id: nil, page_id: nil, **params)
         ws = safe_id("workspace_id", workspace_id)
+        content = format_mentions(workspace_id, content)
         body = compact_params(content: content, card_id: card_id, page_id: page_id, **params)
         post_object("/#{ws}/comments", body: body,
           object_class: Models::Comment, unwrap_key: :comment)
@@ -61,6 +62,7 @@ module Superthread
       def update(workspace_id, comment_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
+        params[:content] = format_mentions(workspace_id, params[:content]) if params[:content]
         patch_object("/#{ws}/comments/#{comment}", body: compact_params(**params),
           object_class: Models::Comment, unwrap_key: :comment)
       end
@@ -88,6 +90,7 @@ module Superthread
       def reply(workspace_id, comment_id, content:, **params)
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
+        content = format_mentions(workspace_id, content)
         body = compact_params(content: content, **params)
         post_object("/#{ws}/comments/#{comment}/children", body: body,
           object_class: Models::Comment, unwrap_key: :comment)
@@ -118,6 +121,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         comment = safe_id("comment_id", comment_id)
         reply = safe_id("reply_id", reply_id)
+        params[:content] = format_mentions(workspace_id, params[:content]) if params[:content]
         patch_object("/#{ws}/comments/#{comment}/children/#{reply}", body: compact_params(**params),
           object_class: Models::Comment, unwrap_key: :comment)
       end

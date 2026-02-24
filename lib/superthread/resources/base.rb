@@ -172,6 +172,17 @@ module Superthread
         args.compact
       end
 
+      # Formats {{@mentions}} in content to HTML user-mention tags.
+      #
+      # @param workspace_id [String] the workspace identifier for member lookup
+      # @param content [String, nil] text that may contain {{@Name}} patterns
+      # @return [String, nil] content with mentions converted to HTML tags
+      def format_mentions(workspace_id, content)
+        return content if content.nil?
+
+        MentionFormatter.new(@client, workspace_id).format(content)
+      end
+
       # Builds an API path prefixed with the workspace ID.
       #
       # @param workspace_id [String] the workspace identifier
