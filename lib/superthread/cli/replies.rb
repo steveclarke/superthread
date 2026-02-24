@@ -20,13 +20,18 @@ module Superthread
       end
 
       desc "get REPLY_ID", "Get reply details"
+      option :comment, type: :string, required: true, desc: "Parent comment ID"
       # Display detailed information about a specific reply.
       #
       # @param reply_id [String] the unique identifier of the reply
       # @return [void]
       def get(reply_id)
         handle_error do
-          reply = client.comments.find(workspace_id, reply_id)
+          begin
+            reply = client.comments.find_reply(workspace_id, options[:comment], reply_id)
+          rescue Superthread::NotFoundError
+            raise Thor::Error, "Reply not found: '#{reply_id}' on comment '#{options[:comment]}'."
+          end
           output_item reply, fields: %i[id content user_id card_id time_created time_updated], labels: {
             id: "Reply ID",
             user_id: "User ID",
@@ -76,7 +81,7 @@ module Superthread
       # @return [void]
       def delete(reply_id)
         handle_error do
-          reply = client.comments.find(workspace_id, reply_id)
+          reply = client.comments.find_reply(workspace_id, options[:comment], reply_id)
           # Strip HTML and normalize whitespace for preview
           plain = reply.content.to_s.gsub(/<[^>]+>/, " ").gsub(/\s+/, " ").strip
           preview = Formatter.truncate(plain, 50)

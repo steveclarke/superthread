@@ -513,7 +513,7 @@ module ApiFixtures
     }.freeze
 
     REPLY_CREATE = {
-      comment: {
+      child_comment: {
         id: "reply-1",
         content: "<p>This is a reply</p>",
         user_id: "user-1",
@@ -522,7 +522,7 @@ module ApiFixtures
     }.freeze
 
     REPLY_UPDATE = {
-      comment: {
+      child_comment: {
         id: "reply-1",
         content: "<p>Updated reply</p>",
         user_id: "user-1",
@@ -542,14 +542,11 @@ module ApiFixtures
       }
     }.freeze
 
-    # Used for delete_reply confirmation
-    REPLY_DELETE = {
-      comment: {
-        id: "reply-to-delete",
-        content: "<p>Reply to delete</p>",
-        user_id: "user-1",
-        time_created: 1705312200000
-      }
+    # Used for find_reply lookup in delete confirmation
+    REPLIES_WITH_DELETE_TARGET = {
+      child_comments: [
+        {id: "reply-to-delete", content: "<p>Reply to delete</p>", user_id: "user-1", time_created: 1705312200000}
+      ]
     }.freeze
   end
 
