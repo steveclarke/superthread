@@ -21,6 +21,7 @@ module Superthread
       class_option :json, type: :boolean, desc: "Output as JSON"
       class_option :account, type: :string, aliases: "-a", desc: "Use specific account"
       class_option :skip_confirm, type: :boolean, aliases: ["-y", "--yes"], desc: "Auto-confirm prompts"
+      class_option :limit, type: :numeric, desc: "Max items to show (default: 50)"
 
       private
 
@@ -371,22 +372,40 @@ module Superthread
 
       # Output a collection as table or JSON array.
       #
-      # In JSON mode, outputs as JSON array. Otherwise, outputs as formatted table.
+      # Applies --limit truncation (default: 50). When truncated, shows a count
+      # footer in table mode or wraps with metadata in JSON mode.
       #
       # @param items [Array, Collection] the items to output
       # @param columns [Array<Symbol>] the columns to display in table mode
       # @param headers [Hash{Symbol => String}] custom labels for column headers
       # @return [void]
       def output_list(items, columns: nil, headers: {})
+        all_items = items.respond_to?(:items) ? items.items : Array(items)
+        limit = effective_limit
+        truncated = all_items.length > limit
+        visible = truncated ? all_items.first(limit) : all_items
+
         if json_output?
-          puts Formatter.json(items)
+          if truncated
+            puts JSON.pretty_generate(
+              items: visible.map { |i| i.respond_to?(:to_h) ? i.to_h : i },
+              total: all_items.length,
+              truncated: true,
+              limit: limit
+            )
+          else
+            puts Formatter.json(visible)
+          end
         else
-          columns ||= default_list_columns(items)
-          result = Formatter.table(items, columns: columns, headers: headers, color_enabled: color_enabled?)
+          columns ||= default_list_columns(visible)
+          result = Formatter.table(visible, columns: columns, headers: headers, color_enabled: color_enabled?)
           if result.empty?
             say "No items found.", :yellow unless options[:quiet]
           else
             puts result
+            if truncated
+              say "Showing #{limit} of #{all_items.length}. Use --limit to adjust.", :yellow
+            end
           end
         end
       end
@@ -534,37 +553,72 @@ module Superthread
         say message, :yellow
       end
 
+      # Get the effective limit for list output.
+      #
+      # @return [Integer] the limit from --limit option or default of 50
+      def effective_limit
+        limit = options[:limit]
+        (limit.is_a?(Integer) && limit > 0) ? limit : 50
+      end
+
+      # Output an error as JSON or human-readable text.
+      #
+      # In JSON mode, outputs a structured error object to stdout.
+      # In text mode, uses Ui.error and optionally Ui.muted for fix hints.
+      #
+      # @param type [String] machine-readable error type (e.g., "not_found")
+      # @param message [String] human-readable error message
+      # @param fix [String, nil] optional hint for how to resolve the error
+      # @return [void]
+      def output_error(type:, message:, fix: nil)
+        if json_output?
+          error_hash = {ok: false, error: {type: type, message: message}}
+          error_hash[:fix] = fix if fix
+          puts JSON.pretty_generate(error_hash)
+        else
+          Ui.error(message)
+          Ui.muted(fix) if fix
+        end
+      end
+
       # Wrap a block with consistent error handling for API operations.
       #
       # Catches API and configuration errors and displays user-friendly messages
-      # before exiting with appropriate status codes.
+      # (or structured JSON in --json mode) before exiting with appropriate
+      # status codes.
       #
       # @yield the block to execute with error handling
       # @return [Object] the return value of the block
       def handle_error
         yield
       rescue Superthread::NotFoundError => e
-        Ui.error("Not found: #{e.message}")
+        output_error(type: "not_found", message: "Not found: #{e.message}")
         exit 1
       rescue Superthread::AuthenticationError => e
-        Ui.error("Authentication failed: #{e.message}")
-        Ui.muted("Check your API key with: st config show")
+        output_error(
+          type: "authentication_error",
+          message: "Authentication failed: #{e.message}",
+          fix: "Check your API key with: suth config show"
+        )
         exit 1
       rescue Superthread::ForbiddenError => e
-        Ui.error("Access denied: #{e.message}")
+        output_error(type: "forbidden", message: "Access denied: #{e.message}")
         exit 1
       rescue Superthread::RateLimitError => e
-        Ui.error("Rate limited: #{e.message}")
-        Ui.muted("Try again in #{e.retry_after || 60} seconds")
+        output_error(
+          type: "rate_limited",
+          message: "Rate limited: #{e.message}",
+          fix: "Try again in #{e.retry_after || 60} seconds"
+        )
         exit 1
       rescue Superthread::ValidationError => e
-        Ui.error("Validation error: #{e.message}")
+        output_error(type: "validation_error", message: "Validation error: #{e.message}")
         exit 1
       rescue Superthread::ApiError => e
-        Ui.error("API error: #{e.message}")
+        output_error(type: "api_error", message: "API error: #{e.message}")
         exit 1
       rescue Superthread::ConfigurationError => e
-        Ui.error("Configuration error: #{e.message}")
+        output_error(type: "configuration_error", message: "Configuration error: #{e.message}")
         exit 1
       end
 
