@@ -189,10 +189,9 @@ module Superthread
               field_opts[:epic_id] = options[:epic] if options[:epic]
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
-              # Then move the card (include sprint context if moving to a sprint)
+              # Then move the card (include sprint context)
               move_opts = {list_id: resolve_list(options[:list])}
-              move_opts[:sprint_id] = sprint_id if options[:sprint]
-              move_opts[:project_id] = space_id if options[:sprint]
+              apply_sprint_context!(move_opts, card_id)
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
               opts = symbolized_options(:title, :priority, :archived)
@@ -208,6 +207,8 @@ module Superthread
                   sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
                   opts[:list_id] = sprint_obj.lists.first&.id
                 end
+              elsif opts[:list_id]
+                apply_sprint_context!(opts, card_id)
               end
 
               card = client.cards.update(workspace_id, card_id, **opts)
@@ -397,6 +398,29 @@ module Superthread
       end
 
       private
+
+      # Include sprint context in update params when needed.
+      #
+      # The API requires sprint_id, project_id, and position when moving cards
+      # between lists within a sprint. If --sprint is explicitly provided, uses
+      # that. Otherwise, fetches the card to detect if it's already in a sprint
+      # and includes the context automatically.
+      #
+      # @param params [Hash] the update params hash to modify in place
+      # @param card_id [String] the card identifier to look up
+      # @return [void]
+      def apply_sprint_context!(params, card_id)
+        if options[:sprint]
+          opts[:sprint_id] = sprint_id
+          opts[:project_id] = space_id
+        else
+          card = client.cards.find(workspace_id, card_id)
+          if card.sprint_id
+            opts[:sprint_id] = card.sprint_id
+            opts[:project_id] = card.project_id
+          end
+        end
+      end
 
       # Apply date filters to a collection of cards.
       # The API doesn't support time-based filtering, so we filter client-side.
