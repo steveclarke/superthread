@@ -157,9 +157,13 @@ suth members list                              # List workspace members
 
 # Cards
 suth cards list -b BOARD                       # List cards on a board
+suth cards list --sprint SPRINT -s SPACE       # List cards in a sprint
 suth cards get CARD_ID                         # Get card details
 suth cards create --title "Task" -l LIST -b BOARD
+suth cards create --title "Task" -l LIST --sprint SPRINT -s SPACE
 suth cards update CARD_ID --title "New title"
+suth cards update CARD_ID --sprint SPRINT -s SPACE  # Move to sprint
+suth cards update CARD_ID -l "Done"            # Move list (auto-detects sprint)
 suth cards delete CARD_ID
 suth cards duplicate CARD_ID                   # Clone a card
 suth cards assigned USER                       # Cards assigned to user
@@ -306,7 +310,7 @@ Common options have short aliases:
 
 ### Tips
 
-- Most commands accept **names or IDs** for spaces, boards, lists, users, and tags
+- Most commands accept **names or IDs** for spaces, boards, lists, sprints, users, and tags
 - Use `-s SPACE` to help resolve ambiguous board/list names
 - Use `--json` for scripted output: `suth cards assigned me --json`
 - Use `me` as a user reference: `suth cards assigned me`
@@ -375,6 +379,18 @@ The gem uses Superthread's modern UI terminology:
 | Card | Task/issue on a board |
 | Page | Wiki/documentation page |
 | Note | Quick notes within a space |
+
+## Claude Code Skill
+
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill is included for AI agents that use the Superthread CLI. It provides a complete command reference so agents can manage cards, boards, sprints, and other resources without needing to run `--help` for every command.
+
+### Install the skill
+
+```bash
+npx skills add steveclarke/superthread
+```
+
+Once installed, any Claude Code session can invoke it with `/superthread` or it will activate automatically when working with Superthread tasks.
 
 ## Development
 

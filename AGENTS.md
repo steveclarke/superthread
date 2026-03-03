@@ -105,6 +105,13 @@ output_success "Card deleted"                    # Success message
 4. Create CLI commands in `lib/superthread/cli/`
 5. Register subcommand in `lib/superthread/cli/main.rb`
 6. Add specs
+7. Update the CLI skill in `skills/superthread/SKILL.md`
+
+## CLI Skill
+
+The file `skills/superthread/SKILL.md` is a Claude Code skill that teaches agents how to use the `suth` CLI. It is the canonical reference for all CLI commands, options, and usage patterns.
+
+**IMPORTANT:** When adding, removing, or changing CLI commands, options, or behavior, update the skill file to match. This keeps agents in sync with the CLI without needing to run `--help` for every command.
 
 ## Key Design Decisions
 
