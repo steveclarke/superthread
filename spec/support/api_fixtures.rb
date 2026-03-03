@@ -673,7 +673,12 @@ module ApiFixtures
         title: "Sprint 1",
         start_date: 1705312200,
         time_created: 1705312200,
-        time_updated: 1705398600
+        time_updated: 1705398600,
+        lists: [
+          {id: "sprint-list-1", title: "To do"},
+          {id: "sprint-list-2", title: "Doing"},
+          {id: "sprint-list-3", title: "Done"}
+        ]
       }
     }.freeze
   end

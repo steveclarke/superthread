@@ -187,20 +187,29 @@ module Superthread
               field_opts = symbolized_options(:title, :priority, :archived)
               field_opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               field_opts[:epic_id] = options[:epic] if options[:epic]
-              field_opts[:sprint_id] = sprint_id if options[:sprint]
-              field_opts[:project_id] = space_id if options[:sprint]
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
-              # Then move the card
+              # Then move the card (include sprint context if moving to a sprint)
               move_opts = {list_id: resolve_list(options[:list])}
+              move_opts[:sprint_id] = sprint_id if options[:sprint]
+              move_opts[:project_id] = space_id if options[:sprint]
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
               opts = symbolized_options(:title, :priority, :archived)
               opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:epic_id] = options[:epic] if options[:epic]
               opts[:list_id] = resolve_list(options[:list]) if options[:list]
-              opts[:sprint_id] = sprint_id if options[:sprint]
-              opts[:project_id] = space_id if options[:sprint]
+
+              # Moving to a sprint requires list_id — default to first list if not specified
+              if options[:sprint]
+                opts[:sprint_id] = sprint_id
+                opts[:project_id] = space_id
+                unless opts[:list_id]
+                  sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
+                  opts[:list_id] = sprint_obj.lists.first&.id
+                end
+              end
+
               card = client.cards.update(workspace_id, card_id, **opts)
             end
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
