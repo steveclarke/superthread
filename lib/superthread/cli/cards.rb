@@ -164,6 +164,7 @@ module Superthread
       option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
       option :sprint, type: :string, desc: "Sprint to move card to (ID or name)"
       option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board/list name)"
+      option :position, type: :numeric, desc: "Position within the list (0 = top)"
       option :priority, type: :numeric, desc: "Priority level (1=low, 4=urgent)"
       option :parent_card, type: :string, desc: "Parent card ID"
       option :epic, type: :string, desc: "Epic ID"
@@ -191,6 +192,7 @@ module Superthread
 
               # Then move the card (include sprint context)
               move_opts = {list_id: resolve_list(options[:list])}
+              move_opts[:position] = options[:position] if options[:position]
               apply_sprint_context!(move_opts, card_id)
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
@@ -198,6 +200,7 @@ module Superthread
               opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:epic_id] = options[:epic] if options[:epic]
               opts[:list_id] = resolve_list(options[:list]) if options[:list]
+              opts[:position] = options[:position] if options[:position]
 
               # Moving to a sprint requires list_id — default to first list if not specified
               if options[:sprint]
