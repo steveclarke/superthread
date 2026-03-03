@@ -191,9 +191,8 @@ module Superthread
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
               # Then move the card (include sprint context)
-              move_opts = {list_id: resolve_list(options[:list])}
+              move_opts = resolve_list_with_context(options[:list], card_id)
               move_opts[:position] = options[:position] if options[:position]
-              apply_sprint_context!(move_opts, card_id)
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
               opts = symbolized_options(:title, :priority, :archived)
@@ -201,39 +200,14 @@ module Superthread
               opts[:epic_id] = options[:epic] if options[:epic]
               opts[:position] = options[:position] if options[:position]
 
-              # Resolve list name and sprint context together.
-              # When moving a card by list name without --board or --sprint,
-              # we fetch the card first to discover its sprint/board context
-              # so we can resolve the list name against the right set of lists.
               if options[:list]
-                if options[:board] || options[:sprint]
-                  opts[:list_id] = resolve_list(options[:list])
-                else
-                  existing = client.cards.find(workspace_id, card_id)
-                  if existing.sprint_id
-                    sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
-                      space_id: existing.project_id)
-                    list = sprint_obj.lists&.find { |l| l.title&.downcase == options[:list].downcase }
-                    # Use resolved list ID if found, otherwise treat as an ID
-                    opts[:list_id] = list ? list.id : options[:list]
-                    opts[:sprint_id] = existing.sprint_id
-                    opts[:project_id] = existing.project_id
-                  else
-                    opts[:list_id] = resolve_list(options[:list])
-                  end
-                end
-              end
-
-              # Moving to a sprint requires list_id — default to first list if not specified
-              if options[:sprint] && !opts[:sprint_id]
+                opts.merge!(resolve_list_with_context(options[:list], card_id))
+              elsif options[:sprint]
+                # Moving to a sprint without --list — default to first list
                 opts[:sprint_id] = sprint_id
                 opts[:project_id] = space_id
-                unless opts[:list_id]
-                  sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-                  opts[:list_id] = sprint_obj.lists.first&.id
-                end
-              elsif opts[:list_id] && !opts[:sprint_id]
-                apply_sprint_context!(opts, card_id)
+                sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
+                opts[:list_id] = sprint_obj.lists.first&.id
               end
 
               card = client.cards.update(workspace_id, card_id, **opts)
@@ -424,27 +398,41 @@ module Superthread
 
       private
 
-      # Include sprint context in update params when needed.
+      # Resolve a list reference and include sprint context when needed.
       #
-      # The API requires sprint_id, project_id, and position when moving cards
-      # between lists within a sprint. If --sprint is explicitly provided, uses
-      # that. Otherwise, fetches the card to detect if it's already in a sprint
-      # and includes the context automatically.
+      # The API requires sprint_id and project_id alongside list_id when moving
+      # cards within a sprint. This method handles three scenarios:
+      # 1. --board or --sprint given: resolve list name with that context
+      # 2. Neither given: fetch the card to discover its sprint/board context
+      # 3. Card is on a board (no sprint): resolve normally
       #
-      # @param params [Hash] the update params hash to modify in place
-      # @param card_id [String] the card identifier to look up
-      # @return [void]
-      def apply_sprint_context!(params, card_id)
-        if options[:sprint]
-          params[:sprint_id] = sprint_id
-          params[:project_id] = space_id
+      # @param list_ref [String] the list ID or name to resolve
+      # @param card_id [String] the card identifier to look up for context
+      # @return [Hash] params hash with :list_id and optional :sprint_id, :project_id
+      def resolve_list_with_context(list_ref, card_id)
+        result = {}
+
+        if options[:board] || options[:sprint]
+          result[:list_id] = resolve_list(list_ref)
+          if options[:sprint]
+            result[:sprint_id] = sprint_id
+            result[:project_id] = space_id
+          end
         else
-          card = client.cards.find(workspace_id, card_id)
-          if card.sprint_id
-            params[:sprint_id] = card.sprint_id
-            params[:project_id] = card.project_id
+          existing = client.cards.find(workspace_id, card_id)
+          if existing.sprint_id
+            sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
+              space_id: existing.project_id)
+            list = sprint_obj.lists&.find { |l| l.title&.downcase == list_ref.downcase }
+            result[:list_id] = list ? list.id : list_ref
+            result[:sprint_id] = existing.sprint_id
+            result[:project_id] = existing.project_id
+          else
+            result[:list_id] = resolve_list(list_ref)
           end
         end
+
+        result
       end
 
       # Apply date filters to a collection of cards.
