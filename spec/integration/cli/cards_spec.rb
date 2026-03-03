@@ -8,6 +8,41 @@ RSpec.describe "st cards", :cli do
     ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
   end
 
+  describe "cards list with --sprint" do
+    before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_api_post("test_workspace/views/preview", response: {
+        cards: [
+          {id: "card-s1", title: "Sprint Card 1", priority: 2, list_title: "To Do", sprint_id: "sprint-1"},
+          {id: "card-s2", title: "Sprint Card 2", priority: 1, list_title: "In Progress", sprint_id: "sprint-1"}
+        ]
+      })
+    end
+
+    it "lists cards in a sprint" do
+      result = run_cli("cards", "list", "--sprint=sprint-1", "-s", "1")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Sprint Card 1")
+      expect(result[:stdout]).to include("Sprint Card 2")
+    end
+
+    it "requires --space when using --sprint" do
+      result = run_cli("cards", "list", "--sprint=sprint-1")
+
+      expect(result[:exit_code]).not_to eq(0)
+      expect(result[:stderr]).to include("--space is required")
+    end
+
+    it "requires --board or --sprint" do
+      result = run_cli("cards", "list")
+
+      expect(result[:exit_code]).not_to eq(0)
+      expect(result[:stderr]).to include("Either --board or --sprint is required")
+    end
+  end
+
   describe "cards list with --since" do
     let(:now) { Time.new(2025, 1, 20, 12, 0, 0) }
     let(:today_ts) { Time.new(2025, 1, 20, 10, 0, 0).to_i * 1000 }
@@ -124,6 +159,28 @@ RSpec.describe "st cards", :cli do
 
       expect(json["title"]).to eq("Updated card title")
       expect(json["priority"]).to eq(1)
+    end
+  end
+
+  describe "cards update with --sprint" do
+    before do
+      # resolve_space tries name lookup first, so stub the list endpoint
+      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_api_patch("test_workspace/cards/card-123", response: ApiFixtures::Cards::UPDATE)
+    end
+
+    it "moves card to a sprint" do
+      result = run_cli("cards", "update", "card-123",
+        "--sprint=sprint-1", "-s", "1")
+
+      expect(result[:exit_code]).to eq(0)
+    end
+
+    it "requires --space when using --sprint" do
+      result = run_cli("cards", "update", "card-123", "--sprint=sprint-1")
+
+      expect(result[:exit_code]).not_to eq(0)
+      expect(result[:stderr]).to include("--space is required")
     end
   end
 

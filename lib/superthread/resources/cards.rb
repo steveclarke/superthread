@@ -47,6 +47,8 @@ module Superthread
       # @option params [Integer] :due_date the new due date as Unix timestamp
       # @option params [Integer] :priority the new priority level (1-4)
       # @option params [Integer] :estimate the new story point estimate
+      # @option params [String] :sprint_id the destination sprint identifier
+      # @option params [String] :project_id the project/space identifier (required with sprint_id)
       # @option params [String] :parent_card_id the new parent card identifier
       # @option params [String] :epic_id the new epic identifier
       # @option params [Boolean] :archived whether the card is archived
@@ -104,6 +106,7 @@ module Superthread
       # @param workspace_id [String] the workspace identifier
       # @param filters [Hash{Symbol => Object}] filter options
       # @option filters [String] :board_id filter by board identifier
+      # @option filters [String] :sprint_id filter by sprint identifier
       # @option filters [String] :list_id filter by list identifier
       # @option filters [String] :project_id filter by project/space identifier
       # @option filters [Boolean] :archived when true, includes archived cards
@@ -121,6 +124,7 @@ module Superthread
         body[:card_filters][:include][:boards] = [filters[:board_id]] if filters[:board_id]
         body[:card_filters][:include][:lists] = [filters[:list_id]] if filters[:list_id]
         body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
+        body[:card_filters][:include][:sprints] = [filters[:sprint_id]] if filters[:sprint_id]
 
         post_collection("/#{ws}/views/preview", body: body,
           item_class: Models::Card, items_key: :cards)

@@ -7,6 +7,24 @@ RSpec.describe Superthread::Resources::Cards do
 
   let(:client) { Superthread::Client.new(api_key: "test_key") }
 
+  describe "#list with sprint filter" do
+    before do
+      stub_api_post("test_workspace/views/preview", response: {
+        cards: [{id: "card-s1", title: "Sprint Card", priority: 2, list_title: "To Do"}]
+      })
+    end
+
+    it "sends sprint_id in card_filters include" do
+      result = client.cards.list("test_workspace", sprint_id: "sprint-1")
+
+      expect(result.first.id).to eq("card-s1")
+      expect(WebMock).to have_requested(:post, "https://api.superthread.com/v1/test_workspace/views/preview")
+        .with(body: hash_including(
+          "card_filters" => hash_including("include" => hash_including("sprints" => ["sprint-1"]))
+        ))
+    end
+  end
+
   describe "#update_checklist_item" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",

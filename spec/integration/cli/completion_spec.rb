@@ -82,7 +82,7 @@ RSpec.describe "suth completion", :cli do
       result = run_cli("completion", "fish")
 
       expect(result[:stdout]).to include("__fish_seen_subcommand_from cards")
-      expect(result[:stdout]).to include("-a list -d 'List cards on a board'")
+      expect(result[:stdout]).to include("-a list -d 'List cards on a board or sprint'")
     end
   end
 

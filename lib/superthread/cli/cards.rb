@@ -11,21 +11,37 @@ module Superthread
     class Cards < Base
       include Concerns::DateParsable
 
-      desc "list", "List cards on a board"
-      option :board, type: :string, required: true, aliases: "-b", desc: "Board to list cards from (ID or name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      desc "list", "List cards on a board or sprint"
+      option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
+      option :sprint, type: :string, desc: "Sprint (ID or name, required unless --board)"
+      option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board name)"
       option :list, type: :string, aliases: "-l", desc: "List to filter by (ID or name)"
       option :include_archived, type: :boolean, desc: "Include archived cards"
       option :since, type: :string, desc: "Filter by created date (e.g., 'friday', '3 days ago', '2026-01-20')"
       option :updated_since, type: :string, desc: "Filter by updated date"
-      # List all cards on a specified board with optional filtering.
+      # List cards on a board or sprint with optional filtering.
       #
       # @return [void]
+      # @raise [Thor::Error] if neither --board nor --sprint is provided
+      # @raise [Thor::Error] if --sprint is used without --space
       def list
         handle_error do
+          raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
+
+          if options[:sprint] && !options[:space]
+            raise Thor::Error, "--space is required when listing cards in a sprint"
+          end
+
           opts = {}
           opts[:archived] = options[:include_archived] if options[:include_archived]
-          opts[:board_id] = board_id
+
+          if options[:sprint]
+            opts[:sprint_id] = sprint_id
+            opts[:project_id] = space_id
+          else
+            opts[:board_id] = board_id
+          end
+
           opts[:list_id] = resolve_list(options[:list]) if options[:list]
           cards = client.cards.list(workspace_id, **opts)
 
@@ -108,7 +124,7 @@ module Superthread
       option :list, type: :string, required: true, aliases: "-l", desc: "Destination list (ID or name)"
       option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
       option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board name)"
-      option :sprint, type: :string, desc: "Sprint ID (required unless --board)"
+      option :sprint, type: :string, desc: "Sprint (ID or name, required unless --board)"
       option :content, type: :string, desc: "Card content (HTML)"
       option :project, type: :string, desc: "Project ID"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
@@ -132,7 +148,7 @@ module Superthread
           opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
           opts[:list_id] = resolve_list(options[:list])
           opts[:board_id] = board_id if options[:board]
-          opts[:sprint_id] = options[:sprint] if options[:sprint]
+          opts[:sprint_id] = sprint_id if options[:sprint]
           opts[:project_id] = options[:project] || (space_id if options[:sprint])
           opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
           opts[:epic_id] = options[:epic] if options[:epic]
@@ -146,7 +162,8 @@ module Superthread
       option :title, type: :string, desc: "New title"
       option :list, type: :string, aliases: "-l", desc: "Destination list (ID or name)"
       option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
-      option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
+      option :sprint, type: :string, desc: "Sprint to move card to (ID or name)"
+      option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board/list name)"
       option :priority, type: :numeric, desc: "Priority level (1=low, 4=urgent)"
       option :parent_card, type: :string, desc: "Parent card ID"
       option :epic, type: :string, desc: "Epic ID"
@@ -157,6 +174,10 @@ module Superthread
       # @return [void]
       def update(card_id)
         handle_error do
+          if options[:sprint] && !options[:space]
+            raise Thor::Error, "--space is required when moving cards to a sprint"
+          end
+
           begin
             # WORKAROUND: API ignores title when combined with list_id,
             # so we make separate requests when both are provided.
@@ -166,6 +187,8 @@ module Superthread
               field_opts = symbolized_options(:title, :priority, :archived)
               field_opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               field_opts[:epic_id] = options[:epic] if options[:epic]
+              field_opts[:sprint_id] = sprint_id if options[:sprint]
+              field_opts[:project_id] = space_id if options[:sprint]
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
               # Then move the card
@@ -176,6 +199,8 @@ module Superthread
               opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:epic_id] = options[:epic] if options[:epic]
               opts[:list_id] = resolve_list(options[:list]) if options[:list]
+              opts[:sprint_id] = sprint_id if options[:sprint]
+              opts[:project_id] = space_id if options[:sprint]
               card = client.cards.update(workspace_id, card_id, **opts)
             end
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
