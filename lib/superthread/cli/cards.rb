@@ -166,7 +166,6 @@ module Superthread
       option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board/list name)"
       option :position, type: :numeric, desc: "Position within the list (0 = top)"
       option :priority, type: :numeric, desc: "Priority level (1=low, 4=urgent)"
-      option :parent_card, type: :string, desc: "Parent card ID"
       option :epic, type: :string, desc: "Epic ID"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       # Update an existing card's properties.
@@ -183,10 +182,9 @@ module Superthread
             # WORKAROUND: API ignores title when combined with list_id,
             # so we make separate requests when both are provided.
             # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
-            if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:parent_card] || options[:epic])
+            if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:epic])
               # First update non-move fields
               field_opts = symbolized_options(:title, :priority, :archived)
-              field_opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               field_opts[:epic_id] = options[:epic] if options[:epic]
               client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
 
@@ -196,7 +194,6 @@ module Superthread
               card = client.cards.update(workspace_id, card_id, **move_opts)
             else
               opts = symbolized_options(:title, :priority, :archived)
-              opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:epic_id] = options[:epic] if options[:epic]
               opts[:position] = options[:position] if options[:position]
 

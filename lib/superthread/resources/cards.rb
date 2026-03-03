@@ -49,11 +49,11 @@ module Superthread
       # @option params [Integer] :estimate the new story point estimate
       # @option params [String] :sprint_id the destination sprint identifier
       # @option params [String] :project_id the project/space identifier (required with sprint_id)
-      # @option params [String] :parent_card_id the new parent card identifier
       # @option params [String] :epic_id the new epic identifier
       # @option params [Boolean] :archived whether the card is archived
       # @return [Superthread::Models::Card] the updated card
       # @note Content cannot be updated via this API; it uses WebSocket collaboration.
+      # @note parent_card_id is not supported on update; the API silently ignores it.
       def update(workspace_id, card_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
