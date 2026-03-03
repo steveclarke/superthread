@@ -199,18 +199,40 @@ module Superthread
               opts = symbolized_options(:title, :priority, :archived)
               opts[:parent_card_id] = options[:parent_card] if options[:parent_card]
               opts[:epic_id] = options[:epic] if options[:epic]
-              opts[:list_id] = resolve_list(options[:list]) if options[:list]
               opts[:position] = options[:position] if options[:position]
 
+              # Resolve list name and sprint context together.
+              # When moving a card by list name without --board or --sprint,
+              # we fetch the card first to discover its sprint/board context
+              # so we can resolve the list name against the right set of lists.
+              if options[:list]
+                if options[:board] || options[:sprint]
+                  opts[:list_id] = resolve_list(options[:list])
+                else
+                  existing = client.cards.find(workspace_id, card_id)
+                  if existing.sprint_id
+                    sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
+                      space_id: existing.project_id)
+                    list = sprint_obj.lists&.find { |l| l.title&.downcase == options[:list].downcase }
+                    # Use resolved list ID if found, otherwise treat as an ID
+                    opts[:list_id] = list ? list.id : options[:list]
+                    opts[:sprint_id] = existing.sprint_id
+                    opts[:project_id] = existing.project_id
+                  else
+                    opts[:list_id] = resolve_list(options[:list])
+                  end
+                end
+              end
+
               # Moving to a sprint requires list_id — default to first list if not specified
-              if options[:sprint]
+              if options[:sprint] && !opts[:sprint_id]
                 opts[:sprint_id] = sprint_id
                 opts[:project_id] = space_id
                 unless opts[:list_id]
                   sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
                   opts[:list_id] = sprint_obj.lists.first&.id
                 end
-              elsif opts[:list_id]
+              elsif opts[:list_id] && !opts[:sprint_id]
                 apply_sprint_context!(opts, card_id)
               end
 
@@ -414,13 +436,13 @@ module Superthread
       # @return [void]
       def apply_sprint_context!(params, card_id)
         if options[:sprint]
-          opts[:sprint_id] = sprint_id
-          opts[:project_id] = space_id
+          params[:sprint_id] = sprint_id
+          params[:project_id] = space_id
         else
           card = client.cards.find(workspace_id, card_id)
           if card.sprint_id
-            opts[:sprint_id] = card.sprint_id
-            opts[:project_id] = card.project_id
+            params[:sprint_id] = card.sprint_id
+            params[:project_id] = card.project_id
           end
         end
       end
