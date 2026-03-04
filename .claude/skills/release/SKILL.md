@@ -25,11 +25,11 @@ Write concise, user-facing notes. Group under `### Added`, `### Changed`, `### F
 ### 3. Bump, commit, release
 
 ```bash
-bundle exec bump patch          # or minor, major — updates version.rb only
-git add lib/superthread/version.rb
-git commit -m "release: v<VERSION>"
+bundle exec bump patch          # or minor, major — updates version.rb and commits
 bundle exec rake release        # creates tag, pushes, triggers GitHub Actions
 ```
+
+> The `bump` command runs `bundle install` automatically to sync `Gemfile.lock`, then commits both files. Do NOT edit `version.rb` by hand — the lockfile will be out of sync and CI will fail in frozen mode.
 
 ### 4. Add release notes
 
