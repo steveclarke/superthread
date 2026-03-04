@@ -15,6 +15,9 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      detail_fields :id, :title, :start_date, :time_created, :time_updated
+      list_columns :id, :title, :status
+
       # @!attribute [rw] id
       #   @return [String] unique sprint identifier
       attribute :id, Shale::Type::String

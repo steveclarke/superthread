@@ -19,6 +19,9 @@ module Superthread
 
       presents_as :display_name
 
+      detail_fields :user_id, :display_name, :email, :role
+      list_columns :user_id, :display_name, :email
+
       # @!attribute [rw] id
       #   @return [String] unique user identifier
       attribute :id, Shale::Type::String

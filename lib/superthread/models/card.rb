@@ -22,6 +22,9 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      detail_fields :id, :title, :status, :priority, :list_title, :board_title, :time_created, :time_updated
+      list_columns :id, :title, :status, :priority, :list_title
+
       # @!attribute [rw] id
       #   @return [String] unique card identifier
       attribute :id, Shale::Type::String

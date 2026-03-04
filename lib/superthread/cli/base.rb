@@ -206,8 +206,8 @@ module Superthread
       #
       # @return [Array<Superthread::Models::Board>] all accessible boards
       def load_all_boards
-        spaces = client.spaces.list(workspace_id)
-        spaces.flat_map do |space|
+        @spaces_cache ||= client.spaces.list(workspace_id)
+        @spaces_cache.flat_map do |space|
           client.boards.list(workspace_id, space_id: space.id).to_a
         rescue Superthread::ApiError
           [] # Skip spaces we can't access
@@ -486,36 +486,10 @@ module Superthread
       # @param item [Object] the item to determine fields for
       # @return [Array<Symbol>] the default fields for this item type
       def default_detail_fields(item)
-        case item
-        when Superthread::Models::Card
-          %i[id title status priority list_title board_title time_created time_updated]
-        when Superthread::Models::Checklist
-          %i[id title card_id time_created]
-        when Superthread::Models::ChecklistItem
-          %i[id title checked checklist_id]
-        when Superthread::Models::Tag
-          %i[id name color total_cards]
-        when Superthread::Models::Board
-          %i[id title time_created time_updated]
-        when Superthread::Models::List
-          %i[id title color position board_id]
-        when Superthread::Models::User
-          %i[user_id display_name email role]
-        when Superthread::Models::Project
-          %i[id title status start_date due_date]
-        when Superthread::Models::Space
-          %i[id title description time_created]
-        when Superthread::Models::Sprint
-          %i[id title start_date time_created time_updated]
-        when Superthread::Models::Comment
-          %i[id content user_id time_created]
-        when Superthread::Models::Page
-          %i[id title space_id time_created time_updated]
-        when Superthread::Models::Note
-          %i[id title time_created]
-        else
-          item.respond_to?(:keys) ? item.keys.take(10) : []
-        end
+        fields = item.class.detail_fields if item.class.respond_to?(:detail_fields)
+        return fields if fields&.any?
+
+        item.respond_to?(:keys) ? item.keys.take(10) : []
       end
 
       # Get default list columns based on the first item's model type.
@@ -526,36 +500,10 @@ module Superthread
         first = items.respond_to?(:first) ? items.first : nil
         return [] if first.nil?
 
-        case first
-        when Superthread::Models::Card
-          %i[id title status priority list_title]
-        when Superthread::Models::Checklist
-          %i[id title]
-        when Superthread::Models::ChecklistItem
-          %i[id title checked]
-        when Superthread::Models::Tag
-          %i[id name color]
-        when Superthread::Models::Board
-          %i[id title]
-        when Superthread::Models::List
-          %i[id title color]
-        when Superthread::Models::User
-          %i[user_id display_name email]
-        when Superthread::Models::Project
-          %i[id title status]
-        when Superthread::Models::Space
-          %i[id title]
-        when Superthread::Models::Sprint
-          %i[id title status]
-        when Superthread::Models::Comment
-          %i[id content user_id]
-        when Superthread::Models::Page
-          %i[id title]
-        when Superthread::Models::Note
-          %i[id title]
-        else
-          first.respond_to?(:keys) ? first.keys.take(5) : []
-        end
+        columns = first.class.list_columns if first.class.respond_to?(:list_columns)
+        return columns if columns&.any?
+
+        first.respond_to?(:keys) ? first.keys.take(5) : []
       end
 
       # Extract specified options as a hash with symbol keys for API calls.
@@ -575,14 +523,6 @@ module Superthread
       # @return [void]
       def say_info(message)
         say message, :cyan unless options[:quiet]
-      end
-
-      # Display a success message in green unless quiet mode.
-      #
-      # @param message [String] the success message to display
-      # @return [void]
-      def say_success(message)
-        say message, :green unless options[:quiet]
       end
 
       # Display a warning message in yellow (always shown).
@@ -679,23 +619,6 @@ module Superthread
           Ui.muted("Aborted")
           nil
         end
-      end
-
-      # Wrap a block with an animated spinner for long operations.
-      #
-      # @param title [String] the status message shown during execution
-      # @param block [Proc] the block to execute while spinner is displayed
-      # @yieldreturn [Object] the result of the long-running operation
-      # @return [Object] the return value of the block
-      def with_spinner(title, &block)
-        Ui.spin(title, &block)
-      end
-
-      # Access the UI module for terminal output helpers.
-      #
-      # @return [Module] the Ui module with styled output methods
-      def ui
-        Ui
       end
     end
   end

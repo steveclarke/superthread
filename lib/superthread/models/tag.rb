@@ -17,6 +17,9 @@ module Superthread
 
       presents_as :name
 
+      detail_fields :id, :name, :color, :total_cards
+      list_columns :id, :name, :color
+
       # @!attribute [rw] id
       #   @return [String] unique tag identifier
       attribute :id, Shale::Type::String
