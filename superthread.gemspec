@@ -28,13 +28,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Runtime dependencies
-  spec.add_dependency "activesupport", ">= 7.0"
-  spec.add_dependency "faraday", "~> 2.0"
-  spec.add_dependency "glamour", "~> 0.2"
-  spec.add_dependency "gum", "~> 0.1"
-  spec.add_dependency "reverse_markdown", "~> 3.0"
-  spec.add_dependency "shale", "~> 1.0"
-  spec.add_dependency "thor", "~> 1.3"
-  spec.add_dependency "unicode-display_width", "~> 3.0"
-  spec.add_dependency "zeitwerk", ">= 2.6", "< 3.0"
+  spec.add_dependency "activesupport"
+  spec.add_dependency "faraday"
+  spec.add_dependency "glamour"
+  spec.add_dependency "gum"
+  spec.add_dependency "reverse_markdown"
+  spec.add_dependency "shale"
+  spec.add_dependency "thor"
+  spec.add_dependency "unicode-display_width"
+  spec.add_dependency "zeitwerk"
 end
