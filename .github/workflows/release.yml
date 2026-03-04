@@ -1,9 +1,10 @@
-# Release - Create GitHub Release and update Homebrew tap
+# Release - Create GitHub Release, publish gem, and update Homebrew tap
 #
 # This workflow handles the complete release process:
 # 1. Validates the Ruby gem builds and tests pass
 # 2. Creates a GitHub Release
-# 3. Updates the Homebrew formula in steveclarke/homebrew-tap
+# 3. Publishes the gem to RubyGems (via OIDC trusted publishing)
+# 4. Updates the Homebrew formula in steveclarke/homebrew-tap
 #
 # Trigger: Automatically runs when a tag matching 'v*' is pushed
 #          (e.g., v0.1.0, v1.0.0)
@@ -17,6 +18,10 @@
 # Secrets required:
 # - HOMEBREW_TAP_TOKEN: Fine-grained PAT with Contents (read/write) on steveclarke/homebrew-tap
 #
+# RubyGems setup:
+# - Configure trusted publishing at https://rubygems.org/gems/superthread/trusted_publishers
+#   (GitHub repo: steveclarke/superthread, workflow: release.yml, environment: blank)
+#
 name: Release
 
 on:
@@ -26,6 +31,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-release:
@@ -78,6 +84,18 @@ jobs:
           files: superthread-${{ steps.version.outputs.VERSION }}.gem
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  push-to-rubygems:
+    name: Push to RubyGems
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - uses: rubygems/release-gem@v1
 
   update-homebrew-tap:
     name: Update Homebrew Formula
