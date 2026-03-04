@@ -33,6 +33,14 @@ task :release do
     abort
   end
 
+  # Check that Gemfile.lock matches the current version
+  lockfile = File.read("Gemfile.lock")
+  unless lockfile.include?("superthread (#{version})")
+    warn "\e[31mError: Gemfile.lock still references an old version\e[0m"
+    warn "\e[90mRun 'bundle install' and commit the updated Gemfile.lock\e[0m"
+    abort
+  end
+
   puts "\e[1mRelease v#{version}\e[0m"
   puts "\e[90mThis will:\e[0m"
   puts "\e[90m  1. Create tag: v#{version}\e[0m"
