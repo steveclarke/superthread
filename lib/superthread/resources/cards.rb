@@ -113,18 +113,7 @@ module Superthread
       # @return [Superthread::Objects::Collection<Superthread::Models::Card>] the matching cards
       def list(workspace_id, **filters)
         ws = safe_id("workspace_id", workspace_id)
-
-        body = {
-          type: "card",
-          card_filters: {}
-        }
-
-        body[:card_filters][:is_archived] = filters[:archived] unless filters[:archived].nil?
-        body[:card_filters][:include] = {}
-        body[:card_filters][:include][:boards] = [filters[:board_id]] if filters[:board_id]
-        body[:card_filters][:include][:lists] = [filters[:list_id]] if filters[:list_id]
-        body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
-        body[:card_filters][:include][:sprints] = [filters[:sprint_id]] if filters[:sprint_id]
+        body = {type: "card", card_filters: build_card_filters(filters)}
 
         post_collection("/#{ws}/views/preview", body: body,
           item_class: Models::Card, items_key: :cards)
@@ -142,18 +131,7 @@ module Superthread
       # @return [Superthread::Objects::Collection<Superthread::Models::Card>] the user's assigned cards
       def assigned(workspace_id, user_id:, **filters)
         ws = safe_id("workspace_id", workspace_id)
-
-        body = {
-          type: "card",
-          card_filters: {
-            include: {members: [user_id]}
-          }
-        }
-
-        body[:card_filters][:is_archived] = filters[:archived] unless filters[:archived].nil?
-        body[:card_filters][:include][:boards] = [filters[:board_id]] if filters[:board_id]
-        body[:card_filters][:include][:lists] = [filters[:list_id]] if filters[:list_id]
-        body[:card_filters][:include][:projects] = [filters[:project_id]] if filters[:project_id]
+        body = {type: "card", card_filters: build_card_filters(filters, members: [user_id])}
 
         post_collection("/#{ws}/views/preview", body: body,
           item_class: Models::Card, items_key: :cards)
@@ -359,6 +337,26 @@ module Superthread
         tag = safe_id("tag_id", tag_id)
         http_delete("/#{ws}/cards/#{card}/tags/#{tag}")
         success_response
+      end
+
+      private
+
+      # Builds the card_filters hash for the views/preview endpoint.
+      #
+      # @param filters [Hash{Symbol => Object}] filter options
+      # @param members [Array<String>, nil] user IDs to filter by assignment
+      # @return [Hash] the card_filters structure for the API request
+      def build_card_filters(filters, members: nil)
+        includes = {}
+        includes[:members] = members if members
+        includes[:boards] = [filters[:board_id]] if filters[:board_id]
+        includes[:lists] = [filters[:list_id]] if filters[:list_id]
+        includes[:projects] = [filters[:project_id]] if filters[:project_id]
+        includes[:sprints] = [filters[:sprint_id]] if filters[:sprint_id]
+
+        card_filters = {include: includes}
+        card_filters[:is_archived] = filters[:archived] unless filters[:archived].nil?
+        card_filters
       end
     end
   end

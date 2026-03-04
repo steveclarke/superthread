@@ -17,6 +17,9 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      detail_fields :id, :title, :status, :start_date, :due_date
+      list_columns :id, :title, :status
+
       # @!attribute [rw] id
       #   @return [String] unique project identifier
       attribute :id, Shale::Type::String

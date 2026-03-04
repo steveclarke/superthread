@@ -18,6 +18,9 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      detail_fields :id, :title, :description, :time_created
+      list_columns :id, :title
+
       # @!attribute [rw] id
       #   @return [String] unique space identifier
       attribute :id, Shale::Type::String

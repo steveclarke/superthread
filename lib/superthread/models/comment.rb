@@ -19,6 +19,9 @@ module Superthread
 
       presents_as(:content) { content.to_s.then { |c| (c.length > 50) ? "#{c[0..47]}..." : c } }
 
+      detail_fields :id, :content, :user_id, :time_created
+      list_columns :id, :content, :user_id
+
       # @!attribute [rw] id
       #   @return [String] unique comment identifier
       attribute :id, Shale::Type::String

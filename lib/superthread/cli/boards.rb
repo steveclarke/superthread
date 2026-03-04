@@ -32,16 +32,10 @@ module Superthread
       def get(board_ref)
         handle_error do
           resolved_board_id = resolve_board(board_ref)
-          begin
-            board = client.boards.find(workspace_id, resolved_board_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
+          board = with_not_found("Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards.") do
+            client.boards.find(workspace_id, resolved_board_id)
           end
-          output_item board, fields: %i[id title time_created time_updated], labels: {
-            id: "Board ID",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item board, fields: %i[id title time_created time_updated], labels: {id: "Board ID"}
         end
       end
 
@@ -66,10 +60,7 @@ module Superthread
           opts = symbolized_options(:title, :icon, :color, :layout)
           opts[:content] = options[:description] if options[:description]
           board = client.boards.create(workspace_id, space_id: space_id, **opts)
-          output_item board, fields: %i[id title time_created], labels: {
-            id: "Board ID",
-            time_created: "Time Created"
-          }
+          output_item board, fields: %i[id title time_created], labels: {id: "Board ID"}
         end
       end
 
@@ -88,18 +79,12 @@ module Superthread
       def update(board_ref)
         handle_error do
           resolved_board_id = resolve_board(board_ref)
-          begin
-            opts = symbolized_options(:title, :icon, :color, :layout, :archived)
-            opts[:content] = options[:description] if options[:description]
-            board = client.boards.update(workspace_id, resolved_board_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
+          opts = symbolized_options(:title, :icon, :color, :layout, :archived)
+          opts[:content] = options[:description] if options[:description]
+          board = with_not_found("Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards.") do
+            client.boards.update(workspace_id, resolved_board_id, **opts)
           end
-          output_item board, fields: %i[id title time_created time_updated], labels: {
-            id: "Board ID",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item board, fields: %i[id title time_created time_updated], labels: {id: "Board ID"}
         end
       end
 
@@ -115,16 +100,11 @@ module Superthread
       def duplicate(board_ref)
         handle_error do
           resolved_board_id = resolve_board(board_ref)
-          begin
-            opts = symbolized_options(:title, :copy_cards, :create_missing_tags)
-            board = client.boards.duplicate(workspace_id, resolved_board_id, space_id: space_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
+          opts = symbolized_options(:title, :copy_cards, :create_missing_tags)
+          board = with_not_found("Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards.") do
+            client.boards.duplicate(workspace_id, resolved_board_id, space_id: space_id, **opts)
           end
-          output_item board, fields: %i[id title time_created], labels: {
-            id: "Board ID",
-            time_created: "Time Created"
-          }
+          output_item board, fields: %i[id title time_created], labels: {id: "Board ID"}
         end
       end
 
@@ -137,10 +117,8 @@ module Superthread
       def delete(board_ref)
         handle_error do
           resolved_board_id = resolve_board(board_ref)
-          begin
-            board = client.boards.find(workspace_id, resolved_board_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards."
+          board = with_not_found("Board not found: '#{board_ref}'. Use 'suth boards list -s SPACE' to see available boards.") do
+            client.boards.find(workspace_id, resolved_board_id)
           end
           confirming("Delete board '#{board.title}' (#{board.id})?") do
             client.boards.destroy(workspace_id, board.id)

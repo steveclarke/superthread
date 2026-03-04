@@ -71,6 +71,30 @@ module Superthread
           def presentation_block
             @presentation_block
           end
+
+          # Configure the default fields shown in CLI detail view.
+          #
+          # @param fields [Array<Symbol>] field names for detail output
+          # @return [Array<Symbol>] the configured detail fields
+          def detail_fields(*fields)
+            if fields.empty?
+              @detail_fields || []
+            else
+              @detail_fields = fields.flatten
+            end
+          end
+
+          # Configure the default columns shown in CLI list view.
+          #
+          # @param columns [Array<Symbol>] column names for list output
+          # @return [Array<Symbol>] the configured list columns
+          def list_columns(*columns)
+            if columns.empty?
+              @list_columns || []
+            else
+              @list_columns = columns.flatten
+            end
+          end
         end
 
         # Returns the string representation using the configured attribute or block.

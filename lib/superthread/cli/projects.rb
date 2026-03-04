@@ -26,18 +26,11 @@ module Superthread
       # @return [void]
       def get(project_id)
         handle_error do
-          begin
-            project = client.projects.find(workspace_id, project_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Project not found: '#{project_id}'. Use 'suth projects list' to see available projects."
+          project = with_not_found("Project not found: '#{project_id}'. Use 'suth projects list' to see available projects.") do
+            client.projects.find(workspace_id, project_id)
           end
-          output_item project, fields: %i[id title status start_date due_date time_created time_updated], labels: {
-            id: "Project ID",
-            start_date: "Start Date",
-            due_date: "Due Date",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item project, fields: %i[id title status start_date due_date time_created time_updated],
+            labels: {id: "Project ID"}
         end
       end
 
@@ -78,13 +71,11 @@ module Superthread
       # @return [void]
       def update(project_id)
         handle_error do
-          begin
-            opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
-            opts[:list_id] = resolve_list(options[:list]) if options[:list]
-            opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
-            project = client.projects.update(workspace_id, project_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Project not found: '#{project_id}'. Use 'suth projects list' to see available projects."
+          opts = symbolized_options(:title, :start_date, :due_date, :priority, :archived)
+          opts[:list_id] = resolve_list(options[:list]) if options[:list]
+          opts[:owner_id] = resolve_user(options[:owner]) if options[:owner]
+          project = with_not_found("Project not found: '#{project_id}'. Use 'suth projects list' to see available projects.") do
+            client.projects.update(workspace_id, project_id, **opts)
           end
           output_item project, labels: {id: "Project ID"}
         end
@@ -97,10 +88,8 @@ module Superthread
       # @return [void]
       def delete(project_ref)
         handle_error do
-          begin
-            project = client.projects.find(workspace_id, project_ref)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Project not found: '#{project_ref}'. Use 'suth projects list' to see available projects."
+          project = with_not_found("Project not found: '#{project_ref}'. Use 'suth projects list' to see available projects.") do
+            client.projects.find(workspace_id, project_ref)
           end
           confirming("Delete project '#{project.title}' (#{project.id})?") do
             client.projects.destroy(workspace_id, project.id)

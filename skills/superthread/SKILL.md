@@ -53,7 +53,19 @@ suth accounts list                            # List all configured accounts
 suth accounts show                            # Show current account details
 suth accounts use NAME                        # Switch to account
 suth accounts add NAME                        # Add new account (interactive)
+suth accounts add NAME --with-token           # Non-interactive: read API key from stdin
+suth accounts add NAME --workspace-name "X"   # Select workspace by name (non-interactive)
 suth accounts remove NAME                     # Remove account
+```
+
+#### Non-interactive setup (for agents and scripts)
+
+```bash
+# Pipe API key from environment variable
+echo "$SUPERTHREAD_API_KEY" | suth accounts add myaccount --with-token
+
+# With specific workspace (when account has multiple)
+echo "$SUPERTHREAD_API_KEY" | suth accounts add myaccount --with-token --workspace-name "My Team"
 ```
 
 ### Workspaces

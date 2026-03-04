@@ -14,6 +14,9 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      detail_fields :id, :title, :checked, :checklist_id
+      list_columns :id, :title, :checked
+
       # @!attribute [rw] id
       #   @return [String] unique checklist item identifier
       attribute :id, Shale::Type::String

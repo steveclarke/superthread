@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
 module Superthread
   module Cli
     # CLI commands for managing Superthread cards.
@@ -10,6 +8,9 @@ module Superthread
     # as well as managing card assignments, relationships, checklists, and tags.
     class Cards < Base
       include Concerns::DateParsable
+
+      # Valid relationship types for linking cards.
+      LINK_RELATION_TYPES = %w[blocks blocked_by related duplicates].freeze
 
       desc "list", "List cards on a board or sprint"
       option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
@@ -27,10 +28,7 @@ module Superthread
       def list
         handle_error do
           raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
-
-          if options[:sprint] && !options[:space]
-            raise Thor::Error, "--space is required when listing cards in a sprint"
-          end
+          require_space_for_sprint!
 
           opts = {}
           opts[:archived] = options[:include_archived] if options[:include_archived]
@@ -144,10 +142,7 @@ module Superthread
       def create
         handle_error do
           raise Thor::Error, "Either --board or --sprint is required" unless options[:board] || options[:sprint]
-
-          if options[:sprint] && !options[:space]
-            raise Thor::Error, "--space is required when creating cards in a sprint"
-          end
+          require_space_for_sprint!
 
           opts = symbolized_options(:title, :content, :start_date, :due_date, :priority)
           opts[:list_id] = resolve_list(options[:list])
@@ -178,9 +173,7 @@ module Superthread
       # @return [void]
       def update(card_id)
         handle_error do
-          if options[:sprint] && !options[:space]
-            raise Thor::Error, "--space is required when moving cards to a sprint"
-          end
+          require_space_for_sprint!
 
           begin
             # WORKAROUND: API ignores title when combined with list_id,
@@ -340,14 +333,13 @@ module Superthread
       # @return [void]
       def link
         handle_error do
-          valid_types = %w[blocks blocked_by related duplicates]
-          unless valid_types.include?(options[:type])
+          unless LINK_RELATION_TYPES.include?(options[:type])
             if %w[parent child].include?(options[:type])
               raise Thor::Error,
                 "Parent/child relationships are set via --parent-card on 'suth cards create' or 'suth cards update'"
             end
             raise Thor::Error,
-              "Expected '--type' to be one of #{valid_types.join(", ")}; got #{options[:type]}"
+              "Expected '--type' to be one of #{LINK_RELATION_TYPES.join(", ")}; got #{options[:type]}"
           end
           client.cards.add_related(
             workspace_id, options[:card],
@@ -410,10 +402,9 @@ module Superthread
       # @return [void]
       def enrich_members(cards)
         cards = Array(cards)
-        return if cards.all? { |c| c.members.empty? }
+        return unless cards.any? { |c| c.members.any? }
 
-        users = @users_cache ||= client.users.members(workspace_id)
-        user_names = users.each_with_object({}) do |u, h|
+        user_names = workspace_users.each_with_object({}) do |u, h|
           h[u.user_identifier] = u.display_name
         end
 
@@ -467,19 +458,24 @@ module Superthread
       # @param cards [Enumerable] the cards to apply --since and --updated_since filters to
       # @return [Array] Filtered cards
       def apply_date_filters(cards)
-        result = cards.to_a
+        since_ts = parse_date(options[:since]) if options[:since]
+        updated_ts = parse_date(options[:updated_since]) if options[:updated_since]
+        return cards.to_a unless since_ts || updated_ts
 
-        if options[:since]
-          since_ts = parse_date(options[:since])
-          result = filter_by_date(result, field: :time_created, since: since_ts)
+        cards.to_a.select do |card|
+          (since_ts.nil? || meets_date_threshold?(card.time_created, since_ts)) &&
+            (updated_ts.nil? || meets_date_threshold?(card.time_updated, updated_ts))
         end
+      end
 
-        if options[:updated_since]
-          updated_ts = parse_date(options[:updated_since])
-          result = filter_by_date(result, field: :time_updated, since: updated_ts)
-        end
-
-        result
+      # Check if a timestamp meets a minimum threshold after normalization.
+      #
+      # @param timestamp [Object] the raw timestamp value from the model
+      # @param threshold [Integer] the minimum Unix timestamp
+      # @return [Boolean] true if the normalized timestamp meets or exceeds the threshold
+      def meets_date_threshold?(timestamp, threshold)
+        ts = Formatter.normalize_timestamp(timestamp)
+        ts && ts >= threshold
       end
 
       # Output card relationships (parent, children, links) in human-readable format.
@@ -524,8 +520,7 @@ module Superthread
           Ui.kv(checklist.title, progress)
           checklist.items&.each do |item|
             marker = item.checked? ? "✓" : "○"
-            # Strip HTML tags from item title (API may return HTML)
-            title = Nokogiri::HTML.fragment(item.title).text.strip
+            title = item.title.gsub(/<[^>]*>/, "").strip
             puts "  #{marker} #{title}"
           end
         end

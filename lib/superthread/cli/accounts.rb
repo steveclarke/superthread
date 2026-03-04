@@ -84,7 +84,14 @@ module Superthread
       end
 
       desc "add NAME", "Add a new account"
-      # Adds a new account by prompting for API key and workspace selection.
+      method_option :with_token, type: :boolean,
+        desc: "Read API key from standard input (for scripts and agents)"
+      method_option :workspace_name, type: :string,
+        desc: "Select workspace by name (non-interactive)"
+      # Adds a new account with API key and workspace selection.
+      #
+      # By default, prompts interactively for the API key. Use --with-token
+      # to read the key from standard input instead (like gh auth login --with-token).
       #
       # @param name [String] unique name for the new account
       # @return [void]
@@ -95,17 +102,21 @@ module Superthread
           return
         end
 
-        # Prompt for API key
-        api_key = Ui.password("API key for '#{name}'")
-        if api_key.nil? || api_key.empty?
-          Ui.error "API key is required"
-          return
-        end
+        api_key = read_api_key(name)
+        return unless api_key
 
         # Validate and fetch workspaces
-        Ui.spin("Validating API key") do
-          temp_client = Superthread::Client.new(api_key: api_key)
-          @user = temp_client.users.me
+        begin
+          Ui.spin("Validating API key") do
+            temp_client = Superthread::Client.new(api_key: api_key)
+            @user = temp_client.users.me
+          end
+        rescue Superthread::AuthenticationError
+          Ui.error "Invalid API key"
+          return
+        rescue Superthread::ApiError => e
+          Ui.error "API error: #{e.message}"
+          return
         end
 
         teams = @user.teams || []
@@ -114,17 +125,8 @@ module Superthread
           return
         end
 
-        # Select workspace
-        workspace = if teams.length == 1
-          teams.first
-        else
-          Ui.muted "Found #{teams.length} workspaces:"
-          teams.each_with_index do |team, i|
-            puts "  #{i + 1}. #{team.team_name || team.id}"
-          end
-          choice = Ui.input("Select workspace (1-#{teams.length})")&.to_i || 1
-          teams[choice - 1] || teams.first
-        end
+        workspace = select_workspace(teams)
+        return unless workspace
 
         # Save account
         app_config.add_account(name, api_key: api_key)
@@ -161,6 +163,67 @@ module Superthread
       end
 
       private
+
+      # Reads the API key from stdin (--with-token) or interactive prompt.
+      #
+      # @param account_name [String] the account name (used in interactive prompt)
+      # @return [String, nil] the API key, or nil if empty/missing
+      def read_api_key(account_name)
+        api_key = if options[:with_token]
+          $stdin.gets&.chomp
+        else
+          Ui.password("API key for '#{account_name}'")
+        end
+
+        if api_key.nil? || api_key.empty?
+          if options[:with_token]
+            Ui.error "No API key provided on standard input"
+            Ui.muted "Usage: echo $SUPERTHREAD_API_KEY | suth accounts add NAME --with-token"
+          else
+            Ui.error "API key is required"
+          end
+          return nil
+        end
+
+        api_key
+      end
+
+      # Selects a workspace from the list of teams.
+      #
+      # Uses --workspace-name if provided, auto-selects if only one,
+      # or prompts interactively.
+      #
+      # @param teams [Array] available workspaces
+      # @return [Object, nil] the selected workspace, or nil on error
+      def select_workspace(teams)
+        if teams.length == 1
+          return teams.first
+        end
+
+        if options[:workspace_name]
+          match = teams.find { |t| t.team_name&.downcase == options[:workspace_name].downcase }
+          unless match
+            names = teams.map { |t| t.team_name || t.id }.join(", ")
+            Ui.error "Workspace '#{options[:workspace_name]}' not found"
+            Ui.muted "Available: #{names}"
+            return nil
+          end
+          return match
+        end
+
+        if options[:with_token]
+          Ui.muted "Multiple workspaces found, using '#{teams.first.team_name || teams.first.id}'"
+          Ui.muted "Use --workspace-name to select a different workspace"
+          return teams.first
+        end
+
+        Ui.muted "Found #{teams.length} workspaces:"
+        teams.each_with_index do |team, i|
+          puts "  #{i + 1}. #{team.team_name || team.id}"
+        end
+        choice = Ui.input("Select workspace (1-#{teams.length})")&.to_i || 1
+        teams[choice - 1] || teams.first
+      end
 
       # Masks an API key for display, showing only the first 4 and last 4 characters.
       #

@@ -20,6 +20,9 @@ module Superthread
 
       presents_as(:title) { "#{title} (#{completed_count}/#{total_count})" }
 
+      detail_fields :id, :title, :card_id, :time_created
+      list_columns :id, :title
+
       # @!attribute [rw] id
       #   @return [String] unique checklist identifier
       attribute :id, Shale::Type::String

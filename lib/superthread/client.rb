@@ -66,14 +66,6 @@ module Superthread
       @config.workspace
     end
 
-    # Resolves a workspace reference to an ID.
-    #
-    # @param workspace_ref [String] workspace alias or direct ID
-    # @return [String] resolved workspace ID
-    def resolve_workspace(workspace_ref)
-      @config.resolve_workspace(workspace_ref)
-    end
-
     # Makes an API request and returns raw hash data.
     #
     # Use this when you need the raw response before object conversion.

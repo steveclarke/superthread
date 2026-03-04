@@ -29,16 +29,10 @@ module Superthread
       # @return [void]
       def get(page_id)
         handle_error do
-          begin
-            page = client.pages.find(workspace_id, page_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Page not found: '#{page_id}'. Use 'suth pages list' to see available pages."
+          page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+            client.pages.find(workspace_id, page_id)
           end
-          output_item page, fields: %i[id title time_created time_updated], labels: {
-            id: "Page ID",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item page, fields: %i[id title time_created time_updated], labels: {id: "Page ID"}
         end
       end
 
@@ -70,12 +64,10 @@ module Superthread
       # @return [void]
       def update(page_id)
         handle_error do
-          begin
-            opts = symbolized_options(:title, :is_public, :archived)
-            opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
-            page = client.pages.update(workspace_id, page_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Page not found: '#{page_id}'. Use 'suth pages list' to see available pages."
+          opts = symbolized_options(:title, :is_public, :archived)
+          opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
+          page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+            client.pages.update(workspace_id, page_id, **opts)
           end
           output_item page, labels: {id: "Page ID"}
         end
@@ -91,13 +83,11 @@ module Superthread
       # @return [void]
       def duplicate(page_id)
         handle_error do
-          begin
-            opts = symbolized_options(:title)
-            opts[:space_id] = space_id
-            opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
-            page = client.pages.duplicate(workspace_id, page_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Page not found: '#{page_id}'. Use 'suth pages list' to see available pages."
+          opts = symbolized_options(:title)
+          opts[:space_id] = space_id
+          opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
+          page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+            client.pages.duplicate(workspace_id, page_id, **opts)
           end
           output_item page, labels: {id: "Page ID"}
         end
@@ -110,10 +100,8 @@ module Superthread
       # @return [void]
       def archive(page_id)
         handle_error do
-          begin
-            page = client.pages.archive(workspace_id, page_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Page not found: '#{page_id}'. Use 'suth pages list' to see available pages."
+          page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+            client.pages.archive(workspace_id, page_id)
           end
           output_item page, labels: {id: "Page ID"}
         end
@@ -126,10 +114,8 @@ module Superthread
       # @return [void]
       def delete(page_ref)
         handle_error do
-          begin
-            page = client.pages.find(workspace_id, page_ref)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Page not found: '#{page_ref}'. Use 'suth pages list' to see available pages."
+          page = with_not_found("Page not found: '#{page_ref}'. Use 'suth pages list' to see available pages.") do
+            client.pages.find(workspace_id, page_ref)
           end
           confirming("Delete page '#{page.title}' (#{page.id})?") do
             client.pages.destroy(workspace_id, page.id)
