@@ -308,15 +308,9 @@ module Superthread
       # @return [String] the formatted cell value ready for table display
       def format_cell(item, column, color_enabled: true)
         value = item.respond_to?(column) ? item.send(column) : item[column]
+        status = item.respond_to?(:status) ? item.status : item[:status]
 
-        # Special case: color list_title by status
-        if column == :list_title && color_enabled
-          status = item.respond_to?(:status) ? item.status : item[:status]
-          if status
-            color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
-            return colorize(value || "-", color, enabled: true)
-          end
-        end
+        return color_by_status(value, status) if column == :list_title && color_enabled && status
 
         format_value(value, column, color_enabled: color_enabled)
       end
@@ -330,16 +324,19 @@ module Superthread
       def format_field(data, field, color_enabled: true)
         value = data[field]
 
-        # Special case: color list_title by status
-        if field == :list_title && color_enabled
-          status = data[:status]
-          if status
-            color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
-            return colorize(value || "-", color, enabled: true)
-          end
-        end
+        return color_by_status(value, data[:status]) if field == :list_title && color_enabled && data[:status]
 
         format_value(value, field, color_enabled: color_enabled)
+      end
+
+      # Colors a value based on a workflow status.
+      #
+      # @param value [String, nil] the text to colorize
+      # @param status [String] the status used to determine color
+      # @return [String] the value with ANSI color codes applied
+      def color_by_status(value, status)
+        color = STATUS_COLORS.fetch(status.to_s.downcase, :white)
+        colorize(value || "-", color, enabled: true)
       end
 
       # Formats a value based on its field name with appropriate type handling.
