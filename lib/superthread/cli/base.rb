@@ -273,13 +273,19 @@ module Superthread
         raise Thor::Error, "User not found: '#{ref}'. Use 'suth members list' to see available users."
       end
 
+      # Get cached workspace members list.
+      #
+      # @return [Array<Superthread::Models::User>] all workspace members
+      def workspace_users
+        @users_cache ||= client.users.members(workspace_id)
+      end
+
       # Find a user by display name or email from the cached member list.
       #
       # @param name [String] the display name or email to search for (case-insensitive)
       # @return [Superthread::Models::User, nil] the user object or nil if not found
       def find_user_by_name(name)
-        @users_cache ||= client.users.members(workspace_id)
-        @users_cache.find do |u|
+        workspace_users.find do |u|
           u.display_name&.downcase == name.downcase ||
             u.email&.downcase == name.downcase
         end
@@ -367,6 +373,16 @@ module Superthread
       def looks_like_id?(value)
         # IDs are short alphanumeric strings or full UUIDs (36 chars with hyphens)
         value.match?(/\A[a-zA-Z0-9_-]+\z/) && value.length <= 36
+      end
+
+      # Validate that --space is provided when --sprint is used.
+      #
+      # @return [void]
+      # @raise [Thor::Error] if --sprint is set without --space
+      def require_space_for_sprint!
+        return unless options[:sprint] && !options[:space]
+
+        raise Thor::Error, "--space is required when using --sprint"
       end
 
       # Check if color output is enabled based on TTY and quiet mode.
