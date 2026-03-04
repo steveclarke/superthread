@@ -2,6 +2,7 @@
 
 require "glamour"
 require "gum"
+require "io/console"
 require "reverse_markdown"
 
 module Superthread
@@ -122,7 +123,15 @@ module Superthread
       # @param default [Boolean] the default answer if user presses enter
       # @return [Boolean] true if confirmed, false if declined
       def confirm(question, default: true)
-        Gum.confirm(question, default: default)
+        if plain_mode?
+          hint = default ? "(Y/n)" : "(y/N)"
+          print "#{question} #{hint}: "
+          answer = $stdin.gets&.chomp
+          return default if answer.nil? || answer.empty?
+          answer.downcase.start_with?("y")
+        else
+          Gum.confirm(question, default: default)
+        end
       end
 
       # Prompt user for single-line text input.
@@ -132,7 +141,12 @@ module Superthread
       # @return [String] the text entered by the user
       def input(prompt, placeholder: nil)
         prompt = "#{prompt} " unless prompt.end_with?(" ")
-        Gum.input(prompt: prompt, placeholder: placeholder)
+        if plain_mode?
+          print prompt
+          $stdin.gets&.chomp
+        else
+          Gum.input(prompt: prompt, placeholder: placeholder)
+        end
       end
 
       # Prompt user for password input with hidden characters.
@@ -141,7 +155,12 @@ module Superthread
       # @return [String] the password entered by the user (not echoed to screen)
       def password(prompt)
         prompt = "#{prompt} " unless prompt.end_with?(" ")
-        Gum.input(prompt: prompt, password: true)
+        if plain_mode?
+          print prompt
+          $stdin.noecho(&:gets)&.chomp
+        else
+          Gum.input(prompt: prompt, password: true)
+        end
       end
 
       # Prompt user to choose a single item from a list with arrow keys.
@@ -150,26 +169,49 @@ module Superthread
       # @param header [String, nil] the optional header text above the list
       # @return [String] the selected item string
       def choose(items, header: nil)
-        Gum.choose(items, header: header)
+        if plain_mode?
+          puts header if header
+          items.each_with_index { |item, i| puts "  #{i + 1}. #{item}" }
+          print "Choose (1-#{items.length}): "
+          choice = $stdin.gets&.chomp&.to_i || 1
+          items[choice - 1] || items.first
+        else
+          Gum.choose(items, header: header)
+        end
       end
 
       # Prompt user to filter and select from a list with fuzzy search.
+      #
+      # Falls back to numbered list selection in plain mode.
       #
       # @param items [Array<String>] the items available for filtering
       # @param placeholder [String, nil] the placeholder hint for the search input
       # @return [String] the selected item after filtering
       def filter(items, placeholder: nil)
-        Gum.filter(items, placeholder: placeholder)
+        if plain_mode?
+          choose(items)
+        else
+          Gum.filter(items, placeholder: placeholder)
+        end
       end
 
       # Show an animated spinner while executing a block.
+      #
+      # In plain mode, prints a status line without animation.
       #
       # @param title [String] the status message shown next to the spinner
       # @param block [Proc] the block to execute while the spinner is displayed
       # @yieldreturn [Object] the result of the long-running operation
       # @return [Object] the return value of the block
       def spin(title, &block)
-        Gum.spin(title, spinner: :dot, &block)
+        if plain_mode?
+          print "#{title}..."
+          result = yield
+          puts " done"
+          result
+        else
+          Gum.spin(title, spinner: :dot, &block)
+        end
       end
 
       # Format a numeric amount as currency with negative values in red.
@@ -183,6 +225,18 @@ module Superthread
         else
           formatted
         end
+      end
+
+      # Whether to use plain Ruby I/O instead of gum interactive widgets.
+      #
+      # Detects Terminal.app (which renders gum's ANSI redraws incorrectly)
+      # and respects the SUPERTHREAD_PLAIN env var as a manual override.
+      #
+      # @return [Boolean] true if interactive widgets should use plain fallbacks
+      def plain_mode?
+        return true if ENV["SUPERTHREAD_PLAIN"]
+
+        ENV["TERM_PROGRAM"] == "Apple_Terminal"
       end
 
       # Render HTML or Markdown content with terminal-friendly styling.
