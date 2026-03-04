@@ -106,9 +106,17 @@ module Superthread
         return unless api_key
 
         # Validate and fetch workspaces
-        Ui.spin("Validating API key") do
-          temp_client = Superthread::Client.new(api_key: api_key)
-          @user = temp_client.users.me
+        begin
+          Ui.spin("Validating API key") do
+            temp_client = Superthread::Client.new(api_key: api_key)
+            @user = temp_client.users.me
+          end
+        rescue Superthread::AuthenticationError
+          Ui.error "Invalid API key"
+          return
+        rescue Superthread::ApiError => e
+          Ui.error "API error: #{e.message}"
+          return
         end
 
         teams = @user.teams || []

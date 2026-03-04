@@ -63,6 +63,18 @@ RSpec.describe "suth accounts add", :cli do
       $stdin = original_stdin
     end
 
+    it "errors when API key is invalid" do
+      stub_api_get("users/me", response: {error: "Unauthorized"}, status: 401)
+      original_stdin = $stdin
+      $stdin = StringIO.new("stp_bad_key\n")
+
+      result = run_cli("accounts", "add", "myaccount", "--with-token")
+
+      expect(result[:stdout]).to include("Invalid API key")
+    ensure
+      $stdin = original_stdin
+    end
+
     it "auto-selects workspace when only one exists" do
       stub_api_get("users/me", response: single_workspace_response)
       original_stdin = $stdin
