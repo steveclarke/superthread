@@ -3,11 +3,17 @@
 require "glamour"
 require "gum"
 require "reverse_markdown"
+require_relative "ui/gum_prompt"
+require_relative "ui/plain_prompt"
 
 module Superthread
   module Cli
     # Terminal UI helpers using Gum for styled output.
     # Provides consistent styling across all CLI commands.
+    #
+    # Interactive prompts delegate to a prompt backend selected based on
+    # terminal capabilities. Terminals with limited ANSI support (e.g.,
+    # macOS Terminal.app) use {PlainPrompt}; all others use {GumPrompt}.
     #
     # @example
     #   Ui.header("Cards")
@@ -18,6 +24,41 @@ module Superthread
       PRIMARY = "#7D56F4"
 
       module_function
+
+      # Returns the prompt backend for interactive widgets.
+      #
+      # Uses {PlainPrompt} for terminals with limited ANSI support,
+      # otherwise {GumPrompt}.
+      #
+      # @return [Module] the prompt backend (PlainPrompt or GumPrompt)
+      def prompt
+        @prompt ||= plain_mode? ? PlainPrompt : GumPrompt
+      end
+
+      # Resets the cached prompt backend.
+      #
+      # Useful for testing when environment variables change mid-process.
+      #
+      # @return [void]
+      def reset_prompt!
+        @prompt = nil
+      end
+
+      # Whether to use plain Ruby I/O instead of gum interactive widgets.
+      #
+      # Detects Terminal.app (which renders gum's ANSI redraws incorrectly)
+      # and respects the SUPERTHREAD_PLAIN env var as a manual override.
+      #
+      # @return [Boolean] true if interactive widgets should use plain fallbacks
+      def plain_mode?
+        return true if ENV["SUPERTHREAD_PLAIN"]
+
+        ENV["TERM_PROGRAM"] == "Apple_Terminal"
+      end
+
+      # ========================================
+      # Output methods (always use Gum.style)
+      # ========================================
 
       # Display a styled header with rounded border in brand color.
       #
@@ -116,62 +157,6 @@ module Superthread
         puts Gum.style("─" * 40, faint: true)
       end
 
-      # Prompt user for yes/no confirmation.
-      #
-      # @param question [String] the confirmation question to display
-      # @param default [Boolean] the default answer if user presses enter
-      # @return [Boolean] true if confirmed, false if declined
-      def confirm(question, default: true)
-        Gum.confirm(question, default: default)
-      end
-
-      # Prompt user for single-line text input.
-      #
-      # @param prompt [String] the prompt label shown before the input field
-      # @param placeholder [String, nil] the placeholder hint shown in empty field
-      # @return [String] the text entered by the user
-      def input(prompt, placeholder: nil)
-        prompt = "#{prompt} " unless prompt.end_with?(" ")
-        Gum.input(prompt: prompt, placeholder: placeholder)
-      end
-
-      # Prompt user for password input with hidden characters.
-      #
-      # @param prompt [String] the prompt label shown before the input field
-      # @return [String] the password entered by the user (not echoed to screen)
-      def password(prompt)
-        prompt = "#{prompt} " unless prompt.end_with?(" ")
-        Gum.input(prompt: prompt, password: true)
-      end
-
-      # Prompt user to choose a single item from a list with arrow keys.
-      #
-      # @param items [Array<String>] the options to choose from
-      # @param header [String, nil] the optional header text above the list
-      # @return [String] the selected item string
-      def choose(items, header: nil)
-        Gum.choose(items, header: header)
-      end
-
-      # Prompt user to filter and select from a list with fuzzy search.
-      #
-      # @param items [Array<String>] the items available for filtering
-      # @param placeholder [String, nil] the placeholder hint for the search input
-      # @return [String] the selected item after filtering
-      def filter(items, placeholder: nil)
-        Gum.filter(items, placeholder: placeholder)
-      end
-
-      # Show an animated spinner while executing a block.
-      #
-      # @param title [String] the status message shown next to the spinner
-      # @param block [Proc] the block to execute while the spinner is displayed
-      # @yieldreturn [Object] the result of the long-running operation
-      # @return [Object] the return value of the block
-      def spin(title, &block)
-        Gum.spin(title, spinner: :dot, &block)
-      end
-
       # Format a numeric amount as currency with negative values in red.
       #
       # @param amount [Numeric] the monetary amount to format
@@ -183,6 +168,70 @@ module Superthread
         else
           formatted
         end
+      end
+
+      # ========================================
+      # Interactive methods (delegate to prompt)
+      # ========================================
+
+      # Prompt user for yes/no confirmation.
+      #
+      # @param question [String] the confirmation question to display
+      # @param default [Boolean] the default answer if user presses enter
+      # @return [Boolean] true if confirmed, false if declined
+      def confirm(question, default: true)
+        prompt.confirm(question, default: default)
+      end
+
+      # Prompt user for single-line text input.
+      #
+      # @param prompt_text [String] the prompt label shown before the input field
+      # @param placeholder [String, nil] the placeholder hint shown in empty field
+      # @return [String] the text entered by the user
+      def input(prompt_text, placeholder: nil)
+        prompt_text = "#{prompt_text} " unless prompt_text.end_with?(" ")
+        prompt.input(prompt_text, placeholder: placeholder)
+      end
+
+      # Prompt user for password input with hidden characters.
+      #
+      # @param prompt_text [String] the prompt label shown before the input field
+      # @return [String] the password entered by the user (not echoed to screen)
+      def password(prompt_text)
+        prompt_text = "#{prompt_text} " unless prompt_text.end_with?(" ")
+        prompt.password(prompt_text)
+      end
+
+      # Prompt user to choose a single item from a list with arrow keys.
+      #
+      # @param items [Array<String>] the options to choose from
+      # @param header [String, nil] the optional header text above the list
+      # @return [String] the selected item string
+      def choose(items, header: nil)
+        prompt.choose(items, header: header)
+      end
+
+      # Prompt user to filter and select from a list with fuzzy search.
+      #
+      # Falls back to numbered list selection in plain mode.
+      #
+      # @param items [Array<String>] the items available for filtering
+      # @param placeholder [String, nil] the placeholder hint for the search input
+      # @return [String] the selected item after filtering
+      def filter(items, placeholder: nil)
+        prompt.filter(items, placeholder: placeholder)
+      end
+
+      # Show an animated spinner while executing a block.
+      #
+      # In plain mode, prints a status line without animation.
+      #
+      # @param title [String] the status message shown next to the spinner
+      # @param block [Proc] the block to execute while the spinner is displayed
+      # @yieldreturn [Object] the result of the long-running operation
+      # @return [Object] the return value of the block
+      def spin(title, &block)
+        prompt.spin(title, &block)
       end
 
       # Render HTML or Markdown content with terminal-friendly styling.
