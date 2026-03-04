@@ -133,6 +133,7 @@ jobs:
 
             def install
               ENV["GEM_HOME"] = libexec
+              ENV["GEM_PATH"] = libexec
               system "gem", "build", "superthread.gemspec"
               system "gem", "install", "--no-document", "superthread-#{version}.gem"
 
