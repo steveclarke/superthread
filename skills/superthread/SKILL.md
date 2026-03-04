@@ -25,6 +25,11 @@ The interactive wizard will:
 3. Validate and auto-detect your workspace
 4. Save configuration
 
+If prompts render incorrectly (e.g., in macOS Terminal.app), use plain mode:
+```bash
+SUPERTHREAD_PLAIN=1 suth setup
+```
+
 After setup, try:
 ```bash
 suth spaces list

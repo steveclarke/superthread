@@ -35,7 +35,7 @@ module CliHelpers
     end
   ensure
     $stdout = original_stdout || original if defined?(original_stdout) || defined?(original)
-    $stderr = original_stderr if defined?(original_stderr)
+    $stderr = original_stderr if defined?(original_stderr) && !original_stderr.nil?
   end
 
   # Run a CLI command and capture output
