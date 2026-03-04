@@ -577,6 +577,21 @@ module Superthread
         end
       end
 
+      # Execute a block, converting not-found errors to a user-friendly Thor error.
+      #
+      # Wraps an API call so that ForbiddenError and NotFoundError are caught
+      # and re-raised as Thor::Error with a resource-specific message.
+      #
+      # @param message [String] the error message to display if the resource is not found
+      # @yield the block containing the API call
+      # @return [Object] the return value of the block
+      # @raise [Thor::Error] if the API call raises NotFoundError or ForbiddenError
+      def with_not_found(message)
+        yield
+      rescue Superthread::ForbiddenError, Superthread::NotFoundError
+        raise Thor::Error, message
+      end
+
       # Wrap a block with consistent error handling for API operations.
       #
       # Catches API and configuration errors and displays user-friendly messages

@@ -46,10 +46,8 @@ module Superthread
       def update(tag_ref)
         handle_error do
           tag_id = resolve_tag(tag_ref)
-          begin
-            tag = client.tags.update(workspace_id, tag_id, **symbolized_options(:name, :color))
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Tag not found: '#{tag_ref}'. Use 'suth tags list' to see available tags."
+          tag = with_not_found("Tag not found: '#{tag_ref}'. Use 'suth tags list' to see available tags.") do
+            client.tags.update(workspace_id, tag_id, **symbolized_options(:name, :color))
           end
           output_item tag, labels: {id: "Tag ID"}
         end

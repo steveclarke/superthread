@@ -23,16 +23,10 @@ module Superthread
       # @return [void]
       def get(note_id)
         handle_error do
-          begin
-            note = client.notes.find(workspace_id, note_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Note not found: '#{note_id}'. Use 'suth notes list' to see available notes."
+          note = with_not_found("Note not found: '#{note_id}'. Use 'suth notes list' to see available notes.") do
+            client.notes.find(workspace_id, note_id)
           end
-          output_item note, fields: %i[id title content time_created time_updated], labels: {
-            id: "Note ID",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item note, fields: %i[id title content time_created time_updated], labels: {id: "Note ID"}
         end
       end
 
@@ -56,10 +50,8 @@ module Superthread
       # @return [void]
       def delete(note_ref)
         handle_error do
-          begin
-            note = client.notes.find(workspace_id, note_ref)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Note not found: '#{note_ref}'. Use 'suth notes list' to see available notes."
+          note = with_not_found("Note not found: '#{note_ref}'. Use 'suth notes list' to see available notes.") do
+            client.notes.find(workspace_id, note_ref)
           end
           confirming("Delete note '#{note.title}' (#{note.id})?") do
             client.notes.destroy(workspace_id, note.id)

@@ -15,10 +15,8 @@ module Superthread
       # @return [void]
       def list
         handle_error do
-          begin
-            board = client.boards.find(workspace_id, board_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Board not found. Use 'suth boards list -s SPACE' to see available boards."
+          board = with_not_found("Board not found. Use 'suth boards list -s SPACE' to see available boards.") do
+            client.boards.find(workspace_id, board_id)
           end
           if board.lists.nil? || board.lists.empty?
             say "No lists found on this board.", :yellow
@@ -43,10 +41,7 @@ module Superthread
           opts = symbolized_options(:title, :icon, :color)
           opts[:content] = options[:description] if options[:description]
           list = client.boards.create_list(workspace_id, board_id: board_id, **opts)
-          output_item list, fields: %i[id title color board_id], labels: {
-            id: "List ID",
-            board_id: "Board ID"
-          }
+          output_item list, fields: %i[id title color board_id], labels: {id: "List ID"}
         end
       end
 
@@ -61,17 +56,12 @@ module Superthread
       # @return [void]
       def update(list_id)
         handle_error do
-          begin
-            opts = symbolized_options(:title, :icon, :color)
-            opts[:content] = options[:description] if options[:description]
-            list = client.boards.update_list(workspace_id, list_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "List not found: '#{list_id}'. Use 'suth lists list -b BOARD' to see available lists."
+          opts = symbolized_options(:title, :icon, :color)
+          opts[:content] = options[:description] if options[:description]
+          list = with_not_found("List not found: '#{list_id}'. Use 'suth lists list -b BOARD' to see available lists.") do
+            client.boards.update_list(workspace_id, list_id, **opts)
           end
-          output_item list, fields: %i[id title color board_id], labels: {
-            id: "List ID",
-            board_id: "Board ID"
-          }
+          output_item list, fields: %i[id title color board_id], labels: {id: "List ID"}
         end
       end
 
@@ -83,10 +73,8 @@ module Superthread
       def delete(list_id)
         handle_error do
           confirming("Delete list #{list_id}?") do
-            begin
+            with_not_found("List not found: '#{list_id}'. Use 'suth lists list -b BOARD' to see available lists.") do
               client.boards.delete_list(workspace_id, list_id)
-            rescue Superthread::ForbiddenError, Superthread::NotFoundError
-              raise Thor::Error, "List not found: '#{list_id}'. Use 'suth lists list -b BOARD' to see available lists."
             end
             output_success "List #{list_id} deleted"
           end

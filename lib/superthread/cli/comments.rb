@@ -25,18 +25,11 @@ module Superthread
       # @return [void]
       def get(comment_id)
         handle_error do
-          begin
-            comment = client.comments.find(workspace_id, comment_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          comment = with_not_found("Comment not found: '#{comment_id}'.") do
+            client.comments.find(workspace_id, comment_id)
           end
-          output_item comment, fields: %i[id content user_id card_id time_created time_updated], labels: {
-            id: "Comment ID",
-            user_id: "User ID",
-            card_id: "Card ID",
-            time_created: "Time Created",
-            time_updated: "Time Updated"
-          }
+          output_item comment, fields: %i[id content user_id card_id time_created time_updated],
+            labels: {id: "Comment ID"}
         end
       end
 
@@ -64,10 +57,8 @@ module Superthread
       # @return [void]
       def update(comment_id)
         handle_error do
-          begin
-            comment = client.comments.update(workspace_id, comment_id, **symbolized_options(:content, :status))
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          comment = with_not_found("Comment not found: '#{comment_id}'.") do
+            client.comments.update(workspace_id, comment_id, **symbolized_options(:content, :status))
           end
           output_item comment, labels: {id: "Comment ID"}
         end
@@ -80,10 +71,8 @@ module Superthread
       # @return [void]
       def delete(comment_id)
         handle_error do
-          begin
-            comment = client.comments.find(workspace_id, comment_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Comment not found: '#{comment_id}'."
+          comment = with_not_found("Comment not found: '#{comment_id}'.") do
+            client.comments.find(workspace_id, comment_id)
           end
           preview = Formatter.truncate(Formatter.strip_html(comment.content), 50)
           confirming("Delete comment '#{preview}' (#{comment.id})?") do
