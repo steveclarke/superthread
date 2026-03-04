@@ -94,8 +94,11 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
-          bundler-cache: true
-      - uses: rubygems/release-gem@v1
+      - uses: rubygems/configure-rubygems-credentials@main
+      - name: Build and push gem
+        run: |
+          gem build superthread.gemspec
+          gem push superthread-${{ needs.build-and-release.outputs.version }}.gem
 
   update-homebrew-tap:
     name: Update Homebrew Formula
