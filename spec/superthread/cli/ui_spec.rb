@@ -4,6 +4,8 @@ require "spec_helper"
 require "stringio"
 
 RSpec.describe Superthread::Cli::Ui do
+  include CliHelpers
+
   around do |example|
     original_plain = ENV["SUPERTHREAD_PLAIN"]
     original_term = ENV["TERM_PROGRAM"]
@@ -77,156 +79,120 @@ RSpec.describe Superthread::Cli::Ui do
 
     describe ".input" do
       it "reads from stdin" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("my input\n")
-
         result = nil
-        capture(:stdout) { result = described_class.input("Name:") }
+        with_stdin("my input\n") do
+          capture(:stdout) { result = described_class.input("Name:") }
+        end
 
         expect(result).to eq("my input")
-      ensure
-        $stdin = original_stdin
       end
 
       it "prints the prompt" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("hello\n")
-
-        output = capture(:stdout) { described_class.input("Name:") }
+        output = with_stdin("hello\n") do
+          capture(:stdout) { described_class.input("Name:") }
+        end
 
         expect(output).to include("Name:")
-      ensure
-        $stdin = original_stdin
       end
     end
 
     describe ".password" do
       it "reads without echoing" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("secret\n")
-        allow($stdin).to receive(:noecho).and_yield($stdin)
-
         result = nil
-        capture(:stdout) { result = described_class.password("API key:") }
+        with_stdin("secret\n") do
+          allow($stdin).to receive(:noecho).and_yield($stdin)
+          capture(:stdout) { result = described_class.password("API key:") }
+        end
 
         expect(result).to eq("secret")
-      ensure
-        $stdin = original_stdin
       end
     end
 
     describe ".confirm" do
       it "returns true for 'y'" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("y\n")
-
         result = nil
-        capture(:stdout) { result = described_class.confirm("Delete?", default: false) }
+        with_stdin("y\n") do
+          capture(:stdout) { result = described_class.confirm("Delete?", default: false) }
+        end
 
         expect(result).to be true
-      ensure
-        $stdin = original_stdin
       end
 
       it "returns false for 'n'" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("n\n")
-
         result = nil
-        capture(:stdout) { result = described_class.confirm("Delete?", default: true) }
+        with_stdin("n\n") do
+          capture(:stdout) { result = described_class.confirm("Delete?", default: true) }
+        end
 
         expect(result).to be false
-      ensure
-        $stdin = original_stdin
       end
 
       it "returns default when input is empty" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("\n")
-
         result = nil
-        capture(:stdout) { result = described_class.confirm("Continue?", default: true) }
+        with_stdin("\n") do
+          capture(:stdout) { result = described_class.confirm("Continue?", default: true) }
+        end
 
         expect(result).to be true
-      ensure
-        $stdin = original_stdin
       end
 
       it "shows Y/n hint when default is true" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("\n")
-
-        output = capture(:stdout) { described_class.confirm("Continue?", default: true) }
+        output = with_stdin("\n") do
+          capture(:stdout) { described_class.confirm("Continue?", default: true) }
+        end
 
         expect(output).to include("(Y/n)")
-      ensure
-        $stdin = original_stdin
       end
 
       it "shows y/N hint when default is false" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("\n")
-
-        output = capture(:stdout) { described_class.confirm("Delete?", default: false) }
+        output = with_stdin("\n") do
+          capture(:stdout) { described_class.confirm("Delete?", default: false) }
+        end
 
         expect(output).to include("(y/N)")
-      ensure
-        $stdin = original_stdin
       end
     end
 
     describe ".choose" do
       it "shows numbered list and returns selected item" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("2\n")
-
         result = nil
-        output = capture(:stdout) { result = described_class.choose(["alpha", "beta", "gamma"]) }
+        output = with_stdin("2\n") do
+          capture(:stdout) { result = described_class.choose(["alpha", "beta", "gamma"]) }
+        end
 
         expect(output).to include("1. alpha")
         expect(output).to include("2. beta")
         expect(output).to include("3. gamma")
         expect(result).to eq("beta")
-      ensure
-        $stdin = original_stdin
       end
 
       it "shows header when provided" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("1\n")
-
-        output = capture(:stdout) { described_class.choose(["a"], header: "Pick one:") }
+        output = with_stdin("1\n") do
+          capture(:stdout) { described_class.choose(["a"], header: "Pick one:") }
+        end
 
         expect(output).to include("Pick one:")
-      ensure
-        $stdin = original_stdin
       end
 
       it "defaults to first item for invalid input" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("99\n")
-
         result = nil
-        capture(:stdout) { result = described_class.choose(["alpha", "beta"]) }
+        with_stdin("99\n") do
+          capture(:stdout) { result = described_class.choose(["alpha", "beta"]) }
+        end
 
         expect(result).to eq("alpha")
-      ensure
-        $stdin = original_stdin
       end
     end
 
     describe ".filter" do
       it "falls back to numbered list" do
-        original_stdin = $stdin
-        $stdin = StringIO.new("1\n")
-
         result = nil
-        output = capture(:stdout) { result = described_class.filter(["x", "y"]) }
+        output = with_stdin("1\n") do
+          capture(:stdout) { result = described_class.filter(["x", "y"]) }
+        end
 
         expect(output).to include("1. x")
         expect(result).to eq("x")
-      ensure
-        $stdin = original_stdin
       end
     end
 
@@ -244,13 +210,11 @@ RSpec.describe Superthread::Cli::Ui do
 
   private
 
-  def capture(stream = :stdout)
-    captured = StringIO.new
-    original = $stdout
-    $stdout = captured
+  def with_stdin(input)
+    original = $stdin
+    $stdin = StringIO.new(input)
     yield
-    captured.string
   ensure
-    $stdout = original
+    $stdin = original
   end
 end

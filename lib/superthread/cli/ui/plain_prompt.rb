@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "io/console"
-
 module Superthread
   module Cli
     module Ui
@@ -34,6 +32,7 @@ module Superthread
         # @param prompt [String] the prompt label
         # @return [String]
         def password(prompt)
+          require "io/console"
           print prompt
           $stdin.noecho(&:gets)&.chomp
         end
@@ -57,9 +56,10 @@ module Superthread
         end
 
         # @param title [String] status message
+        # @param block [Proc] the block to execute while the status is displayed
         # @yieldreturn [Object] result of the block
         # @return [Object]
-        def spin(title)
+        def spin(title, &block)
           print "#{title}..."
           result = yield
           puts " done"
