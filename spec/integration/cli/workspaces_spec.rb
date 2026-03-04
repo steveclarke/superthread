@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe "st workspaces", :cli do
   before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
+    ENV.delete("SUPERTHREAD_WORKSPACE_ID")
   end
 
   describe "workspaces list" do

@@ -3,15 +3,9 @@
 require "spec_helper"
 
 RSpec.describe "st lists", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "lists list --board" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_get("test_workspace/boards/10", response: ApiFixtures::Boards::GET)
     end
 
@@ -35,8 +29,7 @@ RSpec.describe "st lists", :cli do
 
   describe "lists create" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/lists", response: ApiFixtures::Boards::LIST_CREATE)
     end
 

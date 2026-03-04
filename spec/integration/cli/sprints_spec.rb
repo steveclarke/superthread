@@ -3,19 +3,10 @@
 require "spec_helper"
 
 RSpec.describe "st sprints", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "sprints list" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/sprints")
-        .with(query: hash_including(project_id: "1"))
-        .to_return(status: 200, body: ApiFixtures::Sprints::LIST.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_space
+      stub_api_get("test_workspace/sprints", response: ApiFixtures::Sprints::LIST, query: {project_id: "1"})
     end
 
     it "lists all sprints in a space" do
@@ -37,12 +28,8 @@ RSpec.describe "st sprints", :cli do
 
   describe "sprints get SPRINT_ID" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/sprints/sprint-1")
-        .with(query: hash_including(project_id: "1"))
-        .to_return(status: 200, body: ApiFixtures::Sprints::GET.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_space
+      stub_api_get("test_workspace/sprints/sprint-1", response: ApiFixtures::Sprints::GET, query: {project_id: "1"})
     end
 
     it "displays sprint details" do

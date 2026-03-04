@@ -88,33 +88,17 @@ module CliHelpers
     output = cli_output(*args)
     JSON.parse(output)
   end
-
-  # Assert CLI command succeeds
-  #
-  # @param args [Array<String>] Command arguments
-  def expect_cli_success(*args)
-    result = run_cli(*args)
-    expect(result[:exit_code]).to eq(0),
-      "Expected exit code 0, got #{result[:exit_code]}\nstderr: #{result[:stderr]}"
-  end
-
-  # Assert CLI command fails
-  #
-  # @param args [Array<String>] Command arguments
-  # @param exit_code [Integer] Expected exit code (default: any non-zero)
-  def expect_cli_failure(*args, exit_code: nil)
-    result = run_cli(*args)
-    if exit_code
-      expect(result[:exit_code]).to eq(exit_code)
-    else
-      expect(result[:exit_code]).not_to eq(0)
-    end
-  end
 end
 
 RSpec.configure do |config|
   config.include CliHelpers, type: :cli
   config.include CliHelpers, :cli
+
+  # Set default ENV for CLI tests
+  config.before(:each, :cli) do
+    ENV["SUPERTHREAD_API_KEY"] = "test_key"
+    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
+  end
 
   # Isolate CLI tests from user's real config
   config.around(:each, :cli) do |example|

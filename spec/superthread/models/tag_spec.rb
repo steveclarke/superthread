@@ -7,6 +7,18 @@ RSpec.describe Superthread::Models::Tag do
     let(:presentation_value) { "bug" }
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :name }
+    let(:hash_symbol_value) { "bug" }
+    let(:hash_string_key) { "color" }
+    let(:hash_string_value) { "red" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { tag_data }
+  end
+
   let(:tag_data) do
     {
       "id" => "tag-123",
@@ -41,41 +53,6 @@ RSpec.describe Superthread::Models::Tag do
       expect(hash).to be_a(Hash)
       expect(hash[:id]).to eq("tag-123")
       expect(hash[:name]).to eq("bug")
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the tag name" do
-      expect(tag.to_s).to eq("bug")
-    end
-
-    it "returns empty string when name is nil" do
-      tag_without_name = described_class.from_response({"id" => "1"})
-      expect(tag_without_name.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(tag[:name]).to eq("bug")
-      expect(tag["color"]).to eq("red")
-    end
-
-    it "supports key? check" do
-      expect(tag.key?(:name)).to be true
-      expect(tag.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      tag2 = described_class.from_response(tag_data)
-      expect(tag).to eq(tag2)
-    end
-
-    it "returns false for different tags" do
-      tag2 = described_class.from_response(tag_data.merge("id" => "different"))
-      expect(tag).not_to eq(tag2)
     end
   end
 end

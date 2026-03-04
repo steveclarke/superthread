@@ -3,17 +3,9 @@
 require "spec_helper"
 
 RSpec.describe "st search", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "search query SEARCH_TERM" do
     before do
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/search")
-        .with(query: hash_including(query: "authentication"))
-        .to_return(status: 200, body: ApiFixtures::Search::RESULTS.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_api_get("test_workspace/search", response: ApiFixtures::Search::RESULTS, query: {query: "authentication"})
     end
 
     it "searches across workspace" do
@@ -35,10 +27,7 @@ RSpec.describe "st search", :cli do
 
   describe "search query with type filter" do
     before do
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/search")
-        .with(query: hash_including(query: "authentication"))
-        .to_return(status: 200, body: ApiFixtures::Search::RESULTS_TYPED.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_api_get("test_workspace/search", response: ApiFixtures::Search::RESULTS_TYPED, query: {query: "authentication"})
     end
 
     it "filters by type" do

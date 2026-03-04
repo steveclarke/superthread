@@ -4,9 +4,9 @@ require "spec_helper"
 
 RSpec.describe "suth completion", :cli do
   describe "completion bash" do
-    it "generates bash completion script" do
-      result = run_cli("completion", "bash")
+    let(:result) { run_cli("completion", "bash") }
 
+    it "generates bash completion script" do
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("# Bash completion for suth")
       expect(result[:stdout]).to include("_suth()")
@@ -14,16 +14,12 @@ RSpec.describe "suth completion", :cli do
     end
 
     it "includes all main commands" do
-      result = run_cli("completion", "bash")
-
       %w[cards boards projects spaces pages notes comments search tags].each do |cmd|
         expect(result[:stdout]).to include(cmd)
       end
     end
 
     it "includes global options" do
-      result = run_cli("completion", "bash")
-
       expect(result[:stdout]).to include("--verbose")
       expect(result[:stdout]).to include("--workspace")
       expect(result[:stdout]).to include("--json")
@@ -31,9 +27,9 @@ RSpec.describe "suth completion", :cli do
   end
 
   describe "completion zsh" do
-    it "generates zsh completion script" do
-      result = run_cli("completion", "zsh")
+    let(:result) { run_cli("completion", "zsh") }
 
+    it "generates zsh completion script" do
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("#compdef suth")
       expect(result[:stdout]).to include("# Zsh completion for suth")
@@ -41,46 +37,36 @@ RSpec.describe "suth completion", :cli do
     end
 
     it "includes command descriptions" do
-      result = run_cli("completion", "zsh")
-
       expect(result[:stdout]).to include("cards:Card management commands")
       expect(result[:stdout]).to include("boards:Board and list management commands")
     end
 
     it "includes subcommands with descriptions" do
-      result = run_cli("completion", "zsh")
-
       expect(result[:stdout]).to include("list:List cards on a board")
       expect(result[:stdout]).to include("get:Get card details")
     end
   end
 
   describe "completion fish" do
-    it "generates fish completion script" do
-      result = run_cli("completion", "fish")
+    let(:result) { run_cli("completion", "fish") }
 
+    it "generates fish completion script" do
       expect(result[:exit_code]).to eq(0)
       expect(result[:stdout]).to include("# Fish completion for suth")
       expect(result[:stdout]).to include("complete -c suth")
     end
 
     it "uses fish built-in helper functions" do
-      result = run_cli("completion", "fish")
-
       expect(result[:stdout]).to include("__fish_use_subcommand")
       expect(result[:stdout]).to include("__fish_seen_subcommand_from")
     end
 
     it "includes main commands with descriptions" do
-      result = run_cli("completion", "fish")
-
       expect(result[:stdout]).to include("-a cards -d 'Card management commands'")
       expect(result[:stdout]).to include("-a boards -d 'Board and list management commands'")
     end
 
     it "includes subcommands" do
-      result = run_cli("completion", "fish")
-
       expect(result[:stdout]).to include("__fish_seen_subcommand_from cards")
       expect(result[:stdout]).to include("-a list -d 'List cards on a board or sprint'")
     end

@@ -24,6 +24,18 @@ RSpec.describe Superthread::Models::Card do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Test Card" }
+    let(:hash_string_key) { "status" }
+    let(:hash_string_value) { "started" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { card_data }
+  end
+
   let(:card_data) do
     {
       "id" => "card-123",
@@ -96,21 +108,6 @@ RSpec.describe Superthread::Models::Card do
     end
   end
 
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(card.created_at).to be_a(Time)
-      expect(card.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(card.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      expect(card.due_time).to be_nil
-    end
-  end
-
   describe "#priority_name" do
     it "returns human-readable priority" do
       expect(card.priority_name).to eq("urgent")
@@ -161,30 +158,6 @@ RSpec.describe Superthread::Models::Card do
       expect(checklist.total_count).to eq(2)
       expect(checklist.progress).to eq(50.0)
       expect(checklist.complete?).to be false
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(card[:title]).to eq("Test Card")
-      expect(card["status"]).to eq("started")
-    end
-
-    it "supports key? check" do
-      expect(card.key?(:title)).to be true
-      expect(card.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      card2 = described_class.from_response(card_data)
-      expect(card).to eq(card2)
-    end
-
-    it "returns false for different cards" do
-      card2 = described_class.from_response(card_data.merge("id" => "different"))
-      expect(card).not_to eq(card2)
     end
   end
 

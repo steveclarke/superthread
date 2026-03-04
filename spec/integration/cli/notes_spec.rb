@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st notes", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "notes list" do
     before do
       stub_api_get("test_workspace/notes", response: ApiFixtures::Notes::LIST)

@@ -25,6 +25,13 @@ RSpec.describe Superthread::Models::Checklist do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Requirements" }
+    let(:hash_string_key) { "card_id" }
+    let(:hash_string_value) { "card-456" }
+  end
+
   let(:checklist_data) do
     {
       "id" => "checklist-123",
@@ -58,23 +65,6 @@ RSpec.describe Superthread::Models::Checklist do
       expect(hash).to be_a(Hash)
       expect(hash[:id]).to eq("checklist-123")
       expect(hash[:title]).to eq("Requirements")
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(checklist.created_at).to be_a(Time)
-      expect(checklist.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(checklist.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      checklist_without_times = described_class.from_response({"id" => "1"})
-      expect(checklist_without_times.created_at).to be_nil
-      expect(checklist_without_times.updated_at).to be_nil
     end
   end
 
@@ -154,18 +144,6 @@ RSpec.describe Superthread::Models::Checklist do
     it "returns false for empty checklist" do
       empty_checklist = described_class.from_response({"id" => "1"})
       expect(empty_checklist.complete?).to be false
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(checklist[:title]).to eq("Requirements")
-      expect(checklist["card_id"]).to eq("card-456")
-    end
-
-    it "supports key? check" do
-      expect(checklist.key?(:title)).to be true
-      expect(checklist.key?(:nonexistent)).to be false
     end
   end
 end

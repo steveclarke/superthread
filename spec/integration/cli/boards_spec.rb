@@ -3,19 +3,10 @@
 require "spec_helper"
 
 RSpec.describe "st boards", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "boards list --space" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/boards")
-        .with(query: hash_including(project_id: "1"))
-        .to_return(status: 200, body: ApiFixtures::Boards::LIST.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_space
+      stub_api_get("test_workspace/boards", response: ApiFixtures::Boards::LIST, query: {project_id: "1"})
     end
 
     it "lists boards in a space" do
@@ -60,8 +51,7 @@ RSpec.describe "st boards", :cli do
 
   describe "boards create" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/boards", response: ApiFixtures::Boards::CREATE)
     end
 
@@ -125,8 +115,7 @@ RSpec.describe "st boards", :cli do
 
   describe "boards duplicate BOARD" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/boards/10/copy", response: ApiFixtures::Boards::DUPLICATE)
     end
 

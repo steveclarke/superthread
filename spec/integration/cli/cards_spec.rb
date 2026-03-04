@@ -3,15 +3,9 @@
 require "spec_helper"
 
 RSpec.describe "st cards", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "cards list with --sprint" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/views/preview", response: {
         cards: [
           {id: "card-s1", title: "Sprint Card 1", priority: 2, list_title: "To Do", sprint_id: "sprint-1"},
@@ -165,13 +159,9 @@ RSpec.describe "st cards", :cli do
 
   describe "cards update with --sprint" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       # When no --list given, fetches sprint to default to first list
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/sprints/sprint-1")
-        .with(query: hash_including(project_id: "1"))
-        .to_return(status: 200, body: ApiFixtures::Sprints::GET.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_api_get("test_workspace/sprints/sprint-1", response: ApiFixtures::Sprints::GET, query: {project_id: "1"})
       stub_api_patch("test_workspace/cards/card-123", response: ApiFixtures::Cards::UPDATE)
     end
 
@@ -304,11 +294,7 @@ RSpec.describe "st cards", :cli do
 
   describe "cards tag CARD_ID TAGS" do
     before do
-      # resolve_tag tries name resolution first, so stub the tags list API
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
-        .with(query: hash_including(all: "true"))
-        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_tags
       stub_api_post("test_workspace/cards/card-123/tags", response: ApiFixtures::SUCCESS)
     end
 
@@ -322,11 +308,7 @@ RSpec.describe "st cards", :cli do
 
   describe "cards untag CARD_ID TAG" do
     before do
-      # resolve_tag tries name resolution first, so stub the tags list API
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
-        .with(query: hash_including(all: "true"))
-        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_tags
       stub_api_delete("test_workspace/cards/card-123/tags/tag-1")
     end
 

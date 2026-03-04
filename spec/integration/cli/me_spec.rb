@@ -4,8 +4,6 @@ require "spec_helper"
 
 RSpec.describe "st me", :cli do
   before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
     stub_api_get("users/me", response: ApiFixtures::Users::ME)
   end
 

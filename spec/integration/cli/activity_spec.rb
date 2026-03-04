@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st activity", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   let(:now) { Time.new(2025, 1, 20, 12, 0, 0) }
   let(:today_ts) { Time.new(2025, 1, 20, 10, 0, 0).to_i * 1000 }  # 10am today in ms
   let(:yesterday_ts) { Time.new(2025, 1, 19, 14, 0, 0).to_i * 1000 }  # yesterday in ms

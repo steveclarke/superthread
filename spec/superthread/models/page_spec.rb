@@ -21,6 +21,18 @@ RSpec.describe Superthread::Models::Page do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Project Overview" }
+    let(:hash_string_key) { "space_id" }
+    let(:hash_string_value) { "space-789" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { page_data }
+  end
+
   let(:page_data) do
     {
       "id" => "page-123",
@@ -52,71 +64,6 @@ RSpec.describe Superthread::Models::Page do
       expect(hash).to be_a(Hash)
       expect(hash[:id]).to eq("page-123")
       expect(hash[:title]).to eq("Project Overview")
-    end
-  end
-
-  describe "#archived?" do
-    it "returns false when not archived" do
-      expect(page.archived?).to be false
-    end
-
-    it "returns true when archived" do
-      archived_page = described_class.from_response(
-        page_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
-      )
-      expect(archived_page.archived?).to be true
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(page.created_at).to be_a(Time)
-      expect(page.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(page.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      page_without_times = described_class.from_response({"id" => "1"})
-      expect(page_without_times.created_at).to be_nil
-      expect(page_without_times.updated_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the page title" do
-      expect(page.to_s).to eq("Project Overview")
-    end
-
-    it "returns empty string when title is nil" do
-      page_without_title = described_class.from_response({"id" => "1"})
-      expect(page_without_title.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(page[:title]).to eq("Project Overview")
-      expect(page["space_id"]).to eq("space-789")
-    end
-
-    it "supports key? check" do
-      expect(page.key?(:title)).to be true
-      expect(page.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      page2 = described_class.from_response(page_data)
-      expect(page).to eq(page2)
-    end
-
-    it "returns false for different pages" do
-      page2 = described_class.from_response(page_data.merge("id" => "different"))
-      expect(page).not_to eq(page2)
     end
   end
 end

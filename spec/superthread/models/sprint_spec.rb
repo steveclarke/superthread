@@ -18,6 +18,18 @@ RSpec.describe Superthread::Models::Sprint do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Sprint 42" }
+    let(:hash_string_key) { "team_id" }
+    let(:hash_string_value) { "team-456" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { sprint_data }
+  end
+
   let(:sprint_data) do
     {
       "id" => "sprint-123",
@@ -45,70 +57,6 @@ RSpec.describe Superthread::Models::Sprint do
       expect(hash).to be_a(Hash)
       expect(hash[:id]).to eq("sprint-123")
       expect(hash[:title]).to eq("Sprint 42")
-    end
-  end
-
-  describe "date helpers" do
-    it "converts start_date to Time" do
-      expect(sprint.start_time).to be_a(Time)
-      expect(sprint.start_time.year).to eq(2024)
-    end
-
-    it "returns nil for missing dates" do
-      sprint_without_dates = described_class.from_response({"id" => "1"})
-      expect(sprint_without_dates.start_time).to be_nil
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(sprint.created_at).to be_a(Time)
-      expect(sprint.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(sprint.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      sprint_without_times = described_class.from_response({"id" => "1"})
-      expect(sprint_without_times.created_at).to be_nil
-      expect(sprint_without_times.updated_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the sprint title" do
-      expect(sprint.to_s).to eq("Sprint 42")
-    end
-
-    it "returns empty string when title is nil" do
-      sprint_without_title = described_class.from_response({"id" => "1"})
-      expect(sprint_without_title.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(sprint[:title]).to eq("Sprint 42")
-      expect(sprint["team_id"]).to eq("team-456")
-    end
-
-    it "supports key? check" do
-      expect(sprint.key?(:title)).to be true
-      expect(sprint.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      sprint2 = described_class.from_response(sprint_data)
-      expect(sprint).to eq(sprint2)
-    end
-
-    it "returns false for different sprints" do
-      sprint2 = described_class.from_response(sprint_data.merge("id" => "different"))
-      expect(sprint).not_to eq(sprint2)
     end
   end
 end

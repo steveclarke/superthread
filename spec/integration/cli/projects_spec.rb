@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st projects", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "projects list" do
     before do
       stub_api_get("test_workspace/epics", response: ApiFixtures::Projects::LIST)

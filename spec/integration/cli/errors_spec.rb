@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "CLI error handling", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "404 Not Found" do
     it "displays friendly error message" do
       stub_api_error(:get, "test_workspace/cards/nonexistent", status: 404, error: "Card not found")

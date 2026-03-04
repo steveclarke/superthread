@@ -17,6 +17,18 @@ RSpec.describe Superthread::Models::ChecklistItem do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Write specs" }
+    let(:hash_string_key) { "checklist_id" }
+    let(:hash_string_value) { "checklist-456" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { item_data }
+  end
+
   let(:item_data) do
     {
       "id" => "item-123",
@@ -72,58 +84,6 @@ RSpec.describe Superthread::Models::ChecklistItem do
   describe "#complete?" do
     it "is an alias for checked?" do
       expect(item.complete?).to eq(item.checked?)
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(item.created_at).to be_a(Time)
-      expect(item.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(item.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      item_without_times = described_class.from_response({"id" => "1"})
-      expect(item_without_times.created_at).to be_nil
-      expect(item_without_times.updated_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the title" do
-      expect(item.to_s).to eq("Write specs")
-    end
-
-    it "returns empty string when title is nil" do
-      item_without_title = described_class.from_response({"id" => "1"})
-      expect(item_without_title.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(item[:title]).to eq("Write specs")
-      expect(item["checklist_id"]).to eq("checklist-456")
-    end
-
-    it "supports key? check" do
-      expect(item.key?(:title)).to be true
-      expect(item.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      item2 = described_class.from_response(item_data)
-      expect(item).to eq(item2)
-    end
-
-    it "returns false for different items" do
-      item2 = described_class.from_response(item_data.merge("id" => "different"))
-      expect(item).not_to eq(item2)
     end
   end
 end

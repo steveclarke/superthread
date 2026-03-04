@@ -14,6 +14,13 @@ RSpec.describe Superthread::Models::Member do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :user_id }
+    let(:hash_symbol_value) { "user-123" }
+    let(:hash_string_key) { "role" }
+    let(:hash_string_value) { "assignee" }
+  end
+
   let(:member_data) do
     {
       "user_id" => "user-123",
@@ -38,41 +45,6 @@ RSpec.describe Superthread::Models::Member do
       expect(hash).to be_a(Hash)
       expect(hash[:user_id]).to eq("user-123")
       expect(hash[:role]).to eq("assignee")
-    end
-  end
-
-  describe "#assigned_at" do
-    it "converts assigned_date to Time" do
-      expect(member.assigned_at).to be_a(Time)
-      expect(member.assigned_at.year).to eq(2024)
-    end
-
-    it "returns nil when assigned_date is missing" do
-      member_without_date = described_class.from_response({"user_id" => "user-1"})
-      expect(member_without_date.assigned_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the user_id" do
-      expect(member.to_s).to eq("user-123")
-    end
-
-    it "returns empty string when user_id is nil" do
-      member_without_id = described_class.from_response({})
-      expect(member_without_id.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(member[:user_id]).to eq("user-123")
-      expect(member["role"]).to eq("assignee")
-    end
-
-    it "supports key? check" do
-      expect(member.key?(:user_id)).to be true
-      expect(member.key?(:nonexistent)).to be false
     end
   end
 end

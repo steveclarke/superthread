@@ -23,6 +23,18 @@ RSpec.describe Superthread::Models::Project do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Q4 Planning" }
+    let(:hash_string_key) { "status" }
+    let(:hash_string_value) { "active" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { project_data }
+  end
+
   let(:project_data) do
     {
       "id" => "project-123",
@@ -58,89 +70,6 @@ RSpec.describe Superthread::Models::Project do
       expect(hash).to be_a(Hash)
       expect(hash[:id]).to eq("project-123")
       expect(hash[:title]).to eq("Q4 Planning")
-    end
-  end
-
-  describe "#archived?" do
-    it "returns false when not archived" do
-      expect(project.archived?).to be false
-    end
-
-    it "returns true when archived" do
-      archived_project = described_class.from_response(
-        project_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
-      )
-      expect(archived_project.archived?).to be true
-    end
-  end
-
-  describe "date helpers" do
-    it "converts start_date to Time" do
-      expect(project.start_time).to be_a(Time)
-      expect(project.start_time.year).to eq(2024)
-    end
-
-    it "converts due_date to Time" do
-      expect(project.due_time).to be_a(Time)
-      expect(project.due_time.year).to eq(2024)
-    end
-
-    it "returns nil for missing dates" do
-      project_without_dates = described_class.from_response({"id" => "1"})
-      expect(project_without_dates.start_time).to be_nil
-      expect(project_without_dates.due_time).to be_nil
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(project.created_at).to be_a(Time)
-      expect(project.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(project.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      project_without_times = described_class.from_response({"id" => "1"})
-      expect(project_without_times.created_at).to be_nil
-      expect(project_without_times.updated_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the project title" do
-      expect(project.to_s).to eq("Q4 Planning")
-    end
-
-    it "returns empty string when title is nil" do
-      project_without_title = described_class.from_response({"id" => "1"})
-      expect(project_without_title.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(project[:title]).to eq("Q4 Planning")
-      expect(project["status"]).to eq("active")
-    end
-
-    it "supports key? check" do
-      expect(project.key?(:title)).to be true
-      expect(project.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      project2 = described_class.from_response(project_data)
-      expect(project).to eq(project2)
-    end
-
-    it "returns false for different projects" do
-      project2 = described_class.from_response(project_data.merge("id" => "different"))
-      expect(project).not_to eq(project2)
     end
   end
 end

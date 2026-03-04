@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st pages", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "pages list" do
     before do
       stub_api_get("test_workspace/pages", response: ApiFixtures::Pages::LIST)
@@ -54,8 +49,7 @@ RSpec.describe "st pages", :cli do
 
   describe "pages create" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/pages", response: ApiFixtures::Pages::CREATE)
     end
 
@@ -104,8 +98,7 @@ RSpec.describe "st pages", :cli do
 
   describe "pages duplicate PAGE_ID" do
     before do
-      # resolve_space tries name lookup first, so stub the list endpoint
-      stub_api_get("test_workspace/projects", response: ApiFixtures::Spaces::LIST)
+      stub_resolve_space
       stub_api_post("test_workspace/pages/page-1/copy", response: ApiFixtures::Pages::DUPLICATE)
     end
 

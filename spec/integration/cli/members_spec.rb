@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st members", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "members list" do
     before do
       stub_api_get("teams/test_workspace/members", response: ApiFixtures::Users::MEMBERS)

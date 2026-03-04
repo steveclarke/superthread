@@ -21,6 +21,18 @@ RSpec.describe Superthread::Models::Board do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :title }
+    let(:hash_symbol_value) { "Sprint Board" }
+    let(:hash_string_key) { "team_id" }
+    let(:hash_string_value) { "team-456" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { board_data }
+  end
+
   let(:board_data) do
     {
       "id" => "board-123",
@@ -56,36 +68,6 @@ RSpec.describe Superthread::Models::Board do
     end
   end
 
-  describe "#archived?" do
-    it "returns false when not archived" do
-      expect(board.archived?).to be false
-    end
-
-    it "returns true when archived" do
-      archived_board = described_class.from_response(
-        board_data.merge("archived" => {"user_id" => "user-1", "time_archived" => 1_705_312_200})
-      )
-      expect(archived_board.archived?).to be true
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(board.created_at).to be_a(Time)
-      expect(board.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(board.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      board_without_times = described_class.from_response({"id" => "1"})
-      expect(board_without_times.created_at).to be_nil
-      expect(board_without_times.updated_at).to be_nil
-    end
-  end
-
   describe "nested lists" do
     it "parses lists as List objects" do
       expect(board.lists).to be_an(Array)
@@ -99,41 +81,6 @@ RSpec.describe Superthread::Models::Board do
       expect(list.title).to eq("To Do")
       expect(list.color).to eq("gray")
       expect(list.position).to eq(0)
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the board title" do
-      expect(board.to_s).to eq("Sprint Board")
-    end
-
-    it "returns empty string when title is nil" do
-      board_without_title = described_class.from_response({"id" => "1"})
-      expect(board_without_title.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(board[:title]).to eq("Sprint Board")
-      expect(board["team_id"]).to eq("team-456")
-    end
-
-    it "supports key? check" do
-      expect(board.key?(:title)).to be true
-      expect(board.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      board2 = described_class.from_response(board_data)
-      expect(board).to eq(board2)
-    end
-
-    it "returns false for different boards" do
-      board2 = described_class.from_response(board_data.merge("id" => "different"))
-      expect(board).not_to eq(board2)
     end
   end
 end

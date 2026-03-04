@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st tags", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "tags list" do
     before do
       stub_api_get("test_workspace/tags", response: ApiFixtures::Tags::LIST)
@@ -57,11 +52,7 @@ RSpec.describe "st tags", :cli do
 
   describe "tags update TAG" do
     before do
-      # resolve_tag tries name resolution first, so stub the tags list API
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
-        .with(query: hash_including(all: "true"))
-        .to_return(status: 200, body: ApiFixtures::Tags::LIST.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_tags
       stub_api_patch("test_workspace/tags/tag-1", response: ApiFixtures::Tags::UPDATE)
     end
 
@@ -83,10 +74,7 @@ RSpec.describe "st tags", :cli do
 
   describe "tags delete TAG" do
     before do
-      stub_request(:get, "https://api.superthread.com/v1/test_workspace/tags")
-        .with(query: hash_including(all: "true"))
-        .to_return(status: 200, body: ApiFixtures::Tags::LIST_WITH_DELETE_TAG.to_json,
-          headers: {"Content-Type" => "application/json"})
+      stub_resolve_tags(fixture: ApiFixtures::Tags::LIST_WITH_DELETE_TAG)
       stub_api_delete("test_workspace/tags/tag-to-delete")
     end
 

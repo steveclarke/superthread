@@ -17,6 +17,18 @@ RSpec.describe Superthread::Models::User do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :display_name }
+    let(:hash_symbol_value) { "John Doe" }
+    let(:hash_string_key) { "email" }
+    let(:hash_string_value) { "john@example.com" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { user_data }
+  end
+
   let(:user_data) do
     {
       "user_id" => "user-123",
@@ -63,58 +75,6 @@ RSpec.describe Superthread::Models::User do
     it "prefers id over user_id" do
       user_with_both = described_class.from_json({"id" => "u-456", "user_id" => "user-789"}.to_json)
       expect(user_with_both.user_identifier).to eq("u-456")
-    end
-  end
-
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(user.created_at).to be_a(Time)
-      expect(user.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(user.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      user_without_times = described_class.from_response({"user_id" => "1"})
-      expect(user_without_times.created_at).to be_nil
-      expect(user_without_times.updated_at).to be_nil
-    end
-  end
-
-  describe "#to_s" do
-    it "returns the display name" do
-      expect(user.to_s).to eq("John Doe")
-    end
-
-    it "returns empty string when display_name is nil" do
-      user_without_name = described_class.from_response({"user_id" => "1"})
-      expect(user_without_name.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(user[:display_name]).to eq("John Doe")
-      expect(user["email"]).to eq("john@example.com")
-    end
-
-    it "supports key? check" do
-      expect(user.key?(:display_name)).to be true
-      expect(user.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      user2 = described_class.from_response(user_data)
-      expect(user).to eq(user2)
-    end
-
-    it "returns false for different users" do
-      user2 = described_class.from_response(user_data.merge("user_id" => "different"))
-      expect(user).not_to eq(user2)
     end
   end
 end

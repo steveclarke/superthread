@@ -3,11 +3,6 @@
 require "spec_helper"
 
 RSpec.describe "st comments", :cli do
-  before do
-    ENV["SUPERTHREAD_API_KEY"] = "test_key"
-    ENV["SUPERTHREAD_WORKSPACE_ID"] = "test_workspace"
-  end
-
   describe "comments list --card" do
     before do
       stub_api_get("test_workspace/comments?card_id=card-123", response: ApiFixtures::Comments::LIST)

@@ -17,6 +17,18 @@ RSpec.describe Superthread::Models::Comment do
     end
   end
 
+  it_behaves_like "hash accessible" do
+    let(:hash_symbol_key) { :content }
+    let(:hash_symbol_value) { "This looks great! Nice work on the implementation." }
+    let(:hash_string_key) { "user_id" }
+    let(:hash_string_value) { "user-456" }
+  end
+
+  it_behaves_like "equatable" do
+    let(:model_class) { described_class }
+    let(:model_data) { comment_data }
+  end
+
   let(:comment_data) do
     {
       "id" => "comment-123",
@@ -68,23 +80,6 @@ RSpec.describe Superthread::Models::Comment do
     end
   end
 
-  describe "time helpers" do
-    it "converts time_created to Time" do
-      expect(comment.created_at).to be_a(Time)
-      expect(comment.created_at.year).to eq(2024)
-    end
-
-    it "converts time_updated to Time" do
-      expect(comment.updated_at).to be_a(Time)
-    end
-
-    it "returns nil for missing times" do
-      comment_without_times = described_class.from_response({"id" => "1"})
-      expect(comment_without_times.created_at).to be_nil
-      expect(comment_without_times.updated_at).to be_nil
-    end
-  end
-
   describe "nested replies" do
     it "parses replies as Comment objects" do
       expect(comment.replies).to be_an(Array)
@@ -112,30 +107,6 @@ RSpec.describe Superthread::Models::Comment do
     it "returns empty string when content is nil" do
       comment_without_content = described_class.from_response({"id" => "1"})
       expect(comment_without_content.to_s).to eq("")
-    end
-  end
-
-  describe "hash-like access" do
-    it "supports bracket access" do
-      expect(comment[:content]).to eq("This looks great! Nice work on the implementation.")
-      expect(comment["user_id"]).to eq("user-456")
-    end
-
-    it "supports key? check" do
-      expect(comment.key?(:content)).to be true
-      expect(comment.key?(:nonexistent)).to be false
-    end
-  end
-
-  describe "#==" do
-    it "compares by attributes" do
-      comment2 = described_class.from_response(comment_data)
-      expect(comment).to eq(comment2)
-    end
-
-    it "returns false for different comments" do
-      comment2 = described_class.from_response(comment_data.merge("id" => "different"))
-      expect(comment).not_to eq(comment2)
     end
   end
 end
