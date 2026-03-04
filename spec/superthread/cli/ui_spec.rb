@@ -174,9 +174,18 @@ RSpec.describe Superthread::Cli::Ui do
         expect(output).to include("Pick one:")
       end
 
-      it "defaults to first item for invalid input" do
+      it "defaults to first item for out-of-range input" do
         result = nil
         with_stdin("99\n") do
+          capture(:stdout) { result = described_class.choose(["alpha", "beta"]) }
+        end
+
+        expect(result).to eq("alpha")
+      end
+
+      it "defaults to first item for empty input" do
+        result = nil
+        with_stdin("\n") do
           capture(:stdout) { result = described_class.choose(["alpha", "beta"]) }
         end
 

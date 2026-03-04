@@ -44,8 +44,10 @@ module Superthread
           puts header if header
           items.each_with_index { |item, i| puts "  #{i + 1}. #{item}" }
           print "Choose (1-#{items.length}): "
-          choice = $stdin.gets&.chomp&.to_i || 1
-          items[choice - 1] || items.first
+          raw = $stdin.gets&.chomp
+          choice = raw&.to_i || 0
+          return items.first if choice < 1 || choice > items.length
+          items[choice - 1]
         end
 
         # @param items [Array<String>] the available options presented as a numbered list
