@@ -9,8 +9,15 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Test (Ruby ${{ matrix.ruby }})
     runs-on: ubuntu-latest
+
+    continue-on-error: ${{ matrix.ruby == 'head' }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.2', '3.3', '3.4', 'head']
 
     steps:
       - name: Checkout
@@ -19,16 +26,18 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       - name: Run tests
         run: bundle exec rspec
 
       - name: Run linter
+        if: matrix.ruby == '3.4'
         run: bundle exec standardrb
 
       - name: Check documentation
+        if: matrix.ruby == '3.4'
         run: bundle exec yard-lint lib/
 
       - name: Verify CLI runs

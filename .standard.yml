@@ -1,7 +1,7 @@
 # StandardRB configuration
 # See: https://github.com/standardrb/standard
 
-ruby_version: 3.2
+ruby_version: 3.4
 
 ignore:
   - "vendor/**/*"
