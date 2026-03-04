@@ -11,6 +11,17 @@ Ruby gem and CLI for [Superthread](https://superthread.com) project management.
 >
 > **Use at your own risk.** Test thoroughly in non-critical environments before relying on it for important workflows. Issues and pull requests are welcome, but support is limited.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [CLI Usage](#cli-usage)
+- [Library Usage](#library-usage)
+- [Terminology](#terminology)
+- [Agent Integration](#agent-integration)
+- [Development](#development)
+- [License](#license)
+
 ## Installation
 
 ### Homebrew (recommended)
@@ -380,11 +391,37 @@ The gem uses Superthread's modern UI terminology:
 | Page | Wiki/documentation page |
 | Note | Quick notes within a space |
 
-## Claude Code Skill
+## Agent Integration
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill is included for AI agents that use the Superthread CLI. It provides a complete command reference so agents can manage cards, boards, sprints, and other resources without needing to run `--help` for every command.
+Superthread's CLI is designed to work with AI coding agents, scripts, and CI pipelines out of the box. Every command supports machine-readable output and non-interactive execution, so agents can manage your project board without human intervention.
 
-### Install the skill
+### Why it works for agents
+
+- **`--json` on every command** — All commands accept `--json` to return structured JSON instead of human-formatted tables. Agents can parse output reliably without scraping terminal text.
+- **`-y` / `--yes` to skip confirmations** — Destructive operations (delete, remove) prompt for confirmation by default. Pass `-y` to bypass prompts entirely, enabling fully non-interactive workflows.
+- **Environment variable configuration** — Set `SUPERTHREAD_API_KEY` and `SUPERTHREAD_WORKSPACE_ID` as environment variables and skip interactive setup altogether. No config files required.
+- **Predictable error handling** — Errors return non-zero exit codes with JSON-formatted error messages when `--json` is active, making failures easy to detect and handle programmatically.
+
+### Example: creating a card from a script
+
+```bash
+export SUPERTHREAD_API_KEY="stp_xxxxxxxxxxxx"
+export SUPERTHREAD_WORKSPACE_ID="t4k7Wa2e"
+
+# Create a card and capture the new card ID
+suth cards create \
+  --title "Deploy v2.1 to staging" \
+  --list "To Do" \
+  --board "Sprint Board" \
+  -s "Engineering" \
+  --json | jq -r '.id'
+```
+
+An agent can chain commands — create a card, assign it, add a checklist, post a comment — all in a single scripted workflow with no human interaction.
+
+### Claude Code skill
+
+A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill is included that gives AI agents a complete command reference for the Superthread CLI. With the skill installed, agents can manage cards, boards, sprints, and other resources without needing to run `--help` for every command.
 
 ```bash
 npx skills add steveclarke/superthread
