@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_support/core_ext/string/inflections"
+require "unicode/display_width"
 
 module Superthread
   module Cli
@@ -193,14 +194,14 @@ module Superthread
         widths = columns.map do |col|
           header = headers.fetch(col, col.to_s.upcase)
           values = items.map { |item| format_cell(item, col).to_s }
-          [header.length, values.map(&:length).max || 0].max
+          [display_width(header), values.map { |v| display_width(v) }.max || 0].max
         end
 
         lines = []
 
         # Header row
         header_row = columns.zip(widths).map do |col, width|
-          colorize(headers.fetch(col, col.to_s.upcase).ljust(width), :bold, enabled: color_enabled)
+          colorize(pad_right(headers.fetch(col, col.to_s.upcase), width), :bold, enabled: color_enabled)
         end.join("  ")
         lines << header_row
 
@@ -209,7 +210,7 @@ module Superthread
           row = columns.zip(widths).map do |col, width|
             cell = format_cell(item, col, color_enabled: color_enabled)
             # Pad without color codes
-            padding = width - strip_ansi(cell).length
+            padding = width - display_width(strip_ansi(cell))
             padding = 0 if padding.negative?
             "#{cell}#{" " * padding}"
           end.join("  ")
@@ -229,12 +230,12 @@ module Superthread
       def detail(item, fields:, labels: {}, color_enabled: true)
         data = item.respond_to?(:to_h) ? item.to_h : item
 
-        max_label_width = fields.map { |f| labels.fetch(f, humanize(f)).length }.max
+        max_label_width = fields.map { |f| display_width(labels.fetch(f, humanize(f))) }.max
 
         lines = fields.map do |field|
           label = labels.fetch(field, humanize(field))
           value = format_field(data, field, color_enabled: color_enabled)
-          "#{colorize(label.ljust(max_label_width), :cyan, enabled: color_enabled)}  #{value}"
+          "#{colorize(pad_right(label, max_label_width), :cyan, enabled: color_enabled)}  #{value}"
         end
 
         lines.join("\n")
@@ -262,6 +263,27 @@ module Superthread
       # @return [String] the plain text without any ANSI codes
       def strip_ansi(str)
         str.to_s.gsub(/\e\[[0-9;]*m/, "")
+      end
+
+      # Returns the display width of a string, accounting for Unicode
+      # wide characters and emoji that occupy more than one column.
+      #
+      # @param str [String] the string to measure
+      # @return [Integer] the number of terminal columns the string occupies
+      def display_width(str)
+        Unicode::DisplayWidth.of(str.to_s)
+      end
+
+      # Right-pads a string to a target display width, accounting for
+      # Unicode wide characters.
+      #
+      # @param str [String] the string to pad
+      # @param target_width [Integer] the desired display width
+      # @return [String] the padded string
+      def pad_right(str, target_width)
+        padding = target_width - display_width(str)
+        padding = 0 if padding.negative?
+        "#{str}#{" " * padding}"
       end
 
       # Converts a symbol or string to a human-readable label.
@@ -348,10 +370,12 @@ module Superthread
           Array(value).map { |t| t.respond_to?(:name) ? t.name : t.to_s }.join(", ")
         when :members
           Array(value).map { |m|
-            if m.respond_to?(:user_id)
+            if m.respond_to?(:display_name) && m.display_name
+              m.display_name
+            elsif m.respond_to?(:user_id)
               m.user_id
             elsif m.is_a?(Hash)
-              m[:user_id] || m["user_id"]
+              m[:display_name] || m["display_name"] || m[:user_id] || m["user_id"]
             else
               m.to_s
             end

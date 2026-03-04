@@ -88,6 +88,7 @@ RSpec.describe "st cards", :cli do
   describe "cards get CARD_ID" do
     before do
       stub_api_get("test_workspace/cards/card-123", response: ApiFixtures::Cards::GET)
+      stub_api_get("teams/test_workspace/members", response: ApiFixtures::Users::MEMBERS)
     end
 
     it "displays card details" do

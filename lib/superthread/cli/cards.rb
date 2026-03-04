@@ -48,7 +48,9 @@ module Superthread
           # Client-side date filtering (API doesn't support time-based filters)
           cards = apply_date_filters(cards)
 
-          output_list cards, columns: %i[id title priority list_title], headers: {id: "CARD_ID", list_title: "LIST"}
+          enrich_members(cards)
+          output_list cards, columns: %i[id title priority list_title members],
+            headers: {id: "CARD_ID", list_title: "LIST"}
         end
       end
 
@@ -66,6 +68,8 @@ module Superthread
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
           end
+
+          enrich_members(card)
 
           if json_output?
             fields = %i[id title status priority list_title board_title
@@ -283,7 +287,9 @@ module Superthread
           # Client-side date filtering (API doesn't support time-based filters)
           cards = apply_date_filters(cards)
 
-          output_list cards, columns: %i[id title priority list_title], headers: {id: "CARD_ID", list_title: "LIST"}
+          enrich_members(cards)
+          output_list cards, columns: %i[id title priority list_title members],
+            headers: {id: "CARD_ID", list_title: "LIST"}
         rescue Superthread::ForbiddenError, Superthread::NotFoundError
           raise Thor::Error, "User not found: '#{user_ref}'. Use 'suth members list' to see available users."
         end
@@ -394,6 +400,29 @@ module Superthread
       end
 
       private
+
+      # Enrich card members with display names from workspace users.
+      #
+      # The API returns members with only user_id. This fetches the workspace
+      # member list once and sets display_name on each member object.
+      #
+      # @param cards [Array<Card>, Card] card(s) whose members to enrich
+      # @return [void]
+      def enrich_members(cards)
+        cards = Array(cards)
+        return if cards.all? { |c| c.members.empty? }
+
+        users = @users_cache ||= client.users.members(workspace_id)
+        user_names = users.each_with_object({}) do |u, h|
+          h[u.user_identifier] = u.display_name
+        end
+
+        cards.each do |card|
+          card.members.each do |member|
+            member.display_name ||= user_names[member.user_id]
+          end
+        end
+      end
 
       # Resolve a list reference and include sprint context when needed.
       #

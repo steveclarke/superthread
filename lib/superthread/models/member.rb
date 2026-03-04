@@ -16,11 +16,15 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
-      presents_as :user_id
+      presents_as(:display_name) { display_name || user_id }
 
       # @!attribute [rw] user_id
       #   @return [String] ID of the assigned user
       attribute :user_id, Shale::Type::String
+
+      # @!attribute [rw] display_name
+      #   @return [String, nil] display name of the assigned user (enriched client-side)
+      attribute :display_name, Shale::Type::String
 
       # @!attribute [rw] role
       #   @return [String] assignment role (e.g., "assignee")

@@ -40,5 +40,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "reverse_markdown", "~> 3.0"
   spec.add_dependency "shale", "~> 1.0"
   spec.add_dependency "thor", "~> 1.3"
+  spec.add_dependency "unicode-display_width", "~> 3.0"
   spec.add_dependency "zeitwerk", ">= 2.6", "< 3.0"
 end
