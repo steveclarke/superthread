@@ -335,14 +335,10 @@ You can also use Superthread as a Ruby gem in your code:
 ```ruby
 require "superthread"
 
-# Set up
-Superthread.configure do |config|
-  config.api_key = "stp_xxxxxxxxxxxx"
-end
+# Pass your API key directly
+client = Superthread::Client.new(api_key: "stp_xxxxxxxxxxxx")
 
-# Or use env vars — they work on their own
-
-# Create a client
+# Or use env vars — set SUPERTHREAD_API_KEY and it just works
 client = Superthread::Client.new
 
 # Users
