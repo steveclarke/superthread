@@ -27,6 +27,25 @@ me                  # Use as user reference: suth cards assigned me
 
 Most commands accept **names or IDs** for spaces, boards, lists, sprints, users, and tags.
 
+## Mentions
+
+Use `{{@Name}}` to mention workspace members in comments, replies, and checklist items. The name is matched case-insensitively against workspace member display names.
+
+```bash
+# Mention in a comment
+suth comments create -c CARD --content "{{@Stacey}} Ready for review."
+
+# Mention in a reply
+suth replies create --comment COMMENT --content "{{@Steve Clarke}} can you take a look?"
+
+# Multiple mentions
+suth comments create -c CARD --content "{{@Stacey}} and {{@Steve Clarke}} — thoughts?"
+```
+
+Do NOT use raw HTML mention tags (e.g., `<user-mention>` or `<mention-user>`). These will not trigger notifications. Always use the `{{@Name}}` template syntax.
+
+To include literal `{{@Name}}` text without triggering a mention, escape it: `\{{@Name}}`.
+
 ## Common Workflows
 
 ### View and manage cards

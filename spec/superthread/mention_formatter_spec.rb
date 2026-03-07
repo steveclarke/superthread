@@ -147,5 +147,52 @@ RSpec.describe Superthread::MentionFormatter do
       result = formatter.format("{{@Steve Clarke}}")
       expect(result).to include('user-id="u-steve"')
     end
+
+    context "when mentions don't resolve" do
+      it "warns about unresolved mentions" do
+        expect { formatter.format("Hey {{@Unknown Person}}") }.to output(
+          /Could not resolve mention: Unknown Person/
+        ).to_stderr
+      end
+
+      it "warns about each unresolved mention separately" do
+        expect { formatter.format("{{@Nobody}} and {{@Ghost}}") }.to output(
+          /Could not resolve mention: Nobody.*Could not resolve mention: Ghost/m
+        ).to_stderr
+      end
+
+      it "does not warn for resolved mentions" do
+        expect { formatter.format("{{@Steve Clarke}}") }.not_to output.to_stderr
+      end
+
+      it "warns only for unresolved ones in a mix" do
+        expect { formatter.format("{{@Steve Clarke}} and {{@Nobody}}") }.to output(
+          /Could not resolve mention: Nobody/
+        ).to_stderr
+      end
+    end
+
+    context "when content contains raw HTML mention tags" do
+      it "warns about <user-mention> tags" do
+        content = '<p><user-mention user-id="u123">Steve</user-mention> check this</p>'
+        expect { formatter.format(content) }.to output(
+          /Use \{\{@Name\}\} syntax to mention users/
+        ).to_stderr
+      end
+
+      it "warns about <mention-user> tags" do
+        content = '<p><mention-user user-id="u123">Steve</mention-user> check this</p>'
+        expect { formatter.format(content) }.to output(
+          /Use \{\{@Name\}\} syntax to mention users/
+        ).to_stderr
+      end
+
+      it "still sends the content through unchanged" do
+        content = '<p><user-mention user-id="u123">Steve</user-mention></p>'
+        result = nil
+        expect { result = formatter.format(content) }.to output(anything).to_stderr
+        expect(result).to eq(content)
+      end
+    end
   end
 end
