@@ -44,7 +44,7 @@ module Superthread
 
       desc "create", "Reply to a comment"
       option :comment, type: :string, required: true, desc: "Parent comment ID"
-      option :content, type: :string, required: true, desc: "Reply content"
+      option :content, type: :string, required: true, desc: "Reply content (HTML). Use {{@Name}} to mention users"
       # Add a threaded reply to an existing comment.
       #
       # @return [void]
@@ -57,7 +57,7 @@ module Superthread
 
       desc "update REPLY_ID", "Update a reply"
       option :comment, type: :string, required: true, desc: "Parent comment ID"
-      option :content, type: :string, desc: "New content"
+      option :content, type: :string, desc: "New content (HTML). Use {{@Name}} to mention users"
       option :status, type: :string, enum: %w[resolved open orphaned], desc: "Status"
       # Update an existing reply's content or status.
       #

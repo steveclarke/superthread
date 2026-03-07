@@ -34,7 +34,7 @@ module Superthread
       end
 
       desc "create", "Create a comment"
-      option :content, type: :string, required: true, desc: "Comment content (HTML)"
+      option :content, type: :string, required: true, desc: "Comment content (HTML). Use {{@Name}} to mention users"
       option :card, type: :string, aliases: "-c", desc: "Parent card ID (required unless --page)"
       option :page, type: :string, aliases: "-p", desc: "Parent page ID (required unless --card)"
       # Create a new comment on a card or page.
@@ -49,7 +49,7 @@ module Superthread
       end
 
       desc "update COMMENT_ID", "Update a comment"
-      option :content, type: :string, desc: "New content"
+      option :content, type: :string, desc: "New content (HTML). Use {{@Name}} to mention users"
       option :status, type: :string, enum: %w[resolved open orphaned], desc: "Comment status"
       # Update an existing comment's content or status.
       #
