@@ -328,6 +328,16 @@ Common options have short forms:
 > - Use `me` as a shortcut: `suth cards assigned me`
 > - Priority levels: 1=Urgent, 2=High, 3=Medium, 4=Low
 
+### Mentions
+
+Use `{{@Name}}` to tag workspace members in comments, replies, and checklist items:
+
+```bash
+suth comments create -c CARD --content "{{@Stacey}} Ready for review."
+```
+
+The name is matched case-insensitively against member display names. Unresolved mentions produce a warning.
+
 ## Library Usage
 
 You can also use Superthread as a Ruby gem in your code:
