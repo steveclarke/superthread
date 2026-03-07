@@ -57,6 +57,7 @@ module Superthread
       result = content.gsub(ESCAPE_PATTERN, '___ESCAPED_MENTION_\1___END___')
 
       # Pass 2: replace {{@Name}} with HTML tags
+      unresolved = []
       result = result.gsub(MENTION_PATTERN) do |match|
         name = Regexp.last_match(1).strip
         member = member_map[name.downcase]
@@ -70,8 +71,14 @@ module Superthread
             "user-value=\"#{safe_name}\" " \
             'denotation-char="@"></user-mention>'
         else
+          unresolved << name
           match
         end
+      end
+
+      unresolved.each do |name|
+        warn "Warning: Could not resolve mention: #{name}. " \
+          "Check the display name matches a workspace member."
       end
 
       # Pass 3: restore escaped mentions as literal {{@Name}} text

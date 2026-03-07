@@ -148,6 +148,30 @@ RSpec.describe Superthread::MentionFormatter do
       expect(result).to include('user-id="u-steve"')
     end
 
+    context "when mentions don't resolve" do
+      it "warns about unresolved mentions" do
+        expect { formatter.format("Hey {{@Unknown Person}}") }.to output(
+          /Could not resolve mention: Unknown Person/
+        ).to_stderr
+      end
+
+      it "warns about each unresolved mention separately" do
+        expect { formatter.format("{{@Nobody}} and {{@Ghost}}") }.to output(
+          /Could not resolve mention: Nobody.*Could not resolve mention: Ghost/m
+        ).to_stderr
+      end
+
+      it "does not warn for resolved mentions" do
+        expect { formatter.format("{{@Steve Clarke}}") }.not_to output.to_stderr
+      end
+
+      it "warns only for unresolved ones in a mix" do
+        expect { formatter.format("{{@Steve Clarke}} and {{@Nobody}}") }.to output(
+          /Could not resolve mention: Nobody/
+        ).to_stderr
+      end
+    end
+
     context "when content contains raw HTML mention tags" do
       it "warns about <user-mention> tags" do
         content = '<p><user-mention user-id="u123">Steve</user-mention> check this</p>'
