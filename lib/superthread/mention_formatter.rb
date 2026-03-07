@@ -30,6 +30,8 @@ module Superthread
     ESCAPE_PATTERN = /\\\{\{@([^}]+)\}\}/
     # @return [Regexp] pattern matching placeholders used during escape processing
     PLACEHOLDER_PATTERN = /___ESCAPED_MENTION_(.+?)___END___/
+    # @return [Regexp] pattern matching raw HTML mention tags that should use {{@Name}} syntax
+    HTML_MENTION_PATTERN = /<(?:user-mention|mention-user)\b/i
 
     # @param client [Superthread::Client] the API client for fetching members
     # @param workspace_id [String] the workspace to look up members in
@@ -43,6 +45,7 @@ module Superthread
     # @param content [String, nil] text that may contain {{@Name}} patterns
     # @return [String, nil] content with mentions converted to HTML tags
     def format(content)
+      warn_html_mentions(content) if content
       return content if content.nil? || !content.include?("{{@")
 
       member_map = build_member_map
@@ -76,6 +79,18 @@ module Superthread
     end
 
     private
+
+    # Warns when content contains raw HTML mention tags instead of {{@Name}} syntax.
+    #
+    # @param content [String] text to check for raw HTML mention tags
+    # @return [void]
+    def warn_html_mentions(content)
+      return unless content.match?(HTML_MENTION_PATTERN)
+
+      warn "Warning: Raw HTML mention tags detected in content. " \
+        "Use {{@Name}} syntax to mention users " \
+        "(e.g., '{{@Steve Clarke}} check this')."
+    end
 
     # Fetches workspace members and builds a case-insensitive lookup map.
     #

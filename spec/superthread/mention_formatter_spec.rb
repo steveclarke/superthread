@@ -147,5 +147,28 @@ RSpec.describe Superthread::MentionFormatter do
       result = formatter.format("{{@Steve Clarke}}")
       expect(result).to include('user-id="u-steve"')
     end
+
+    context "when content contains raw HTML mention tags" do
+      it "warns about <user-mention> tags" do
+        content = '<p><user-mention user-id="u123">Steve</user-mention> check this</p>'
+        expect { formatter.format(content) }.to output(
+          /Use \{\{@Name\}\} syntax to mention users/
+        ).to_stderr
+      end
+
+      it "warns about <mention-user> tags" do
+        content = '<p><mention-user user-id="u123">Steve</mention-user> check this</p>'
+        expect { formatter.format(content) }.to output(
+          /Use \{\{@Name\}\} syntax to mention users/
+        ).to_stderr
+      end
+
+      it "still sends the content through unchanged" do
+        content = '<p><user-mention user-id="u123">Steve</user-mention></p>'
+        result = nil
+        expect { result = formatter.format(content) }.to output(anything).to_stderr
+        expect(result).to eq(content)
+      end
+    end
   end
 end
