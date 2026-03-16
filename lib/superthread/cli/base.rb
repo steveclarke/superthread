@@ -137,7 +137,7 @@ module Superthread
       def output_list(items, columns: nil, headers: {})
         all_items = items.respond_to?(:items) ? items.items : Array(items)
         limit = effective_limit
-        truncated = all_items.length > limit
+        truncated = limit && all_items.length > limit
         visible = truncated ? all_items.first(limit) : all_items
 
         if json_output?

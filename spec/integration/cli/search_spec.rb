@@ -25,6 +25,20 @@ RSpec.describe "st search", :cli do
     end
   end
 
+  describe "search query with --limit 0" do
+    before do
+      stub_api_get("test_workspace/search", response: ApiFixtures::Search::RESULTS, query: {query: "test"})
+    end
+
+    it "shows all results with --limit 0" do
+      result = run_cli("search", "query", "test", "--limit=0")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Auth Module")
+      expect(result[:stdout]).to include("Login Flow")
+    end
+  end
+
   describe "search query with type filter" do
     before do
       stub_api_get("test_workspace/search", response: ApiFixtures::Search::RESULTS_TYPED, query: {query: "authentication"})
