@@ -165,7 +165,7 @@ RSpec.describe "st checklists", :cli do
     end
   end
 
-  describe "checklists check ITEM_ID" do
+  describe "checklists check ITEM_ID [ITEM_ID...]" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",
         response: {checklist_item: ApiFixtures::Cards::CHECKLIST_ITEM_UPDATE})
@@ -175,11 +175,21 @@ RSpec.describe "st checklists", :cli do
       result = run_cli("checklists", "check", "item-1", "--card=card-123", "--checklist=checklist-1")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("yes")
+      expect(result[:stdout]).to include("Checked 1 item(s)")
+    end
+
+    it "marks multiple items as checked" do
+      stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-2",
+        response: {checklist_item: ApiFixtures::Cards::CHECKLIST_ITEM_UPDATE})
+
+      result = run_cli("checklists", "check", "item-1", "item-2", "--card=card-123", "--checklist=checklist-1")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Checked 2 item(s)")
     end
   end
 
-  describe "checklists uncheck ITEM_ID" do
+  describe "checklists uncheck ITEM_ID [ITEM_ID...]" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",
         response: {checklist_item: ApiFixtures::Cards::CHECKLIST_ITEM_CREATE})
@@ -189,7 +199,17 @@ RSpec.describe "st checklists", :cli do
       result = run_cli("checklists", "uncheck", "item-1", "--card=card-123", "--checklist=checklist-1")
 
       expect(result[:exit_code]).to eq(0)
-      expect(result[:stdout]).to include("no")
+      expect(result[:stdout]).to include("Unchecked 1 item(s)")
+    end
+
+    it "marks multiple items as unchecked" do
+      stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-2",
+        response: {checklist_item: ApiFixtures::Cards::CHECKLIST_ITEM_CREATE})
+
+      result = run_cli("checklists", "uncheck", "item-1", "item-2", "--card=card-123", "--checklist=checklist-1")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Unchecked 2 item(s)")
     end
   end
 end

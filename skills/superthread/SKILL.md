@@ -265,8 +265,8 @@ suth checklists delete CHECKLIST -c CARD
 suth checklists add-item CHECKLIST --title "Do thing" -c CARD [--checked]
 suth checklists update-item ITEM --checklist CL -c CARD --title "New"
 suth checklists remove-item ITEM --checklist CL -c CARD
-suth checklists check ITEM --checklist CL -c CARD
-suth checklists uncheck ITEM --checklist CL -c CARD
+suth checklists check ITEM [ITEM...] --checklist CL -c CARD
+suth checklists uncheck ITEM [ITEM...] --checklist CL -c CARD
 ```
 
 ### Tags

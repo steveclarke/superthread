@@ -179,43 +179,45 @@ module Superthread
         end
       end
 
-      desc "check ITEM_ID", "Mark a checklist item as checked"
+      desc "check ITEM_ID [ITEM_ID...]", "Mark checklist item(s) as checked"
       option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :checklist, type: :string, required: true, desc: "Parent checklist ID"
-      # Mark a checklist item as completed.
+      # Mark one or more checklist items as completed.
       #
-      # @param item_id [String] the unique identifier of the item
+      # @param item_ids [Array<String>] the unique identifiers of the items
       # @return [void]
-      def check(item_id)
+      def check(*item_ids)
         handle_error do
-          item = client.cards.update_checklist_item(
-            workspace_id, options[:card], options[:checklist], item_id,
-            checked: true
-          )
-          output_item item, fields: %i[id title checked checklist_id], labels: {
-            id: "Item ID",
-            checklist_id: "Checklist ID"
-          }
+          raise Thor::Error, "No item IDs provided" if item_ids.empty?
+
+          item_ids.each do |item_id|
+            client.cards.update_checklist_item(
+              workspace_id, options[:card], options[:checklist], item_id,
+              checked: true
+            )
+          end
+          output_success "Checked #{item_ids.size} item(s)"
         end
       end
 
-      desc "uncheck ITEM_ID", "Mark a checklist item as unchecked"
+      desc "uncheck ITEM_ID [ITEM_ID...]", "Mark checklist item(s) as unchecked"
       option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :checklist, type: :string, required: true, desc: "Parent checklist ID"
-      # Mark a checklist item as not completed.
+      # Mark one or more checklist items as not completed.
       #
-      # @param item_id [String] the unique identifier of the item
+      # @param item_ids [Array<String>] the unique identifiers of the items
       # @return [void]
-      def uncheck(item_id)
+      def uncheck(*item_ids)
         handle_error do
-          item = client.cards.update_checklist_item(
-            workspace_id, options[:card], options[:checklist], item_id,
-            checked: false
-          )
-          output_item item, fields: %i[id title checked checklist_id], labels: {
-            id: "Item ID",
-            checklist_id: "Checklist ID"
-          }
+          raise Thor::Error, "No item IDs provided" if item_ids.empty?
+
+          item_ids.each do |item_id|
+            client.cards.update_checklist_item(
+              workspace_id, options[:card], options[:checklist], item_id,
+              checked: false
+            )
+          end
+          output_success "Unchecked #{item_ids.size} item(s)"
         end
       end
     end
