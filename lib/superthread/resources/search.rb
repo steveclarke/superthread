@@ -9,8 +9,12 @@ module Superthread
     class Search < Base
       # Searches across workspace entities.
       #
+      # Follows pagination cursors automatically. When limit is provided,
+      # stops after accumulating that many results.
+      #
       # @param workspace_id [String] the workspace identifier
       # @param query [String] the search query string
+      # @param limit [Integer, nil] max results to return (nil = no limit)
       # @param params [Hash{Symbol => Object}] optional search parameters
       # @option params [String] :field the field to search (title, content)
       # @option params [Array<String>] :types entity types to include (board, card, page, etc.)
@@ -18,28 +22,36 @@ module Superthread
       # @option params [String] :space_id the space identifier to filter by
       # @option params [Boolean] :archived when true, includes archived entities
       # @option params [Boolean] :grouped when true, groups results by type (default: false)
-      # @option params [String] :cursor the pagination cursor for next page
       # @return [Superthread::Objects::Collection] the search results
-      def query(workspace_id, query:, **params)
+      def query(workspace_id, query:, limit: nil, **params)
         ws = safe_id("workspace_id", workspace_id)
-        # Default grouped to false so results come in a flat array
-        # Use || instead of fetch because CLI may pass grouped: nil explicitly
         grouped = params[:grouped].nil? ? false : params[:grouped]
-        search_params = compact_params(
-          query: query,
-          project_id: params[:space_id],
-          grouped: grouped,
-          **params.except(:space_id, :grouped)
-        )
-        response = http_get("/#{ws}/search", params: search_params)
+        all_results = []
+        cursor = nil
 
-        # Unwrap results - each item is {"card": {...}} or {"board": {...}}, etc.
-        results = (response[:results] || []).map do |item|
-          result_type, data = item.first
-          data.merge(result_type: result_type.to_s)
+        loop do
+          search_params = compact_params(
+            query: query,
+            project_id: params[:space_id],
+            grouped: grouped,
+            cursor: cursor,
+            **params.except(:space_id, :grouped)
+          )
+          response = http_get("/#{ws}/search", params: search_params)
+
+          results = (response[:results] || []).map do |item|
+            result_type, data = item.first
+            data.merge(result_type: result_type.to_s)
+          end
+          all_results.concat(results)
+
+          cursor = response[:cursor]
+          break if cursor.nil? || cursor.empty?
+          break if limit && all_results.size >= limit
         end
 
-        Objects::Collection.from_response(results)
+        all_results = all_results.first(limit) if limit
+        Objects::Collection.from_response(all_results)
       end
     end
   end
