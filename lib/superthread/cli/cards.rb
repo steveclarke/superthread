@@ -441,11 +441,23 @@ module Superthread
             sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
               space_id: existing.project_id)
             list = sprint_obj.lists&.find { |l| l.title&.downcase == list_ref.downcase }
+            unless list || looks_like_id?(list_ref)
+              available = sprint_obj.lists&.map(&:title)&.join(", ") || "none"
+              raise Thor::Error, "List '#{list_ref}' not found in sprint. Available: #{available}"
+            end
             result[:list_id] = list ? list.id : list_ref
             result[:sprint_id] = existing.sprint_id
             result[:project_id] = existing.project_id
+          elsif looks_like_id?(list_ref)
+            result[:list_id] = list_ref
           else
-            result[:list_id] = resolve_list(list_ref)
+            board = client.boards.find(workspace_id, existing.board_id)
+            list = board.lists&.find { |l| l.title&.downcase == list_ref.downcase }
+            unless list
+              available = board.lists&.map(&:title)&.join(", ") || "none"
+              raise Thor::Error, "List '#{list_ref}' not found on board. Available: #{available}"
+            end
+            result[:list_id] = list.id
           end
         end
 
@@ -518,7 +530,7 @@ module Superthread
         card.checklists.each do |checklist|
           progress = "(#{checklist.completed_count}/#{checklist.total_count})"
           Ui.kv(checklist.title, progress)
-          checklist.items&.each do |item|
+          checklist.sorted_items.each do |item|
             marker = item.checked? ? "✓" : "○"
             title = item.title.gsub(/<[^>]*>/, "").strip
             puts "  #{marker} #{title}"

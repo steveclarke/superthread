@@ -111,7 +111,7 @@ module ApiFixtures
             title: "Checklist to Delete",
             card_id: "card-123",
             items: [
-              {id: "item-to-delete", title: "Item to Delete", checked: false}
+              {id: "item-to-delete", title: "Item to Delete", checked: false, position: 0}
             ]
           }
         ]

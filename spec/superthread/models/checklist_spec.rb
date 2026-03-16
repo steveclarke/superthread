@@ -83,6 +83,36 @@ RSpec.describe Superthread::Models::Checklist do
     end
   end
 
+  describe "#sorted_items" do
+    it "returns items sorted by position" do
+      sorted_checklist = described_class.from_response({
+        "id" => "1",
+        "items" => [
+          {"id" => "a", "title" => "Third", "checked" => false, "position" => 2},
+          {"id" => "b", "title" => "First", "checked" => false, "position" => 0},
+          {"id" => "c", "title" => "Second", "checked" => false, "position" => 1}
+        ]
+      })
+      expect(sorted_checklist.sorted_items.map(&:title)).to eq(["First", "Second", "Third"])
+    end
+
+    it "returns empty array when items is nil" do
+      empty_checklist = described_class.from_response({"id" => "1"})
+      expect(empty_checklist.sorted_items).to eq([])
+    end
+
+    it "treats nil position as 0" do
+      mixed_checklist = described_class.from_response({
+        "id" => "1",
+        "items" => [
+          {"id" => "a", "title" => "With position", "checked" => false, "position" => 1},
+          {"id" => "b", "title" => "Without position", "checked" => false}
+        ]
+      })
+      expect(mixed_checklist.sorted_items.map(&:title)).to eq(["Without position", "With position"])
+    end
+  end
+
   describe "#completed_count" do
     it "returns number of checked items" do
       expect(checklist.completed_count).to eq(2)

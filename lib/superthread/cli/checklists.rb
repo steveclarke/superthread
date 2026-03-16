@@ -57,7 +57,7 @@ module Superthread
             if checklist.items&.any?
               puts ""
               Ui.section "Items"
-              checklist.items.each do |item|
+              checklist.sorted_items.each do |item|
                 marker = item.checked? ? "✓" : "○"
                 puts "  #{marker} #{item.title} (#{item.id})"
               end

@@ -57,6 +57,13 @@ module Superthread
 
       timestamps :time_created, :time_updated
 
+      # Items sorted by position.
+      #
+      # @return [Array<ChecklistItem>] items in position order
+      def sorted_items
+        (items || []).sort_by { |i| i.position || 0 }
+      end
+
       # Count of completed items.
       #
       # @return [Integer] Number of checked items

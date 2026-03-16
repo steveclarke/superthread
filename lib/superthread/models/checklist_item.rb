@@ -41,6 +41,10 @@ module Superthread
       #   @return [Boolean] whether this item is checked/completed
       attribute :checked, Shale::Type::Boolean
 
+      # @!attribute [rw] position
+      #   @return [Integer] position within the checklist for ordering
+      attribute :position, Shale::Type::Integer
+
       # @!attribute [rw] time_created
       #   @return [Integer] Unix timestamp when the item was created
       attribute :time_created, Shale::Type::Integer

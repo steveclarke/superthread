@@ -34,7 +34,7 @@ module Superthread
       @connection.send(method) do |req|
         req.url(relative_path)
         req.params = params if params
-        req.body = body.to_json if body
+        req.body = body.to_json.encode(Encoding::UTF_8) if body
       end
     end
 
