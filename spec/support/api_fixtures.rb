@@ -118,6 +118,42 @@ module ApiFixtures
       }
     }.freeze
 
+    SEARCH_CARD_1 = {
+      card: {
+        id: "card-auth",
+        title: "Auth Module",
+        status: "started",
+        priority: 2,
+        board_id: "10",
+        board_title: "Frontend Board",
+        list_id: "101",
+        list_title: "In Progress",
+        time_created: 1705312200000,
+        time_updated: 1705399000000,
+        members: [{user_id: "u123abc", role: "assignee"}],
+        tags: [],
+        checklists: []
+      }
+    }.freeze
+
+    SEARCH_CARD_2 = {
+      card: {
+        id: "card-login",
+        title: "Login Flow",
+        status: "open",
+        priority: 3,
+        board_id: "10",
+        board_title: "Frontend Board",
+        list_id: "100",
+        list_title: "To Do",
+        time_created: 1705312200000,
+        time_updated: 1705312200000,
+        members: [],
+        tags: [],
+        checklists: []
+      }
+    }.freeze
+
     ASSIGNED = {
       cards: [
         {id: "card-123", title: "Implement feature X", status: "started", priority: 2, list_title: "In Progress"},
@@ -700,6 +736,21 @@ module ApiFixtures
       results: [
         {card: {id: "card-auth", title: "Auth Module", board_id: "1", list_id: "1", project_id: "1"}}
       ]
+    }.freeze
+
+    CARD_RESULTS = {
+      count: 2,
+      cursor: "",
+      results: [
+        {card: {id: "card-auth", title: "Auth Module", board_id: "1", list_id: "1", project_id: "1"}},
+        {card: {id: "card-login", title: "Login Flow", board_id: "1", list_id: "2", project_id: "1"}}
+      ]
+    }.freeze
+
+    CARD_RESULTS_EMPTY = {
+      count: 0,
+      cursor: "",
+      results: []
     }.freeze
   end
 
