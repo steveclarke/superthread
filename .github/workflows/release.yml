@@ -58,7 +58,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           VERSION="${TAG#v}"
-          COMMIT_SHA=$(git rev-parse $TAG)
+          COMMIT_SHA=$(git rev-parse "${TAG}^{commit}")
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "SHA=$COMMIT_SHA" >> $GITHUB_OUTPUT
