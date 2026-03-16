@@ -52,6 +52,60 @@ module Superthread
         end
       end
 
+      desc "search TERM", "Search for cards across boards and spaces"
+      option :space, type: :string, aliases: "-s", desc: "Space to filter by (ID or name)"
+      option :status, type: :string, desc: "Status filter (comma-separated)"
+      option :field, type: :string, enum: %w[title content], desc: "Search in title or content"
+      option :include_archived, type: :boolean, desc: "Include archived cards"
+      # Search for cards by keyword with rich output.
+      #
+      # @param term [String] the search term
+      # @return [void]
+      def search(term)
+        handle_error do
+          fetch_limit = if options[:limit] == 0
+            nil
+          elsif options[:limit].is_a?(Integer) && options[:limit] > 0
+            options[:limit]
+          else
+            30
+          end
+
+          statuses = options[:status]&.split(",")&.map(&:strip)
+          results = client.search.query(
+            workspace_id,
+            query: term,
+            types: ["card"],
+            statuses: statuses,
+            field: options[:field],
+            space_id: (space_id if options[:space]),
+            archived: options[:include_archived],
+            limit: fetch_limit
+          )
+
+          card_ids = results.map { |r| r[:id] }.compact
+          if card_ids.empty?
+            say "No cards found matching '#{term}'.", :yellow unless options[:quiet]
+            return
+          end
+
+          cards = card_ids.filter_map do |id|
+            client.cards.find(workspace_id, id)
+          rescue Superthread::NotFoundError, Superthread::ForbiddenError
+            nil
+          end
+
+          if cards.empty?
+            say "No cards found matching '#{term}'.", :yellow unless options[:quiet]
+            return
+          end
+
+          enrich_members(cards)
+          output_list cards, columns: %i[id title priority list_title board_title members],
+            headers: {id: "CARD_ID", list_title: "LIST", board_title: "BOARD"}
+        end
+      end
+
       desc "get CARD", "Get card details"
       option :raw, type: :boolean, desc: "Show raw content without markdown rendering"
       option :no_content, type: :boolean, desc: "Hide content, show only metadata"
@@ -392,6 +446,14 @@ module Superthread
       end
 
       private
+
+      # Override Base#effective_limit for --limit 0 (unlimited) support.
+      #
+      # @return [Integer, nil] the limit (nil = unlimited when --limit 0)
+      def effective_limit
+        return nil if options[:limit] == 0
+        super
+      end
 
       # Enrich card members with display names from workspace users.
       #

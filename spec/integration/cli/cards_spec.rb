@@ -319,4 +319,71 @@ RSpec.describe "st cards", :cli do
       expect(result[:stdout]).to include("Removed tag tag-1 from card card-123")
     end
   end
+
+  describe "cards search TERM" do
+    before do
+      stub_api_get("test_workspace/search",
+        response: ApiFixtures::Search::CARD_RESULTS,
+        query: {query: "auth"})
+      stub_api_get("test_workspace/cards/card-auth",
+        response: ApiFixtures::Cards::SEARCH_CARD_1)
+      stub_api_get("test_workspace/cards/card-login",
+        response: ApiFixtures::Cards::SEARCH_CARD_2)
+      stub_api_get("teams/test_workspace/members", response: ApiFixtures::Users::MEMBERS)
+    end
+
+    it "searches for cards and shows rich output" do
+      result = run_cli("cards", "search", "auth")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("Auth Module")
+      expect(result[:stdout]).to include("Login Flow")
+      expect(result[:stdout]).to include("Frontend Board")
+      expect(result[:stdout]).to include("In Progress")
+    end
+
+    it "outputs JSON with --json flag" do
+      json = cli_json("cards", "search", "auth")
+
+      expect(json).to be_an(Array)
+      expect(json.length).to eq(2)
+      expect(json.first["title"]).to eq("Auth Module")
+      expect(json.first["board_title"]).to eq("Frontend Board")
+    end
+  end
+
+  describe "cards search with no results" do
+    before do
+      stub_api_get("test_workspace/search",
+        response: ApiFixtures::Search::CARD_RESULTS_EMPTY,
+        query: {query: "nonexistent"})
+    end
+
+    it "shows no results message" do
+      result = run_cli("cards", "search", "nonexistent")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).to include("No cards found")
+    end
+  end
+
+  describe "cards search skips deleted cards" do
+    before do
+      stub_api_get("test_workspace/search",
+        response: ApiFixtures::Search::CARD_RESULTS,
+        query: {query: "auth"})
+      stub_api_error(:get, "test_workspace/cards/card-auth", status: 404, error: "not found")
+      stub_api_get("test_workspace/cards/card-login",
+        response: ApiFixtures::Cards::SEARCH_CARD_2)
+      stub_api_get("teams/test_workspace/members", response: ApiFixtures::Users::MEMBERS)
+    end
+
+    it "shows remaining cards when some are not found" do
+      result = run_cli("cards", "search", "auth")
+
+      expect(result[:exit_code]).to eq(0)
+      expect(result[:stdout]).not_to include("Auth Module")
+      expect(result[:stdout]).to include("Login Flow")
+    end
+  end
 end
