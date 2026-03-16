@@ -52,6 +52,7 @@ To include literal `{{@Name}}` text without triggering a mention, escape it: `\{
 
 ```bash
 suth cards list -b BOARD                         # Cards on a board
+suth cards search "login timeout"                # Find cards by keyword
 suth cards assigned me                           # My cards
 suth cards get CARD                              # Card details
 suth cards create --title "Task" -l LIST -b BOARD
@@ -71,9 +72,12 @@ suth projects list                               # Roadmap projects
 ### Search
 
 ```bash
-suth search query "term"                         # Search workspace
+suth cards search "login timeout"                # Find cards (rich output)
+suth cards search "bug" --status open,started    # Filter by status
+suth cards search "auth" -s SPACE --limit 50     # Filter by space, custom limit
+suth search query "term"                         # Search all entity types
 suth search query "bug" --types card,page        # Filter by type
-suth search query "auth" -s SPACE --grouped      # Filter by space
+suth search query "auth" --status open -s SPACE  # Filter by status and space
 ```
 
 ---
@@ -171,6 +175,11 @@ suth cards assigned USER
 suth cards assigned me
   # Options: --board, --space, --project, --include-archived,
   #          --since DATE, --updated-since DATE
+
+# Search
+suth cards search TERM
+  # Options: -s SPACE, --status STATUS, --field title|content,
+  #          --include-archived, --limit N (default: 30, 0 = unlimited)
 
 # CRUD
 suth cards get CARD
@@ -296,6 +305,14 @@ suth notes delete NOTE
 ```bash
 suth sprints list -s SPACE
 suth sprints get SPRINT -s SPACE
+```
+
+### Search
+
+```bash
+suth search query TERM
+  # Options: --types card,page,..., --status open,started, --field title|content,
+  #          -s SPACE, --include-archived, --grouped, --limit N (default: 30, 0 = unlimited)
 ```
 
 ### Activity
