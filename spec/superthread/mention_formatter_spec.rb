@@ -172,6 +172,45 @@ RSpec.describe Superthread::MentionFormatter do
       end
     end
 
+    context "when content contains plain @Name mentions" do
+      let(:members) do
+        [
+          instance_double(Superthread::Models::User,
+            display_name: "Stacey",
+            user_identifier: "u-stacey"),
+          instance_double(Superthread::Models::User,
+            display_name: "Steve Clarke",
+            user_identifier: "u-steve")
+        ]
+      end
+
+      it "warns when plain @Name matches a workspace member" do
+        expect { formatter.format("@Stacey Ready for review.") }.to output(
+          /did you mean \{\{@Stacey\}\}/
+        ).to_stderr
+      end
+
+      it "does not warn when plain @Name does not match any member" do
+        expect { formatter.format("@Nobody check this") }.not_to output.to_stderr
+      end
+
+      it "does not warn when {{@Name}} syntax is already used" do
+        expect { formatter.format("{{@Stacey}} check this") }.not_to output.to_stderr
+      end
+
+      it "warns when plain @FirstName matches a multi-word display name" do
+        expect { formatter.format("@Steve can you check this?") }.to output(
+          /did you mean \{\{@Steve Clarke\}\}/
+        ).to_stderr
+      end
+
+      it "still passes content through unchanged" do
+        result = nil
+        expect { result = formatter.format("@Stacey check this") }.to output(anything).to_stderr
+        expect(result).to eq("@Stacey check this")
+      end
+    end
+
     context "when content contains raw HTML mention tags" do
       it "warns about <user-mention> tags" do
         content = '<p><user-mention user-id="u123">Steve</user-mention> check this</p>'

@@ -116,7 +116,7 @@ module Superthread
 
       desc "add-item CHECKLIST", "Add item to a checklist"
       option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
-      option :title, type: :string, required: true, desc: "Item title"
+      option :title, type: :string, required: true, desc: "Item title. Use {{@Name}} to mention users"
       option :checked, type: :boolean, default: false, desc: "Create as checked"
       # Add a new item to an existing checklist.
       #
@@ -139,7 +139,7 @@ module Superthread
       desc "update-item ITEM_ID", "Update a checklist item"
       option :card, type: :string, required: true, aliases: "-c", desc: "Parent card ID"
       option :checklist, type: :string, required: true, desc: "Parent checklist ID"
-      option :title, type: :string, desc: "New item title"
+      option :title, type: :string, desc: "New item title. Use {{@Name}} to mention users"
       option :checked, type: :boolean, desc: "Mark as checked/unchecked"
       # Update the title or checked state of a checklist item.
       #

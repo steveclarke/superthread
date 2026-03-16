@@ -173,7 +173,7 @@ module Superthread
       option :board, type: :string, aliases: "-b", desc: "Board (ID or name, required unless --sprint)"
       option :space, type: :string, aliases: "-s", desc: "Space (required for --sprint, helps resolve board name)"
       option :sprint, type: :string, desc: "Sprint (ID or name, required unless --board)"
-      option :content, type: :string, desc: "Card content (HTML)"
+      option :content, type: :string, desc: "Card content (HTML). Use {{@Name}} to mention users"
       option :project, type: :string, desc: "Project ID"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"

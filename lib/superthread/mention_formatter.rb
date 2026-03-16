@@ -32,6 +32,8 @@ module Superthread
     PLACEHOLDER_PATTERN = /___ESCAPED_MENTION_(.+?)___END___/
     # @return [Regexp] pattern matching raw HTML mention tags that should use {{@Name}} syntax
     HTML_MENTION_PATTERN = /<(?:user-mention|mention-user)\b/i
+    # @return [Regexp] pattern matching plain @Word that is not inside {{@...}} delimiters
+    PLAIN_MENTION_PATTERN = /(?<!\{\{)@(\w+)/
 
     # @param client [Superthread::Client] the API client for fetching members
     # @param workspace_id [String] the workspace to look up members in
@@ -46,6 +48,7 @@ module Superthread
     # @return [String, nil] content with mentions converted to HTML tags
     def format(content)
       warn_html_mentions(content) if content
+      warn_plain_mentions(content) if content
       return content if content.nil? || !content.include?("{{@")
 
       member_map = build_member_map
@@ -97,6 +100,36 @@ module Superthread
       warn "Warning: Raw HTML mention tags detected in content. " \
         "Use {{@Name}} syntax to mention users " \
         "(e.g., '{{@Steve Clarke}} check this')."
+    end
+
+    # Warns when content contains plain @Name mentions that match workspace members.
+    # This catches the common mistake of using @Name instead of {{@Name}}.
+    #
+    # @param content [String] text to check for plain @mentions
+    # @return [void]
+    def warn_plain_mentions(content)
+      return if content.include?("{{@")
+
+      names = content.scan(PLAIN_MENTION_PATTERN).flatten
+      return if names.empty?
+
+      member_map = build_member_map
+      return if member_map.nil?
+
+      # Also index by first name for multi-word display names
+      first_name_map = {}
+      member_map.each_value do |info|
+        first = info[:name].split.first&.downcase
+        first_name_map[first] = info[:name] if first
+      end
+
+      names.each do |name|
+        match = member_map[name.downcase]&.fetch(:name) || first_name_map[name.downcase]
+        if match
+          warn "Warning: Found @#{name} — did you mean {{@#{match}}}? " \
+            "Use {{@Name}} syntax to mention users and trigger notifications."
+        end
+      end
     end
 
     # Fetches workspace members and builds a case-insensitive lookup map.
