@@ -7,6 +7,9 @@ module Superthread
     # Provides methods for searching across workspace entities
     # (cards, pages, boards, etc.) via the Superthread API.
     class Search < Base
+      # Safety cap on pagination requests to prevent runaway loops.
+      MAX_PAGES = 100
+
       # Searches across workspace entities.
       #
       # Follows pagination cursors automatically. When limit is provided,
@@ -25,9 +28,10 @@ module Superthread
       # @return [Superthread::Objects::Collection] the search results
       def query(workspace_id, query:, limit: nil, **params)
         ws = safe_id("workspace_id", workspace_id)
-        grouped = params[:grouped].nil? ? false : params[:grouped]
+        grouped = params.fetch(:grouped, false)
         all_results = []
         cursor = nil
+        pages = 0
 
         loop do
           search_params = compact_params(
@@ -46,8 +50,10 @@ module Superthread
           all_results.concat(results)
 
           cursor = response[:cursor]
+          pages += 1
           break if cursor.nil? || cursor.empty?
           break if limit && all_results.size >= limit
+          break if pages >= MAX_PAGES
         end
 
         all_results = all_results.first(limit) if limit

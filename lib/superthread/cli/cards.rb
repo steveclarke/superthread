@@ -63,14 +63,6 @@ module Superthread
       # @return [void]
       def search(term)
         handle_error do
-          fetch_limit = if options[:limit] == 0
-            nil
-          elsif options[:limit].is_a?(Integer) && options[:limit] > 0
-            options[:limit]
-          else
-            30
-          end
-
           statuses = options[:status]&.split(",")&.map(&:strip)
           results = client.search.query(
             workspace_id,
@@ -80,7 +72,7 @@ module Superthread
             field: options[:field],
             space_id: (space_id if options[:space]),
             archived: options[:include_archived],
-            limit: fetch_limit
+            limit: effective_limit
           )
 
           card_ids = results.map { |r| r[:id] }.compact
@@ -447,12 +439,14 @@ module Superthread
 
       private
 
-      # Override Base#effective_limit for --limit 0 (unlimited) support.
+      # Override Base#effective_limit for search-specific defaults.
+      # Returns nil for --limit 0 (unlimited), 30 for search default.
       #
       # @return [Integer, nil] the limit (nil = unlimited when --limit 0)
       def effective_limit
-        return nil if options[:limit] == 0
-        super
+        limit = options[:limit]
+        return nil if limit == 0
+        (limit.is_a?(Integer) && limit > 0) ? limit : 30
       end
 
       # Enrich card members with display names from workspace users.

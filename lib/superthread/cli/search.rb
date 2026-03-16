@@ -25,7 +25,7 @@ module Superthread
             field: options[:field],
             types: types,
             statuses: statuses,
-            space_id: space_id,
+            space_id: (space_id if options[:space]),
             archived: options[:include_archived],
             grouped: options[:grouped],
             limit: effective_limit
