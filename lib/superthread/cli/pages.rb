@@ -55,19 +55,40 @@ module Superthread
 
       desc "update PAGE", "Update a page"
       option :title, type: :string, desc: "New title"
+      option :content, type: :string, desc: "Page content (HTML)"
       option :is_public, type: :boolean, desc: "Public visibility"
       option :parent_page, type: :string, desc: "Parent page ID"
       option :archived, type: :boolean, desc: "Archive/unarchive"
       # Updates an existing page's properties.
       #
+      # Content is updated via a separate PUT endpoint since the standard
+      # PATCH endpoint does not support content changes.
+      #
       # @param page_id [String] numeric ID or URL slug of the page to retrieve
       # @return [void]
       def update(page_id)
         handle_error do
-          opts = symbolized_options(:title, :is_public, :archived)
-          opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
-          page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
-            client.pages.update(workspace_id, page_id, **opts)
+          # Update content via dedicated PUT endpoint (separate from PATCH)
+          if options[:content]
+            with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+              client.pages.update_content(workspace_id, page_id, content: options[:content])
+            end
+          end
+
+          # Update other fields via PATCH (skip if only content was provided)
+          has_patch_fields = options[:title] || !options[:is_public].nil? || !options[:archived].nil? || options[:parent_page]
+
+          if has_patch_fields
+            opts = symbolized_options(:title, :is_public, :archived)
+            opts[:parent_page_id] = options[:parent_page] if options[:parent_page]
+            page = with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+              client.pages.update(workspace_id, page_id, **opts)
+            end
+          end
+
+          # If only content was updated, fetch the page for output
+          page ||= with_not_found("Page not found: '#{page_id}'. Use 'suth pages list' to see available pages.") do
+            client.pages.find(workspace_id, page_id)
           end
           output_item page, labels: {id: "Page ID"}
         end

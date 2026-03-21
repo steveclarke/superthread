@@ -95,6 +95,20 @@ module Superthread
         )
       end
 
+      # Performs a PUT request and returns a typed object.
+      #
+      # @param path [String] the API endpoint path
+      # @param body [Hash{Symbol => Object}, nil] optional request body
+      # @param object_class [Class, nil] the model class to instantiate
+      # @param unwrap_key [Symbol, nil] key to extract from response before wrapping
+      # @return [Superthread::Object] the response wrapped in an object
+      def put_object(path, body: nil, object_class: nil, unwrap_key: nil)
+        @client.request_object(
+          method: :put, path: path, body: body,
+          object_class: object_class, unwrap_key: unwrap_key
+        )
+      end
+
       # Performs a DELETE request and returns a typed object.
       #
       # @param path [String] the API endpoint path

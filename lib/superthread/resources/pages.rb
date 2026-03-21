@@ -56,15 +56,30 @@ module Superthread
       # @param page_id [String] the page identifier
       # @param params [Hash{Symbol => Object}] the attributes to update
       # @option params [String] :title the new page title
-      # @option params [String] :content the new page content as HTML
       # @option params [Boolean] :archived whether the page is archived
       # @option params [String] :parent_page_id the new parent page identifier
       # @return [Superthread::Models::Page] the updated page
+      # @note Content updates use a separate PUT endpoint; use {#update_content} instead.
       def update(workspace_id, page_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         page = safe_id("page_id", page_id)
         patch_object("/#{ws}/pages/#{page}", body: compact_params(**params),
           object_class: Models::Page, unwrap_key: :page)
+      end
+
+      # Updates a page's content via the dedicated PUT endpoint.
+      #
+      # Page content cannot be updated through the standard PATCH endpoint.
+      # This method uses the separate PUT endpoint for content updates.
+      #
+      # @param workspace_id [String] the workspace identifier
+      # @param page_id [String] the page identifier
+      # @param content [String] the new content as HTML
+      # @return [Superthread::Object] a response object with success: true
+      def update_content(workspace_id, page_id, content:)
+        ws = safe_id("workspace_id", workspace_id)
+        page = safe_id("page_id", page_id)
+        put_object("/#{ws}/pages/#{page}/content", body: {content: content, is_html: true})
       end
 
       # Duplicates a page to a destination space.
