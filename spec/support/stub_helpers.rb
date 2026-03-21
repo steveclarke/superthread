@@ -35,6 +35,16 @@ module StubHelpers
       )
   end
 
+  # Stub a PUT request returning JSON
+  def stub_api_put(path, response:, status: 200)
+    stub_request(:put, "#{BASE_URL}/#{path}")
+      .to_return(
+        status: status,
+        body: response.to_json,
+        headers: {"Content-Type" => "application/json"}
+      )
+  end
+
   # Stub a DELETE request returning success
   def stub_api_delete(path, response: {success: true}, status: 200)
     stub_request(:delete, "#{BASE_URL}/#{path}")

@@ -52,13 +52,30 @@ module Superthread
       # @option params [String] :epic_id the new epic identifier
       # @option params [Boolean] :archived whether the card is archived
       # @return [Superthread::Models::Card] the updated card
-      # @note Content cannot be updated via this API; it uses WebSocket collaboration.
+      # @note Content updates use a separate PUT endpoint; use {#update_content} instead.
       # @note parent_card_id is not supported on update; the API silently ignores it.
       def update(workspace_id, card_id, **params)
         ws = safe_id("workspace_id", workspace_id)
         card = safe_id("card_id", card_id)
         patch_object("/#{ws}/cards/#{card}", body: compact_params(**params),
           object_class: Models::Card, unwrap_key: :card)
+      end
+
+      # Updates a card's content (description) via the dedicated PUT endpoint.
+      #
+      # Card content cannot be updated through the standard PATCH endpoint
+      # because the web app uses WebSocket collaboration for real-time editing.
+      # This method uses the separate PUT endpoint for content updates.
+      #
+      # @param workspace_id [String] the workspace identifier
+      # @param card_id [String] the card identifier
+      # @param content [String] the new content as HTML
+      # @return [Superthread::Object] a response object with success: true
+      def update_content(workspace_id, card_id, content:)
+        ws = safe_id("workspace_id", workspace_id)
+        card = safe_id("card_id", card_id)
+        content = format_mentions(workspace_id, content)
+        put_object("/#{ws}/cards/#{card}/content", body: {content: content, is_html: true})
       end
 
       # Gets a specific card with full details.

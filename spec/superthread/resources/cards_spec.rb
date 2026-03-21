@@ -25,6 +25,25 @@ RSpec.describe Superthread::Resources::Cards do
     end
   end
 
+  describe "#update_content" do
+    before do
+      stub_api_put("test_workspace/cards/card-123/content",
+        response: {success: true})
+    end
+
+    it "updates card content via PUT endpoint" do
+      result = client.cards.update_content(
+        "test_workspace",
+        "card-123",
+        content: "<p>Updated description</p>"
+      )
+
+      expect(result[:success]).to be true
+      expect(WebMock).to have_requested(:put, "https://api.superthread.com/v1/test_workspace/cards/card-123/content")
+        .with(body: hash_including("content" => "<p>Updated description</p>", "is_html" => true))
+    end
+  end
+
   describe "#update_checklist_item" do
     before do
       stub_api_patch("test_workspace/cards/card-123/checklists/checklist-1/items/item-1",

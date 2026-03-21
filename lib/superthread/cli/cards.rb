@@ -205,6 +205,7 @@ module Superthread
 
       desc "update CARD", "Update a card"
       option :title, type: :string, desc: "New title"
+      option :content, type: :string, desc: "Card content (HTML). Use {{@Name}} to mention users"
       option :list, type: :string, aliases: "-l", desc: "Destination list (ID or name)"
       option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
       option :sprint, type: :string, desc: "Sprint to move card to (ID or name)"
@@ -215,6 +216,9 @@ module Superthread
       option :archived, type: :boolean, desc: "Archive/unarchive"
       # Update an existing card's properties.
       #
+      # Content is updated via a separate PUT endpoint since the standard
+      # PATCH endpoint does not support content changes.
+      #
       # @param card_id [String] the unique identifier of the card to update
       # @return [void]
       def update(card_id)
@@ -222,36 +226,50 @@ module Superthread
           require_space_for_sprint!
 
           begin
-            # WORKAROUND: API ignores title when combined with list_id,
-            # so we make separate requests when both are provided.
-            # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
-            if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:epic])
-              # First update non-move fields
-              field_opts = symbolized_options(:title, :priority, :archived)
-              field_opts[:epic_id] = options[:epic] if options[:epic]
-              client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
-
-              # Then move the card (include sprint context)
-              move_opts = resolve_list_with_context(options[:list], card_id)
-              move_opts[:position] = options[:position] if options[:position]
-              card = client.cards.update(workspace_id, card_id, **move_opts)
-            else
-              opts = symbolized_options(:title, :priority, :archived)
-              opts[:epic_id] = options[:epic] if options[:epic]
-              opts[:position] = options[:position] if options[:position]
-
-              if options[:list]
-                opts.merge!(resolve_list_with_context(options[:list], card_id))
-              elsif options[:sprint]
-                # Moving to a sprint without --list — default to first list
-                opts[:sprint_id] = sprint_id
-                opts[:project_id] = space_id
-                sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-                opts[:list_id] = sprint_obj.lists.first&.id
-              end
-
-              card = client.cards.update(workspace_id, card_id, **opts)
+            # Update content via dedicated PUT endpoint (separate from PATCH)
+            if options[:content]
+              client.cards.update_content(workspace_id, card_id, content: options[:content])
             end
+
+            # Update other fields via PATCH (skip if only content was provided)
+            has_patch_fields = options[:title] || options[:list] || options[:priority] ||
+              options[:archived] || options[:epic] || options[:position] || options[:sprint]
+
+            if has_patch_fields
+              # WORKAROUND: API ignores title when combined with list_id,
+              # so we make separate requests when both are provided.
+              # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
+              if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:epic])
+                # First update non-move fields
+                field_opts = symbolized_options(:title, :priority, :archived)
+                field_opts[:epic_id] = options[:epic] if options[:epic]
+                client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
+
+                # Then move the card (include sprint context)
+                move_opts = resolve_list_with_context(options[:list], card_id)
+                move_opts[:position] = options[:position] if options[:position]
+                card = client.cards.update(workspace_id, card_id, **move_opts)
+              else
+                opts = symbolized_options(:title, :priority, :archived)
+                opts[:epic_id] = options[:epic] if options[:epic]
+                opts[:position] = options[:position] if options[:position]
+
+                if options[:list]
+                  opts.merge!(resolve_list_with_context(options[:list], card_id))
+                elsif options[:sprint]
+                  # Moving to a sprint without --list — default to first list
+                  opts[:sprint_id] = sprint_id
+                  opts[:project_id] = space_id
+                  sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
+                  opts[:list_id] = sprint_obj.lists.first&.id
+                end
+
+                card = client.cards.update(workspace_id, card_id, **opts)
+              end
+            end
+
+            # If only content was updated, fetch the card for output
+            card ||= client.cards.find(workspace_id, card_id)
           rescue Superthread::ForbiddenError, Superthread::NotFoundError
             raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
           end
