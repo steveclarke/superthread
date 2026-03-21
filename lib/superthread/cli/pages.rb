@@ -76,7 +76,7 @@ module Superthread
           end
 
           # Update other fields via PATCH (skip if only content was provided)
-          has_patch_fields = options[:title] || options[:is_public] || options[:archived] || options[:parent_page]
+          has_patch_fields = options[:title] || !options[:is_public].nil? || !options[:archived].nil? || options[:parent_page]
 
           if has_patch_fields
             opts = symbolized_options(:title, :is_public, :archived)

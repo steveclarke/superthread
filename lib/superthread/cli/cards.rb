@@ -233,13 +233,13 @@ module Superthread
 
             # Update other fields via PATCH (skip if only content was provided)
             has_patch_fields = options[:title] || options[:list] || options[:priority] ||
-              options[:archived] || options[:epic] || options[:position] || options[:sprint]
+              !options[:archived].nil? || options[:epic] || options[:position] || options[:sprint]
 
             if has_patch_fields
               # WORKAROUND: API ignores title when combined with list_id,
               # so we make separate requests when both are provided.
               # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
-              if options[:list] && (options[:title] || options[:priority] || options[:archived] || options[:epic])
+              if options[:list] && (options[:title] || options[:priority] || !options[:archived].nil? || options[:epic])
                 # First update non-move fields
                 field_opts = symbolized_options(:title, :priority, :archived)
                 field_opts[:epic_id] = options[:epic] if options[:epic]

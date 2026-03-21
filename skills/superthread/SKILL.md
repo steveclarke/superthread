@@ -29,7 +29,7 @@ Most commands accept **names or IDs** for spaces, boards, lists, sprints, users,
 
 ## Mentions
 
-Use `{{@Name}}` to mention workspace members in comments, replies, and checklist items. The name is matched case-insensitively against workspace member display names.
+Use `{{@Name}}` to mention workspace members in comments, replies, checklist items, and card/page content. The name is matched case-insensitively against workspace member display names.
 
 ```bash
 # Mention in a comment
