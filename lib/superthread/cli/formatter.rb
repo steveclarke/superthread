@@ -50,17 +50,9 @@ module Superthread
       }.freeze
 
       # Human-readable labels for priority levels.
+      # References the canonical constant from Models::Card.
       # @return [Hash{Integer => String}]
-      PRIORITY_LABELS = {
-        4 => "urgent",
-        3 => "high",
-        2 => "medium",
-        1 => "low"
-      }.freeze
-
-      # Threshold for detecting millisecond timestamps vs second timestamps.
-      # Timestamps above this value are assumed to be in milliseconds.
-      MAX_SECONDS_TIMESTAMP = 9_999_999_999
+      PRIORITY_LABELS = Superthread::Models::Card::PRIORITY_NAMES
 
       module_function
 
@@ -73,13 +65,12 @@ module Superthread
       end
 
       # Normalizes a timestamp to seconds (API sometimes returns milliseconds).
+      # Delegates to {Superthread::TimeUtils.normalize_timestamp}.
       #
       # @param ts [Integer, nil] timestamp in seconds or milliseconds
       # @return [Integer, nil] timestamp in seconds, or nil if nil/zero
       def normalize_timestamp(ts)
-        return nil if ts.nil? || ts == 0
-
-        (ts > MAX_SECONDS_TIMESTAMP) ? ts / 1000 : ts
+        Superthread::TimeUtils.normalize_timestamp(ts)
       end
 
       # Truncates a string to a maximum length with an ellipsis indicator.

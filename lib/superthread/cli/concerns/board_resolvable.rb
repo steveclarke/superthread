@@ -4,6 +4,7 @@ require "active_support/concern"
 
 module Superthread
   module Cli
+    # Shared behavior modules for CLI commands.
     module Concerns
       # Resolves board references (ID or name) to board IDs.
       #

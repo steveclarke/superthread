@@ -105,7 +105,7 @@ module Superthread
             ts = item.send(field)
             next false if ts.nil?
 
-            ts = Formatter.normalize_timestamp(ts)
+            ts = Superthread::TimeUtils.normalize_timestamp(ts)
             next false if ts.nil?
 
             (since.nil? || ts >= since) && (until_time.nil? || ts <= until_time)

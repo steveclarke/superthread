@@ -89,9 +89,9 @@ module Superthread
         }
 
         cards.each do |card|
-          created_ts = normalize_timestamp(card.time_created)
-          updated_ts = normalize_timestamp(card.time_updated)
-          completed_ts = normalize_timestamp(card.completed_date)
+          created_ts = TimeUtils.normalize_timestamp(card.time_created)
+          updated_ts = TimeUtils.normalize_timestamp(card.time_updated)
+          completed_ts = TimeUtils.normalize_timestamp(card.completed_date)
 
           # Check for completion (takes precedence)
           if completed_ts && completed_ts >= since_ts
@@ -111,14 +111,6 @@ module Superthread
         activity[:completed].sort_by! { |c| -(c.completed_date || 0) }
 
         activity
-      end
-
-      # Normalize timestamp to seconds (API sometimes returns milliseconds).
-      #
-      # @param ts [Integer, nil] Timestamp
-      # @return [Integer, nil] Normalized timestamp in seconds
-      def normalize_timestamp(ts)
-        Formatter.normalize_timestamp(ts)
       end
 
       # Output activity as JSON.
