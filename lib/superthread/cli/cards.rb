@@ -41,10 +41,11 @@ module Superthread
           end
 
           opts[:list_id] = resolve_list(options[:list]) if options[:list]
-          cards = client.cards.list(workspace_id, **opts)
+          cards = client.cards.list(workspace_id, **opts).to_a
 
           # Client-side date filtering (API doesn't support time-based filters)
-          cards = apply_date_filters(cards)
+          cards = filter_by_date(cards, field: :time_created, since: parse_date(options[:since])) if options[:since]
+          cards = filter_by_date(cards, field: :time_updated, since: parse_date(options[:updated_since])) if options[:updated_since]
 
           enrich_members(cards)
           output_list cards, columns: %i[id title priority list_title members],
@@ -107,10 +108,8 @@ module Superthread
       # @return [void]
       def get(card_id)
         handle_error do
-          begin
-            card = client.cards.find(workspace_id, card_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
+          card = with_not_found("Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards.") do
+            client.cards.find(workspace_id, card_id)
           end
 
           enrich_members(card)
@@ -224,54 +223,63 @@ module Superthread
       def update(card_id)
         handle_error do
           require_space_for_sprint!
+          not_found_msg = "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
 
-          begin
-            # Update content via dedicated PUT endpoint (separate from PATCH)
-            if options[:content]
+          # Update content via dedicated PUT endpoint (separate from PATCH)
+          if options[:content]
+            with_not_found(not_found_msg) do
               client.cards.update_content(workspace_id, card_id, content: options[:content])
             end
+          end
 
-            # Update other fields via PATCH (skip if only content was provided)
-            has_patch_fields = options[:title] || options[:list] || options[:priority] ||
-              !options[:archived].nil? || options[:epic] || options[:position] || options[:sprint]
+          # Update other fields via PATCH (skip if only content was provided)
+          has_patch_fields = options[:title] || options[:list] || options[:priority] ||
+            !options[:archived].nil? || options[:epic] || options[:position] || options[:sprint]
 
-            if has_patch_fields
-              # WORKAROUND: API ignores title when combined with list_id,
-              # so we make separate requests when both are provided.
-              # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
-              if options[:list] && (options[:title] || options[:priority] || !options[:archived].nil? || options[:epic])
-                # First update non-move fields
-                field_opts = symbolized_options(:title, :priority, :archived)
-                field_opts[:epic_id] = options[:epic] if options[:epic]
-                client.cards.update(workspace_id, card_id, **field_opts) unless field_opts.empty?
-
-                # Then move the card (include sprint context)
-                move_opts = resolve_list_with_context(options[:list], card_id)
-                move_opts[:position] = options[:position] if options[:position]
-                card = client.cards.update(workspace_id, card_id, **move_opts)
-              else
-                opts = symbolized_options(:title, :priority, :archived)
-                opts[:epic_id] = options[:epic] if options[:epic]
-                opts[:position] = options[:position] if options[:position]
-
-                if options[:list]
-                  opts.merge!(resolve_list_with_context(options[:list], card_id))
-                elsif options[:sprint]
-                  # Moving to a sprint without --list — default to first list
-                  opts[:sprint_id] = sprint_id
-                  opts[:project_id] = space_id
-                  sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
-                  opts[:list_id] = sprint_obj.lists.first&.id
+          if has_patch_fields
+            # WORKAROUND: API ignores title when combined with list_id,
+            # so we make separate requests when both are provided.
+            # TODO: Remove when API is fixed (https://superthread.com/api/known-issues)
+            if options[:list] && (options[:title] || options[:priority] || !options[:archived].nil? || options[:epic])
+              # First update non-move fields
+              field_opts = symbolized_options(:title, :priority, :archived)
+              field_opts[:epic_id] = options[:epic] if options[:epic]
+              unless field_opts.empty?
+                with_not_found(not_found_msg) do
+                  client.cards.update(workspace_id, card_id, **field_opts)
                 end
+              end
 
-                card = client.cards.update(workspace_id, card_id, **opts)
+              # Then move the card (include sprint context)
+              move_opts = resolve_list_with_context(options[:list], card_id)
+              move_opts[:position] = options[:position] if options[:position]
+              card = with_not_found(not_found_msg) do
+                client.cards.update(workspace_id, card_id, **move_opts)
+              end
+            else
+              opts = symbolized_options(:title, :priority, :archived)
+              opts[:epic_id] = options[:epic] if options[:epic]
+              opts[:position] = options[:position] if options[:position]
+
+              if options[:list]
+                opts.merge!(resolve_list_with_context(options[:list], card_id))
+              elsif options[:sprint]
+                # Moving to a sprint without --list — default to first list
+                opts[:sprint_id] = sprint_id
+                opts[:project_id] = space_id
+                sprint_obj = client.sprints.find(workspace_id, sprint_id, space_id: space_id)
+                opts[:list_id] = sprint_obj.lists.first&.id
+              end
+
+              card = with_not_found(not_found_msg) do
+                client.cards.update(workspace_id, card_id, **opts)
               end
             end
+          end
 
-            # If only content was updated, fetch the card for output
-            card ||= client.cards.find(workspace_id, card_id)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
+          # If only content was updated, fetch the card for output
+          card ||= with_not_found(not_found_msg) do
+            client.cards.find(workspace_id, card_id)
           end
           output_item card, labels: {id: "Card ID"}
         end
@@ -284,10 +292,8 @@ module Superthread
       # @return [void]
       def delete(card_ref)
         handle_error do
-          begin
-            card = client.cards.find(workspace_id, card_ref)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Card not found: '#{card_ref}'. Use 'suth cards list -b BOARD' to see available cards."
+          card = with_not_found("Card not found: '#{card_ref}'. Use 'suth cards list -b BOARD' to see available cards.") do
+            client.cards.find(workspace_id, card_ref)
           end
           confirming("Delete card '#{card.title}' (#{card.id})?") do
             client.cards.destroy(workspace_id, card.id)
@@ -308,14 +314,12 @@ module Superthread
       # @return [void]
       def duplicate(card_id)
         handle_error do
-          begin
-            opts = symbolized_options(:title)
-            opts[:project_id] = options[:project]
-            opts[:board_id] = board_id
-            opts[:list_id] = resolve_list(options[:list])
-            card = client.cards.duplicate(workspace_id, card_id, **opts)
-          rescue Superthread::ForbiddenError, Superthread::NotFoundError
-            raise Thor::Error, "Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards."
+          opts = symbolized_options(:title)
+          opts[:project_id] = options[:project]
+          opts[:board_id] = board_id
+          opts[:list_id] = resolve_list(options[:list])
+          card = with_not_found("Card not found: '#{card_id}'. Use 'suth cards list -b BOARD' to see available cards.") do
+            client.cards.duplicate(workspace_id, card_id, **opts)
           end
           output_item card, labels: {id: "Card ID"}
         end
@@ -339,10 +343,11 @@ module Superthread
           opts[:user_id] = resolve_user(user_ref)
           opts[:board_id] = board_id if options[:board]
           opts[:project_id] = options[:project] if options[:project]
-          cards = client.cards.assigned(workspace_id, **opts)
+          cards = client.cards.assigned(workspace_id, **opts).to_a
 
           # Client-side date filtering (API doesn't support time-based filters)
-          cards = apply_date_filters(cards)
+          cards = filter_by_date(cards, field: :time_created, since: parse_date(options[:since])) if options[:since]
+          cards = filter_by_date(cards, field: :time_updated, since: parse_date(options[:updated_since])) if options[:updated_since]
 
           enrich_members(cards)
           output_list cards, columns: %i[id title priority list_title members],
@@ -492,76 +497,73 @@ module Superthread
       # Resolve a list reference and include sprint context when needed.
       #
       # The API requires sprint_id and project_id alongside list_id when moving
-      # cards within a sprint. This method handles three scenarios:
-      # 1. --board or --sprint given: resolve list name with that context
-      # 2. Neither given: fetch the card to discover its sprint/board context
-      # 3. Card is on a board (no sprint): resolve normally
+      # cards within a sprint. Dispatches to one of three strategies based on
+      # whether explicit context (--board/--sprint) was provided.
       #
       # @param list_ref [String] the list ID or name to resolve
       # @param card_id [String] the card identifier to look up for context
       # @return [Hash] params hash with :list_id and optional :sprint_id, :project_id
       def resolve_list_with_context(list_ref, card_id)
-        result = {}
-
         if options[:board] || options[:sprint]
-          result[:list_id] = resolve_list(list_ref)
-          if options[:sprint]
-            result[:sprint_id] = sprint_id
-            result[:project_id] = space_id
-          end
+          resolve_list_with_explicit_context(list_ref)
         else
           existing = client.cards.find(workspace_id, card_id)
           if existing.sprint_id
-            sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
-              space_id: existing.project_id)
-            list = sprint_obj.lists&.find { |l| l.title&.downcase == list_ref.downcase }
-            unless list || looks_like_id?(list_ref)
-              available = sprint_obj.lists&.map(&:title)&.join(", ") || "none"
-              raise Thor::Error, "List '#{list_ref}' not found in sprint. Available: #{available}"
-            end
-            result[:list_id] = list ? list.id : list_ref
-            result[:sprint_id] = existing.sprint_id
-            result[:project_id] = existing.project_id
-          elsif looks_like_id?(list_ref)
-            result[:list_id] = list_ref
+            resolve_list_in_sprint_context(existing, list_ref)
           else
-            board = client.boards.find(workspace_id, existing.board_id)
-            list = board.lists&.find { |l| l.title&.downcase == list_ref.downcase }
-            unless list
-              available = board.lists&.map(&:title)&.join(", ") || "none"
-              raise Thor::Error, "List '#{list_ref}' not found on board. Available: #{available}"
-            end
-            result[:list_id] = list.id
+            resolve_list_on_board(existing, list_ref)
           end
         end
+      end
 
+      # Resolve list when --board or --sprint was explicitly provided.
+      #
+      # @param list_ref [String] the list ID or name
+      # @return [Hash] params hash with :list_id and optional :sprint_id, :project_id
+      def resolve_list_with_explicit_context(list_ref)
+        result = {list_id: resolve_list(list_ref)}
+        if options[:sprint]
+          result[:sprint_id] = sprint_id
+          result[:project_id] = space_id
+        end
         result
       end
 
-      # Apply date filters to a collection of cards.
-      # The API doesn't support time-based filtering, so we filter client-side.
+      # Resolve list for a card that lives in a sprint.
       #
-      # @param cards [Enumerable] the cards to apply --since and --updated_since filters to
-      # @return [Array] Filtered cards
-      def apply_date_filters(cards)
-        since_ts = parse_date(options[:since]) if options[:since]
-        updated_ts = parse_date(options[:updated_since]) if options[:updated_since]
-        return cards.to_a unless since_ts || updated_ts
-
-        cards.to_a.select do |card|
-          (since_ts.nil? || meets_date_threshold?(card.time_created, since_ts)) &&
-            (updated_ts.nil? || meets_date_threshold?(card.time_updated, updated_ts))
+      # @param existing [Card] the current card with sprint context
+      # @param list_ref [String] the list ID or name
+      # @return [Hash] params hash with :list_id, :sprint_id, :project_id
+      def resolve_list_in_sprint_context(existing, list_ref)
+        sprint_obj = client.sprints.find(workspace_id, existing.sprint_id,
+          space_id: existing.project_id)
+        list = sprint_obj.lists&.find { |l| l.title&.downcase == list_ref.downcase }
+        unless list || looks_like_id?(list_ref)
+          available = sprint_obj.lists&.map(&:title)&.join(", ") || "none"
+          raise Thor::Error, "List '#{list_ref}' not found in sprint. Available: #{available}"
         end
+        {
+          list_id: list ? list.id : list_ref,
+          sprint_id: existing.sprint_id,
+          project_id: existing.project_id
+        }
       end
 
-      # Check if a timestamp meets a minimum threshold after normalization.
+      # Resolve list for a card that lives on a board (no sprint).
       #
-      # @param timestamp [Object] the raw timestamp value from the model
-      # @param threshold [Integer] the minimum Unix timestamp
-      # @return [Boolean] true if the normalized timestamp meets or exceeds the threshold
-      def meets_date_threshold?(timestamp, threshold)
-        ts = Formatter.normalize_timestamp(timestamp)
-        ts && ts >= threshold
+      # @param existing [Card] the current card with board context
+      # @param list_ref [String] the list ID or name
+      # @return [Hash] params hash with :list_id
+      def resolve_list_on_board(existing, list_ref)
+        return {list_id: list_ref} if looks_like_id?(list_ref)
+
+        board = client.boards.find(workspace_id, existing.board_id)
+        list = board.lists&.find { |l| l.title&.downcase == list_ref.downcase }
+        unless list
+          available = board.lists&.map(&:title)&.join(", ") || "none"
+          raise Thor::Error, "List '#{list_ref}' not found on board. Available: #{available}"
+        end
+        {list_id: list.id}
       end
 
       # Output card relationships (parent, children, links) in human-readable format.

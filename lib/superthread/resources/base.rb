@@ -197,16 +197,6 @@ module Superthread
         MentionFormatter.new(@client, workspace_id).format(content)
       end
 
-      # Builds an API path prefixed with the workspace ID.
-      #
-      # @param workspace_id [String] the workspace identifier
-      # @param path [String] additional path segments to append
-      # @return [String] the full API path (e.g., "/ws-123/cards")
-      def workspace_path(workspace_id, path = "")
-        ws = safe_id("workspace_id", workspace_id)
-        "/#{ws}#{path}"
-      end
-
       # Returns a success response object for delete operations.
       #
       # @return [Superthread::Object] a response object with success: true

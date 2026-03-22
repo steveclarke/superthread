@@ -22,6 +22,15 @@ module Superthread
       include Concerns::Presentable
       include Concerns::Timestampable
 
+      # Human-readable labels for priority levels.
+      # @return [Hash{Integer => String}]
+      PRIORITY_NAMES = {
+        4 => "urgent",
+        3 => "high",
+        2 => "medium",
+        1 => "low"
+      }.freeze
+
       detail_fields :id, :title, :status, :priority, :list_title, :board_title, :time_created, :time_updated
       list_columns :id, :title, :status, :priority, :list_title
 
@@ -198,7 +207,7 @@ module Superthread
       #
       # @return [String, nil] priority label (urgent, high, medium, low)
       def priority_name
-        Cli::Formatter::PRIORITY_LABELS[priority]
+        PRIORITY_NAMES[priority]
       end
 
       # Returns the parent card as a CardRef, or nil if none.
@@ -230,28 +239,6 @@ module Superthread
       # @return [Hash{String => Array<LinkedCardRef>}] links organized by relationship type
       def links_by_type
         links.group_by(&:relationship)
-      end
-    end
-
-    # Represents a linked card with relationship type.
-    #
-    # Extends Card with linked_card_type attribute to indicate how this
-    # card relates to another (blocks, blocked_by, related, duplicates).
-    #
-    # @example
-    #   linked = card.linked_cards.first
-    #   linked.relationship  # => "blocks"
-    #   linked.title         # => "Other Card"
-    class LinkedCard < Card
-      # @!attribute [rw] linked_card_type
-      #   @return [String] relationship type (blocks, blocked_by, related, duplicates)
-      attribute :linked_card_type, Shale::Type::String
-
-      # Returns the relationship type between this card and the linked card.
-      #
-      # @return [String] relationship type (blocks, blocked_by, related, duplicates)
-      def relationship
-        linked_card_type
       end
     end
 
@@ -308,13 +295,6 @@ module Superthread
       def initialize(data)
         super
         @relationship = data["linked_card_type"] || data[:linked_card_type]
-      end
-
-      # Returns a human-readable string representation.
-      #
-      # @return [String] title with ID in parentheses
-      def to_s
-        "#{title} (#{id})"
       end
     end
   end
