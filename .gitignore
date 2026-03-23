@@ -13,6 +13,9 @@
 # VCR cassettes with sensitive data (keep structure)
 # /spec/fixtures/vcr_cassettes/
 
+# Claude Code
+.claude/settings.local.json
+
 # IDE
 /.idea/
 /.vscode/
