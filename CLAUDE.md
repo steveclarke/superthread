@@ -1,15 +1,4 @@
-# AGENTS.md - Superthread Ruby Gem
-
-Guidelines for AI coding agents working in this repository.
-
-## Project Overview
-
-Ruby gem providing a library and CLI for the Superthread project management API.
-- **Language:** Ruby >= 3.2.0
-- **CLI Framework:** Thor
-- **HTTP Client:** Faraday
-- **Models:** Shale (type-safe serialization)
-- **Style:** StandardRB (RuboCop-based)
+# CLAUDE.md - Superthread
 
 ## Commands
 
@@ -29,18 +18,6 @@ bundle exec bin/suth cards get CARD_ID --json  # Raw JSON (useful for debugging 
 
 Both checks are enforced by Lefthook pre-commit hooks.
 
-## Code Style (StandardRB)
-
-This project uses [StandardRB](https://github.com/standardrb/standard) for code style. Key conventions:
-
-- **Double quotes** for strings: `"hello"` not `'hello'`
-- **No trailing commas** in multi-line arrays/hashes
-- **2-space indentation**
-- **No semicolons**
-- **Spaces inside braces**: `{ foo: bar }` not `{foo: bar}`
-
-StandardRB is opinionated and non-configurable by design. Run `bundle exec standardrb --fix` after all code changes to auto-fix style issues.
-
 ## Resource Pattern
 
 API resources inherit from `Resources::Base`. Use these helpers:
@@ -53,31 +30,6 @@ API resources inherit from `Resources::Base`. Use these helpers:
 | `get_collection`, `post_collection` | HTTP verbs returning collections |
 | `success_response` | Returns `{ success: true }` for delete operations |
 
-Example:
-```ruby
-def find(workspace_id, card_id)
-  ws = safe_id("workspace_id", workspace_id)
-  card = safe_id("card_id", card_id)
-  get_object("/#{ws}/cards/#{card}", object_class: Models::Card, unwrap_key: :card)
-end
-```
-
-## Error Hierarchy
-
-```
-Superthread::Error
-  ConfigurationError              # Config issues (client-side)
-  PathValidationError             # ID validation (client-side)
-  ApiError                        # HTTP errors (base)
-    ClientError                   # 4xx errors
-      AuthenticationError (401)
-      ForbiddenError (403)
-      NotFoundError (404)
-      ValidationError (400, 422)
-      RateLimitError (429)
-    ServerError                   # 5xx errors
-```
-
 ## CLI Output
 
 Use these methods in CLI commands (all respect `--json` flag):
@@ -87,15 +39,6 @@ output_item card, fields: %i[id title status]    # Single item as key-value pair
 output_list cards, columns: %i[id title status]  # Collection as table
 output_success "Card deleted"                    # Success message
 ```
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `SUPERTHREAD_API_KEY` | API authentication key (overrides account) |
-| `SUPERTHREAD_WORKSPACE_ID` | Default workspace ID |
-| `SUPERTHREAD_ACCOUNT` | Account name to use (from config) |
-| `SUPERTHREAD_API_BASE_URL` | API endpoint (default: https://api.superthread.com/v1) |
 
 ## Adding a New Resource
 
