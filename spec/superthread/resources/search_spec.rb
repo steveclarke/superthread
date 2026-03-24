@@ -45,6 +45,17 @@ RSpec.describe Superthread::Resources::Search do
       expect(results.map { |r| r[:title] }).to eq(["Result 1", "Result 2"])
     end
 
+    it "sends grouped=false even when nil is passed" do
+      stub_api_get("test_workspace/search",
+        response: {count: 1, cursor: "", results: [{card: {id: "c1", title: "Found"}}]},
+        query: {query: "test", grouped: "false"})
+
+      results = client.search.query("test_workspace", query: "test", grouped: nil)
+
+      expect(results.count).to eq(1)
+      expect(results.first[:title]).to eq("Found")
+    end
+
     it "stops at limit" do
       page1 = {
         count: 3,

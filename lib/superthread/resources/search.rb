@@ -28,7 +28,7 @@ module Superthread
       # @return [Superthread::Objects::Collection] the search results
       def query(workspace_id, query:, limit: nil, **params)
         ws = safe_id("workspace_id", workspace_id)
-        grouped = params.fetch(:grouped, false)
+        grouped = params.fetch(:grouped, false) || false
         all_results = []
         cursor = nil
         pages = 0

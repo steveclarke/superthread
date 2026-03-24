@@ -10,6 +10,7 @@ RSpec.describe Superthread::Resources::Cards do
   describe "#list with sprint filter" do
     before do
       stub_api_post("test_workspace/views/preview", response: {
+        count: 1, cursor: "",
         cards: [{id: "card-s1", title: "Sprint Card", priority: 2, list_title: "To Do"}]
       })
     end
@@ -22,6 +23,57 @@ RSpec.describe Superthread::Resources::Cards do
         .with(body: hash_including(
           "card_filters" => hash_including("include" => hash_including("sprints" => ["sprint-1"]))
         ))
+    end
+  end
+
+  describe "#list pagination" do
+    let(:url) { "https://api.superthread.com/v1/test_workspace/views/preview" }
+
+    it "follows cursor to fetch all pages" do
+      page1 = {count: 3, cursor: "page2cursor",
+               cards: [{id: "card-1", title: "Card 1"}, {id: "card-2", title: "Card 2"}]}
+      page2 = {count: 3, cursor: "",
+               cards: [{id: "card-3", title: "Card 3"}]}
+
+      stub_request(:post, url)
+        .with { |req| req.uri.query.nil? }
+        .to_return(status: 200, body: page1.to_json, headers: {"Content-Type" => "application/json"})
+      stub_request(:post, url)
+        .with(query: {"cursor" => "page2cursor"})
+        .to_return(status: 200, body: page2.to_json, headers: {"Content-Type" => "application/json"})
+
+      result = client.cards.list("test_workspace", board_id: "board-1")
+
+      expect(result.count).to eq(3)
+      expect(result.map(&:id)).to eq(%w[card-1 card-2 card-3])
+    end
+
+    it "passes cursor as query parameter" do
+      page1 = {count: 2, cursor: "abc123", cards: [{id: "card-1", title: "Card 1"}]}
+      page2 = {count: 2, cursor: "", cards: [{id: "card-2", title: "Card 2"}]}
+
+      stub_request(:post, url)
+        .with { |req| req.uri.query.nil? }
+        .to_return(status: 200, body: page1.to_json, headers: {"Content-Type" => "application/json"})
+      stub_request(:post, url)
+        .with(query: {"cursor" => "abc123"})
+        .to_return(status: 200, body: page2.to_json, headers: {"Content-Type" => "application/json"})
+
+      client.cards.list("test_workspace", board_id: "board-1")
+
+      expect(WebMock).to have_requested(:post, url)
+        .with(query: {"cursor" => "abc123"}).once
+    end
+
+    it "stops when cursor is empty" do
+      page1 = {count: 1, cursor: "", cards: [{id: "card-1", title: "Card 1"}]}
+
+      stub_api_post("test_workspace/views/preview", response: page1)
+
+      result = client.cards.list("test_workspace", board_id: "board-1")
+
+      expect(result.count).to eq(1)
+      expect(WebMock).to have_requested(:post, url).once
     end
   end
 
