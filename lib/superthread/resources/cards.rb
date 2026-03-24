@@ -7,6 +7,9 @@ module Superthread
     # Provides methods for creating, updating, listing, and managing cards
     # including their members, checklists, tags, and relationships.
     class Cards < Base
+      # Safety cap on pagination requests to prevent runaway loops.
+      MAX_PAGES = 100
+
       # Creates a new card on a board or in a sprint.
       #
       # @param workspace_id [String] the workspace identifier
@@ -132,8 +135,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         body = {type: "card", card_filters: build_card_filters(filters)}
 
-        post_collection("/#{ws}/views/preview", body: body,
-          item_class: Models::Card, items_key: :cards)
+        paginated_card_list("/#{ws}/views/preview", body: body)
       end
 
       # Gets cards assigned to a user.
@@ -150,8 +152,7 @@ module Superthread
         ws = safe_id("workspace_id", workspace_id)
         body = {type: "card", card_filters: build_card_filters(filters, members: [user_id])}
 
-        post_collection("/#{ws}/views/preview", body: body,
-          item_class: Models::Card, items_key: :cards)
+        paginated_card_list("/#{ws}/views/preview", body: body)
       end
 
       # Links two cards with a relationship.
@@ -357,6 +358,34 @@ module Superthread
       end
 
       private
+
+      # Fetches all pages from the views/preview endpoint.
+      #
+      # The API returns max 25 cards per page with a cursor for pagination.
+      # The cursor must be passed as a query parameter on subsequent requests.
+      #
+      # @param path [String] the API endpoint path
+      # @param body [Hash] the request body with type and card_filters
+      # @return [Superthread::Objects::Collection<Superthread::Models::Card>] all matching cards
+      def paginated_card_list(path, body:)
+        all_cards = []
+        cursor = nil
+        pages = 0
+
+        loop do
+          params = cursor ? {cursor: cursor} : nil
+          response = @client.request(method: :post, path: path, params: params, body: body)
+
+          all_cards.concat(response[:cards] || [])
+
+          cursor = response[:cursor]
+          pages += 1
+          break if cursor.nil? || cursor.empty?
+          break if pages >= MAX_PAGES
+        end
+
+        Objects::Collection.from_response(all_cards, item_class: Models::Card)
+      end
 
       # Builds the card_filters hash for the views/preview endpoint.
       #
