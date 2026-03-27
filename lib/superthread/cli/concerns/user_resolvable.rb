@@ -21,12 +21,22 @@ module Superthread
         # @raise [Thor::Error] if name/email is provided but not found
         def resolve_user(ref)
           return ref if ref.nil?
+
+          return resolve_me if ref.downcase == "me"
+
           return ref if looks_like_id?(ref)
 
           user = find_user_by_name(ref)
           return user.user_identifier if user
 
           raise Thor::Error, "User not found: '#{ref}'. Use 'suth members list' to see available users."
+        end
+
+        # Resolve 'me' to the current user's identifier (cached).
+        #
+        # @return [String] the current user's identifier
+        def resolve_me
+          @me_cache ||= client.users.me.user_identifier
         end
 
         # Get cached workspace members list.
