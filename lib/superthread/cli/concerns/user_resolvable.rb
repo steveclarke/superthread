@@ -21,6 +21,11 @@ module Superthread
         # @raise [Thor::Error] if name/email is provided but not found
         def resolve_user(ref)
           return ref if ref.nil?
+
+          if ref.downcase == "me"
+            return client.users.me.user_identifier
+          end
+
           return ref if looks_like_id?(ref)
 
           user = find_user_by_name(ref)

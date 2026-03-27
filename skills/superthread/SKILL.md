@@ -22,7 +22,7 @@ suth search query "term"           # Search everything
 --json              # Structured output (for scripts/agents)
 -y / --yes          # Skip confirmations
 -s SPACE            # Resolve ambiguous names (boards, lists, sprints)
-me                  # Use as user reference: suth cards assigned me
+me                  # Current user in any user argument (assigned, assign, --owner, --user, etc.)
 ```
 
 Most commands accept **names or IDs** for spaces, boards, lists, sprints, users, and tags.
@@ -198,8 +198,9 @@ suth cards duplicate CARD --project ID -b BOARD -l LIST
   # Required: --project, --board/-b, --list/-l
   # Options: --title, --space/-s
 
-# Members
-suth cards assign CARD USERS                       # Comma-separated
+# Members (USERS = IDs, names, emails, or 'me'; comma-separated)
+suth cards assign CARD USERS
+suth cards assign CARD me                          # Assign yourself
 suth cards unassign CARD USERS
 
 # Relationships

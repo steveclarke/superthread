@@ -100,6 +100,7 @@ RSpec.describe "st activity", :cli do
 
     context "with completed cards" do
       before do
+        stub_api_get("users/me", response: ApiFixtures::Users::ME)
         stub_api_post("test_workspace/views/preview", response: {
           cards: [
             {
@@ -127,6 +128,7 @@ RSpec.describe "st activity", :cli do
 
     context "with no activity" do
       before do
+        stub_api_get("users/me", response: ApiFixtures::Users::ME)
         stub_api_post("test_workspace/views/preview", response: {
           cards: [
             {
@@ -151,6 +153,7 @@ RSpec.describe "st activity", :cli do
 
   describe "activity with date filters" do
     before do
+      stub_api_get("users/me", response: ApiFixtures::Users::ME)
       stub_api_post("test_workspace/views/preview", response: {
         cards: [
           {
