@@ -179,7 +179,7 @@ module Superthread
       option :priority, type: :numeric, desc: "Priority level (1=low, 4=urgent)"
       option :parent_card, type: :string, desc: "Parent card ID"
       option :epic, type: :string, desc: "Epic ID"
-      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
+      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, email, or 'me')"
       # Create a new card on a board or sprint.
       #
       # @return [void]

@@ -325,7 +325,7 @@ Common options have short forms:
 > - Most commands accept **names or IDs** for spaces, boards, lists, sprints, users, and tags
 > - Use `-s SPACE` to help when board or list names are unclear
 > - Use `--json` for scripted output: `suth cards assigned me --json`
-> - Use `me` as a shortcut: `suth cards assigned me`
+> - Use `me` in any user argument: `suth cards assigned me`, `suth cards assign CARD me`, `--owner me`
 > - Priority levels: 1=Urgent, 2=High, 3=Medium, 4=Low
 
 ### Mentions

@@ -42,7 +42,7 @@ module Superthread
       option :content, type: :string, desc: "Project description"
       option :start_date, type: :numeric, desc: "Start date (Unix timestamp)"
       option :due_date, type: :numeric, desc: "Due date (Unix timestamp)"
-      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, or email)"
+      option :owner, type: :string, aliases: "-o", desc: "Owner (user ID, name, email, or 'me')"
       option :priority, type: :numeric, desc: "Priority level"
       # Creates a new project on a board list.
       #
@@ -60,7 +60,7 @@ module Superthread
       option :list, type: :string, aliases: "-l", desc: "Destination list (ID or name, requires --board)"
       option :board, type: :string, aliases: "-b", desc: "Board (helps resolve list name)"
       option :space, type: :string, aliases: "-s", desc: "Space (helps resolve board name)"
-      option :owner, type: :string, aliases: "-o", desc: "New owner (user ID, name, or email)"
+      option :owner, type: :string, aliases: "-o", desc: "New owner (user ID, name, email, or 'me')"
       option :start_date, type: :numeric, desc: "Start date"
       option :due_date, type: :numeric, desc: "Due date"
       option :priority, type: :numeric, desc: "Priority"
